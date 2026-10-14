@@ -1,0 +1,92 @@
+extends layout
+
+block content
+  .contenido
+    .encabezado-de-pagina
+      .titulo-y-descripcion
+        p.titulo Expediente clínico digital
+        p.texto-11 Pacientes / Ana Martínez López / Datos generales
+      .boton
+        .history
+        p.texto-4 Ver historial
+
+    // PERFIL DEL PACIENTE
+    .perfil-del-paciente
+      .identificacion-del-paciente
+        .foto-de-paciente
+        .datos-de-paciente
+          .nombre-y-estado
+            p.texto-24px Ana Martínez López
+            .estado
+              .indicador
+              p.etiqueta-2 Activo
+          .informacion-personal
+            p.texto-11 34 años · Femenino
+            p.texto-11 Tel. +52 55 1234 5678
+            p.texto-11 Tipo sanguíneo: O+
+          p.texto-2 Expediente DL-00248 · Paciente desde enero de 2024
+        .boton-2
+          .history
+          p.texto-4 Nueva cita
+
+    // ÁREA DE FORMULARIO
+    .datos-generales-del-paciente
+      // Pestañas de Navegación
+      .pestanas
+        .pestana
+          p.texto-4 Datos Generales
+        .pestana-2
+          p.texto-3 Historial Médico
+        .pestana-2
+          p.texto-3 Tratamientos
+      
+      // Formulario
+      .formulario-de-datos-generales
+        .datos-personales
+          .campo-de-formulario
+            p.etiqueta-4 Nombre completo
+            .entrada
+              p.valor Ana Martínez López
+          .campo-de-formulario
+            p.etiqueta-4 Fecha de nacimiento
+            .entrada
+              p.valor 15 Feb 1991
+              .chevron-down
+
+        .datos-personales
+          .campo-de-formulario
+            p.etiqueta-4 Teléfono
+            .entrada
+              p.valor +52 55 1234 5678
+          .campo-de-formulario
+            p.etiqueta-4 Correo electrónico
+            .entrada
+              p.valor ana.martinez@correo.com
+
+        .datos-personales
+          .campo-de-formulario
+            p.etiqueta-4 Tipo sanguíneo
+            .entrada
+              p.valor O+
+              .chevron-down
+          .campo-de-formulario
+            p.etiqueta-4 Dirección
+            .entrada
+              p.valor Av. Insurgentes Sur 125, Ciudad de México
+
+      // Info de Emergencia
+      .contacto-de-emergencia
+        .hospital
+        p.texto-11 Contacto de emergencia: Roberto Martínez · +52 55 9876 5432
+      
+      // Acciones (Guardar)
+      .acciones-del-expediente
+        .privacidad
+          .chevron-down
+          p.texto-2 Información clínica protegida y confidencial
+        .acciones
+          .boton
+            p.texto-4 Cancelar
+          .boton-4
+            .history
+            p.etiqueta-11 Guardar cambios

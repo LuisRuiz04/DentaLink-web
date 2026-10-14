@@ -1,0 +1,156 @@
+extends layout
+
+block content
+  .contenido
+    .encabezado-de-pagina
+      .titulo-y-descripcion
+        p.titulo Control de inventario
+        p.texto-11 Mantén tus insumos al día y tu clínica siempre preparada.
+      .boton
+        .plus
+        p.etiqueta Agregar producto
+
+    .inventario-de-productos
+      .controles-de-inventario
+        .buscar-producto
+          .settings
+          p.texto-11 Buscar producto o ID...
+        .boton-2
+          .plus
+          p.texto-6 Todas las categorías
+        .espaciador-2
+        .aviso-de-stock
+          .chevron-down
+          p.texto-19 2 con bajo stock
+
+      .tabla-de-inventario
+        .encabezado-de-tabla
+          .columna: p.texto-20 ID
+          .columna-2: p.texto-20 Nombre del Producto
+          .columna-3: p.texto-20 Cantidad
+          .columna-4: p.texto-20 Estado
+          .columna-5: p.texto-20 Acciones
+
+        // Producto 1
+        .producto
+          .columna: p.texto-2 INV-001
+          .descripcion
+            p.texto-26 Resina compuesta A2
+            p.texto-2 Restauración · Jeringa de 4 g
+          .columna-3: p.texto-11 24 unidades
+          .columna-4
+            .estado
+              .indicador
+              p.etiqueta-3 Suficiente
+          .acciones-de-producto
+            .plus
+            p.texto-29 Actualizar
+            .settings
+
+        // Producto 2
+        .producto
+          .columna: p.texto-2 INV-002
+          .descripcion
+            p.texto-26 Brackets metálicos
+            p.texto-2 Ortodoncia · Kit completo
+          .columna-3: p.texto-11 18 kits
+          .columna-4
+            .estado
+              .indicador
+              p.etiqueta-3 Suficiente
+          .acciones-de-producto
+            .plus
+            p.texto-29 Actualizar
+            .settings
+
+        // Producto 3 (Bajo stock)
+        .producto
+          .columna: p.texto-2 INV-003
+          .descripcion
+            p.texto-26 Guantes de nitrilo M
+            p.texto-2 Protección · Caja de 100 piezas
+          .columna-3: p.texto-11 4 cajas
+          .columna-4
+            .estado-3
+              .indicador-3
+              p.texto-19 Bajo Stock
+          .acciones-de-producto
+            .plus
+            p.texto-29 Actualizar
+            .settings
+
+        // Producto 4
+        .producto
+          .columna: p.texto-2 INV-004
+          .descripcion
+            p.texto-26 Anestesia lidocaína 2%
+            p.texto-2 Anestésicos · Caja de 50 cartuchos
+          .columna-3: p.texto-11 12 cajas
+          .columna-4
+            .estado
+              .indicador
+              p.etiqueta-3 Suficiente
+          .acciones-de-producto
+            .plus
+            p.texto-29 Actualizar
+            .settings
+
+        // Producto 5 (Bajo stock)
+        .producto
+          .columna: p.texto-2 INV-005
+          .descripcion
+            p.texto-26 Agujas dentales cortas
+            p.texto-2 Desechables · Caja de 100 piezas
+          .columna-3: p.texto-11 3 cajas
+          .columna-4
+            .estado-3
+              .indicador-3
+              p.texto-19 Bajo Stock
+          .acciones-de-producto
+            .plus
+            p.texto-29 Actualizar
+            .settings
+
+        // Producto 6
+        .producto
+          .columna: p.texto-2 INV-006
+          .descripcion
+            p.texto-26 Clorhexidina 0.12%
+            p.texto-2 Antisépticos · Frasco de 250 ml
+          .columna-3: p.texto-11 32 frascos
+          .columna-4
+            .estado
+              .indicador
+              p.etiqueta-3 Suficiente
+          .acciones-de-producto
+            .plus
+            p.texto-29 Actualizar
+            .settings
+
+        // Producto 7
+        .producto
+          .columna: p.texto-2 INV-007
+          .descripcion
+            p.texto-26 Mascarillas quirúrgicas
+            p.texto-2 Protección · Caja de 50 piezas
+          .columna-3: p.texto-11 20 cajas
+          .columna-4
+            .estado
+              .indicador
+              p.etiqueta-3 Suficiente
+          .acciones-de-producto
+            .plus
+            p.texto-29 Actualizar
+            .settings
+
+      .paginacion
+        p.texto-60 Mostrando 1–7 de 7 productos
+        .controles-de-pagina
+          .chevron-down
+          .pagina-activa
+            p.texto-10 1
+          .chevron-down
+
+    .informacion-de-inventario
+      p.texto-2 El estado de stock se actualiza según el mínimo definido para cada producto.
+      p.texto-2 Última actualización: 12 Ago 2025, 10:15 AM

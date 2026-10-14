@@ -1,0 +1,198 @@
+extends layout
+
+block content
+  .contenido
+    .encabezado-de-pagina
+      .titulo-y-descripcion
+        p.titulo Odontograma digital
+        p.texto-11 Registra el estado dental y da seguimiento a cada tratamiento.
+      .boton
+        .history
+        p.texto-5 Ver versiones
+
+    // PACIENTE SELECCIONADO
+    .paciente-seleccionado
+      .iniciales
+        p.texto-10 AM
+      p.texto-19 Ana Martínez López
+      p.texto-20 ·
+      p.texto-11 34 años
+      p.texto-20 ·
+      p.texto-11 Expediente DL-00248
+      .espaciador-2
+      p.texto-20 Última visita: 12 Ago 2025
+      .chevron-down
+
+    // GRÁFICO Y HERRAMIENTAS
+    .grafico-y-herramientas
+      // PANEL IZQUIERDO: ODONTOGRAMA
+      .registro-dental
+        .titulo-del-grafico
+          p.texto-25 Dentición permanente
+          p.texto-20 32 piezas
+          
+        .diagrama-de-cuatro-cuadrantes
+          // Cuadrantes Superiores
+          .cuadrantes-superiores
+            p.texto-2 SUPERIOR DERECHO · 1
+            p.texto-2 2 · SUPERIOR IZQUIERDO
+            
+          // Arcada Superior
+          .arcada-dental
+            // Derecha (18 a 11)
+            .pieza-dental: p.numero-de-pieza 18
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 17
+              .anatomia-dental
+            .pieza-dental-3
+              p.numero-de-pieza-3 16
+              .anatomia-dental
+              .superficie-marcada
+            .pieza-dental: p.numero-de-pieza 15
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 14
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 13
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 12
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 11
+              .anatomia-dental
+              
+            // Eje central
+            .eje-central
+              .linea-media
+              
+            // Izquierda (21 a 28)
+            .pieza-dental: p.numero-de-pieza 21
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 22
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 23
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 24
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 25
+              .anatomia-dental
+            .pieza-dental-14
+              p.numero-de-pieza 26
+              .anatomia-dental
+              .superficie-marcada-2
+            .pieza-dental: p.numero-de-pieza 27
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 28
+              .anatomia-dental
+
+          .separador-2
+
+          // Arcada Inferior
+          .arcada-dental
+            // Derecha (48 a 41)
+            .pieza-dental: p.numero-de-pieza 48
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 47
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 46
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 45
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 44
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 43
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 42
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 41
+              .anatomia-dental
+              
+            // Eje central
+            .eje-central
+              .linea-media
+              
+            // Izquierda (31 a 38)
+            .pieza-dental: p.numero-de-pieza 31
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 32
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 33
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 34
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 35
+              .anatomia-dental
+            .pieza-dental-14
+              p.numero-de-pieza 36
+              .anatomia-dental
+              .superficie-marcada-3
+            .pieza-dental: p.numero-de-pieza 37
+              .anatomia-dental
+            .pieza-dental: p.numero-de-pieza 38
+              .anatomia-dental
+
+          // Cuadrantes Inferiores
+          .cuadrantes-superiores
+            p.texto-2 INFERIOR DERECHO · 4
+            p.texto-2 3 · INFERIOR IZQUIERDO
+
+        // Leyenda
+        .leyenda-de-estados
+          .estado-dental
+            .indicador
+            p.texto-20 Sano
+          .estado-dental
+            .indicador-2
+            p.texto-20 Caries
+          .estado-dental
+            .indicador-3
+            p.texto-20 Resina
+
+        .separador-2
+        
+        .resumen-clinico
+          .hospital
+          .detalle
+            p.texto 3 piezas con hallazgos registrados
+            p.texto-35 Selecciona una pieza y una herramienta para actualizar su estado.
+
+      // PANEL DERECHO: HERRAMIENTAS
+      .herramientas-del-odontograma
+        p.texto-25 Herramientas
+        .seleccion-de-tratamiento
+          .herramienta
+            .circle-help
+            p.texto-10 Caries
+          .herramienta-2
+            .circle-help
+            p.texto-20 Extracción
+          .herramienta-2
+            .circle-help
+            p.texto-20 Corona
+            
+        .pieza-seleccionada
+          .cuadrantes-superiores
+            p.texto Pieza 16 seleccionada
+            .settings
+          p.texto-20 Primer molar superior derecho
+          .estado-dental
+            .marca-de-caries
+            p.texto-11 Caries · Superficie oclusal
+            
+        p.texto-19 Hallazgos de esta visita
+        .hallazgos
+          .hallazgo
+            .marca-de-caries
+            p.texto-20 16  ·  Caries oclusal
+          .hallazgo
+            .estado-2
+            p.texto-20 26  ·  Resina en buen estado
+          .hallazgo
+            .estado-2
+            p.texto-20 36  ·  Restauración con resina
+            
+        .espaciador
+        
+        .guardar-registro
+          .boton-2
+            .history
+            p.etiqueta-2 Guardar Odontograma
+          p.texto-2 Último guardado: hoy a las 10:12 AM

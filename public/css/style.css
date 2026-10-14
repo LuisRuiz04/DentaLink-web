@@ -1,0 +1,423 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+img, svg { display: block; }
+button, input, textarea, select {
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+}
+button { cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+ul, ol { list-style: none; }
+
+body { background-color: #f5f7f8; }
+
+.agenda-de-citas { width: 100%; min-height: 100vh; display: flex; align-items: flex-start; overflow: hidden; background-color: #f5f7f8; }
+.barra-lateral { flex-shrink: 0; width: 260px; height: 100vh; display: flex; flex-direction: column; align-items: flex-start; gap: 32px; padding: 24px; overflow: hidden; background-color: #ffffff; box-shadow: inset -1px 0 0 0 #e2e8ec; }
+.marca { flex-shrink: 0; height: 40px; display: flex; align-items: center; gap: 10px; overflow: hidden; }
+.simbolo-dental { flex-shrink: 0; width: 30px; height: 30px; background-color: #00a5c4; border-radius: 4px; }
+.logotipo { flex-shrink: 0; font-family: 'Inter', sans-serif; font-size: 23px; font-weight: 700; letter-spacing: 0; color: #00a5c4; white-space: nowrap; }
+.clinica { flex-shrink: 0; align-self: stretch; display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 8px; overflow: hidden; background-color: #f5f7f8; }
+.hospital { flex-shrink: 0; width: 20px; height: 20px; background-color: #5a6b7c; border-radius: 4px; }
+.datos-de-clinica { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; overflow: hidden; }
+.texto { flex-shrink: 0; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; line-height: 19px; color: #5a6b7c; white-space: nowrap; }
+.texto-2 { flex-shrink: 0; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 400; line-height: 16px; color: #5a6b7c; white-space: nowrap; }
+.chevrons-up-down { flex-shrink: 0; width: 14px; height: 14px; background-color: #5a6b7c; border-radius: 2px; }
+.navegacion-principal { flex-shrink: 0; align-self: stretch; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; overflow: hidden; }
+.etiqueta-de-menu { flex-shrink: 0; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 1px; color: #5a6b7c; white-space: nowrap; }
+.opcion-de-navegacion { flex-shrink: 0; height: 48px; align-self: stretch; display: flex; align-items: center; gap: 12px; padding: 0 14px; border-radius: 8px; overflow: hidden; background-color: #e0f7f1; }
+.texto-3 { flex-shrink: 0; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; line-height: 20px; color: #00a5c4; white-space: nowrap; }
+.opcion-de-navegacion-2 { flex-shrink: 0; height: 48px; align-self: stretch; display: flex; align-items: center; gap: 12px; padding: 0 14px; border-radius: 8px; overflow: hidden; background-color: #ffffff; }
+.texto-4 { flex-shrink: 0; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 400; line-height: 20px; color: #5a6b7c; white-space: nowrap; }
+.espaciador { flex: 1 1 0; min-height: 0; align-self: stretch; display: flex; align-items: flex-start; overflow: hidden; }
+.ayuda { flex-shrink: 0; align-self: stretch; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 16px; border-radius: 12px; overflow: hidden; background-color: #f5f7f8; }
+.circle-help { flex-shrink: 0; height: 22px; width: 22px; background-color: #5a6b7c; border-radius: 11px; }
+.texto-9 { flex-shrink: 0; align-self: stretch; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 400; line-height: 16px; color: #5a6b7c; }
+.texto-10 { flex-shrink: 0; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; line-height: 17px; color: #00a5c4; white-space: nowrap; }
+.configuracion { flex-shrink: 0; align-self: stretch; display: flex; align-items: center; gap: 12px; overflow: hidden; }
+.settings { flex-shrink: 0; width: 18px; height: 18px; background-color: #5a6b7c; border-radius: 4px; }
+.texto-11 { flex-shrink: 0; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 400; line-height: 19px; color: #5a6b7c; white-space: nowrap; }
+.texto-12 { flex-shrink: 0; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 400; line-height: 15px; color: #5a6b7c; white-space: nowrap; }
+.espacio-de-trabajo { flex-shrink: 0; flex: 1; height: 100vh; display: flex; flex-direction: column; align-items: flex-start; overflow-y: auto; }
+.barra-superior { flex-shrink: 0; width: 100%; height: 72px; display: flex; align-items: center; gap: 24px; padding: 0 24px; background-color: #ffffff; box-shadow: inset 0 -1px 0 0 #e2e8ec; }
+.buscador { flex-shrink: 0; width: 360px; height: 40px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border-radius: 8px; background-color: #f5f7f8; }
+.espaciador-2 { flex: 1 1 0; min-width: 0; height: 1px; display: flex; align-items: flex-start; overflow: hidden; }
+.bell { flex-shrink: 0; width: 21px; height: 21px; background-color: #5a6b7c; border-radius: 50%; }
+.separador { flex-shrink: 0; width: 1px; height: 28px; background-color: #e2e8ec; }
+.avatar-del-doctor { flex-shrink: 0; width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background-color: #00a5c4; }
+.perfil-del-doctor { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; overflow: hidden; }
+.chevron-down { flex-shrink: 0; width: 16px; height: 16px; background-color: #5a6b7c; border-radius: 2px; }
+.contenido { flex-shrink: 0; width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 24px; padding: 24px; overflow: hidden; }
+.encabezado-de-pagina { flex-shrink: 0; align-self: stretch; display: flex; justify-content: space-between; align-items: center; overflow: hidden; }
+.titulo-y-descripcion { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; overflow: hidden; }
+.titulo { flex-shrink: 0; font-family: 'Inter', sans-serif; font-size: 28px; font-weight: 600; line-height: 34px; color: #5a6b7c; white-space: nowrap; }
+.boton { flex-shrink: 0; height: 42px; display: flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 8px; background-color: #00a5c4; cursor: pointer; }
+.etiqueta { flex-shrink: 0; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: #ffffff; white-space: nowrap; }
+.calendario-y-citas { flex-shrink: 0; align-self: stretch; display: flex; align-items: flex-start; gap: 24px; }
+.calendario-mensual { flex-shrink: 0; flex: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 24px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 3px 12px 0 rgba(90, 107, 124, 0.04); }
+.navegacion-del-calendario { flex-shrink: 0; align-self: stretch; display: flex; justify-content: space-between; align-items: center; overflow: hidden; }
+.mes { flex-shrink: 0; display: flex; align-items: center; gap: 12px; }
+.texto-18 { font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 600; color: #5a6b7c; }
+.controles-del-calendario { display: flex; align-items: center; gap: 14px; }
+.boton-2 { height: 42px; display: flex; align-items: center; padding: 0 16px; border-radius: 8px; background-color: #ffffff; outline: 1px solid #e2e8ec; }
+.separador-2 { height: 1px; align-self: stretch; background-color: #e2e8ec; }
+.dias-de-la-semana { height: 24px; align-self: stretch; display: flex; align-items: center; }
+.dia-de-la-semana { flex: 1; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 1px; color: #5a6b7c; text-align: center; }
+.fechas-del-mes { align-self: stretch; display: flex; flex-direction: column; }
+.semana { align-self: stretch; display: flex; align-items: flex-start; }
+.dia-del-calendario { flex: 1; height: 92px; display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 8px; border-radius: 8px; }
+.dia-del-calendario-16 { flex: 1; height: 92px; display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 8px; border-radius: 8px; background-color: #e0f7f1; }
+.fecha { height: 32px; width: 32px; display: flex; justify-content: center; align-items: center; border-radius: 100px; }
+.fecha-16 { height: 32px; width: 32px; display: flex; justify-content: center; align-items: center; border-radius: 100px; background-color: #00a5c4; }
+.numero-de-dia, .numero-de-dia-5 { font-family: 'Inter', sans-serif; font-size: 14px; color: #5a6b7c; }
+.numero-de-dia { opacity: 0.35; }
+.numero-de-dia-16 { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: #ffffff; }
+.citas-programadas { display: flex; gap: 4px; }
+.indicador-de-cita { width: 5px; height: 5px; border-radius: 50%; background-color: #00a5c4; }
+.leyenda-del-calendario { align-self: stretch; display: flex; justify-content: space-between; align-items: center; }
+.citas { display: flex; align-items: center; gap: 8px; }
+.indicador { width: 6px; height: 6px; border-radius: 50%; background-color: #00a5c4; }
+.texto-19 { font-family: 'Inter', sans-serif; font-size: 12px; color: #5a6b7c; }
+.citas-de-hoy { flex: 1; display: flex; flex-direction: column; gap: 16px; padding: 24px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 3px 12px 0 rgba(90, 107, 124, 0.04); }
+.texto-21 { font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 600; color: #5a6b7c; }
+.total { width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; border-radius: 100px; background-color: #e0f7f1; }
+.cita { align-self: stretch; display: flex; flex-direction: column; gap: 5px; padding: 14px; border-radius: 8px; background-color: #f5f7f8; }
+.cita-2 { align-self: stretch; display: flex; flex-direction: column; gap: 5px; padding: 14px; border-radius: 8px; background-color: #e0f7f1; }
+.texto-24 { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; color: #00a5c4; }
+.texto-25 { font-family: 'Inter', sans-serif; font-size: 10px; color: #78c030; }
+.ver-agenda { align-self: stretch; display: flex; justify-content: center; }
+.texto-44 { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: #00a5c4; }
+.estado-de-sincronizacion { display: flex; align-items: center; gap: 8px; }
+
+/* --- VISTA: EXPEDIENTE CLÍNICO --- */
+.history { flex-shrink: 0; width: 17px; height: 17px; background-color: #5a6b7c; border-radius: 4px; }
+.perfil-del-paciente { flex-shrink: 0; align-self: stretch; display: flex; flex-direction: column; gap: 20px; padding: 24px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 3px 12px 0 rgba(90, 107, 124, 0.04); }
+.identificacion-del-paciente { display: flex; align-items: center; gap: 24px; }
+.foto-de-paciente { flex-shrink: 0; width: 88px; height: 88px; border-radius: 12px; background-color: #00a5c4; object-fit: cover; }
+.datos-de-paciente { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.nombre-y-estado { display: flex; align-items: center; gap: 16px; }
+.texto-24px { font-family: 'Inter', sans-serif; font-size: 24px; font-weight: 600; color: #5a6b7c; }
+.estado { display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 100px; background-color: #e0f7f1; }
+.etiqueta-2 { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: #78c030; }
+.informacion-personal { display: flex; align-items: center; gap: 24px; }
+.datos-generales-del-paciente { align-self: stretch; display: flex; flex-direction: column; gap: 20px; padding: 24px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 3px 12px 0 rgba(90, 107, 124, 0.04); }
+.pestanas { align-self: stretch; display: flex; align-items: flex-start; gap: 28px; box-shadow: inset 0 -1px 0 0 #e2e8ec; }
+.pestana { display: flex; align-items: flex-start; padding: 2px 0 15px 0; box-shadow: inset 0 -2px 0 0 #00a5c4; cursor: pointer; }
+.pestana-2 { display: flex; align-items: flex-start; padding: 2px 0 15px 0; cursor: pointer;}
+.formulario-de-datos-generales { align-self: stretch; display: flex; flex-direction: column; gap: 20px; }
+.datos-personales { align-self: stretch; display: flex; align-items: flex-start; gap: 24px; }
+.campo-de-formulario { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.etiqueta-4 { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: #5a6b7c; }
+.entrada { height: 44px; align-self: stretch; display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-radius: 8px; background-color: #ffffff; outline: 1px solid #e2e8ec; }
+.valor { flex: 1; font-family: 'Inter', sans-serif; font-size: 14px; color: #5a6b7c; }
+.contacto-de-emergencia { align-self: stretch; display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 8px; background-color: #f5f7f8; }
+.acciones-del-expediente { align-self: stretch; display: flex; justify-content: space-between; align-items: center; }
+.privacidad { display: flex; align-items: center; gap: 8px; }
+.acciones { display: flex; align-items: flex-start; gap: 12px; }
+.boton-4 { height: 42px; display: flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 8px; background-color: #00a5c4; cursor: pointer; }
+.etiqueta-11 { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: #ffffff; }
+
+
+
+/* --- VISTA: ODONTOGRAMA --- */
+.texto-5 { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: #00a5c4; }
+.paciente-seleccionado { height: 62px; align-self: stretch; display: flex; align-items: center; gap: 12px; padding: 0 16px; border-radius: 12px; background-color: #ffffff; }
+.iniciales { width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; border-radius: 100px; background-color: #e0f7f1; }
+.texto-19 { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: #5a6b7c; white-space: nowrap; }
+.texto-20 { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 400; color: #5a6b7c; white-space: nowrap; }
+.grafico-y-herramientas { align-self: stretch; display: flex; align-items: flex-start; gap: 24px; }
+.registro-dental { flex: 2; display: flex; flex-direction: column; gap: 20px; padding: 24px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 3px 12px 0 rgba(90, 107, 124, 0.04); }
+.titulo-del-grafico { align-self: stretch; display: flex; justify-content: space-between; align-items: center; }
+.texto-25 { font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 600; color: #5a6b7c; }
+.diagrama-de-cuatro-cuadrantes { align-self: stretch; display: flex; flex-direction: column; gap: 16px; padding: 8px 0; }
+.cuadrantes-superiores { align-self: stretch; display: flex; justify-content: space-between; align-items: flex-start; }
+.arcada-dental { align-self: stretch; display: flex; align-items: flex-start; gap: 4px; }
+.pieza-dental { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px 0; border-radius: 8px; background-color: #ffffff; }
+.numero-de-pieza { font-family: 'Inter', sans-serif; font-size: 11px; color: #5a6b7c; }
+.anatomia-dental { height: 66px; width: 28px; background-color: #e2e8ec; border-radius: 4px; } /* Placeholder temporal para el diente */
+.pieza-dental-3 { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px 0; border-radius: 8px; background-color: #e0f7f1; position: relative; }
+.numero-de-pieza-3 { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; color: #00a5c4; }
+.superficie-marcada { position: absolute; left: 11px; top: 45px; width: 12px; height: 9px; border-radius: 50%; background-color: #d95c5c; }
+.eje-central { width: 12px; height: 108px; display: flex; justify-content: center; }
+.linea-media { width: 1px; height: 108px; background-color: #e2e8ec; }
+.pieza-dental-14 { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px 0; border-radius: 8px; position: relative; }
+.superficie-marcada-2 { position: absolute; left: 11px; top: 45px; width: 12px; height: 9px; border-radius: 50%; background-color: #00a5c4; }
+.superficie-marcada-3 { position: absolute; left: 11px; top: 64px; width: 12px; height: 9px; border-radius: 50%; background-color: #00a5c4; }
+.leyenda-de-estados { align-self: stretch; display: flex; justify-content: center; gap: 24px; }
+.estado-dental { display: flex; align-items: center; gap: 8px; }
+.indicador-2 { width: 8px; height: 8px; border-radius: 50%; background-color: #d95c5c; }
+.indicador-3 { width: 8px; height: 8px; border-radius: 50%; background-color: #00a5c4; }
+.resumen-clinico { align-self: stretch; display: flex; align-items: flex-start; gap: 12px; padding: 16px; border-radius: 8px; background-color: #f5f7f8; }
+.detalle { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.texto-35 { font-family: 'Inter', sans-serif; font-size: 12px; color: #5a6b7c; }
+.herramientas-del-odontograma { flex: 1; display: flex; flex-direction: column; gap: 20px; padding: 24px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 3px 12px 0 rgba(90, 107, 124, 0.04); }
+.seleccion-de-tratamiento { align-self: stretch; display: flex; gap: 10px; }
+.herramienta { flex: 1; height: 80px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; border-radius: 8px; background-color: #e0f7f1; outline: 1px solid #00a5c4; }
+.herramienta-2 { flex: 1; height: 80px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; border-radius: 8px; background-color: #ffffff; outline: 1px solid #e2e8ec; }
+.pieza-seleccionada { align-self: stretch; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 8px; background-color: #f5f7f8; }
+.marca-de-caries { width: 7px; height: 7px; border-radius: 50%; background-color: #d95c5c; }
+.hallazgos { align-self: stretch; display: flex; flex-direction: column; gap: 12px; }
+.hallazgo { display: flex; align-items: center; gap: 10px; }
+.estado-2 { width: 7px; height: 7px; border-radius: 50%; background-color: #00a5c4; }
+.guardar-registro { align-self: stretch; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+
+/* --- VISTA: HISTORIAL FOTOGRÁFICO --- */
+.upload { flex-shrink: 0; width: 17px; height: 17px; background-color: #ffffff; border-radius: 4px; }
+.filtros-de-imagenes { height: 38px; align-self: stretch; display: flex; justify-content: space-between; align-items: center; }
+.tipo-de-imagen { display: flex; align-items: flex-start; gap: 8px; }
+.filtro { height: 38px; display: flex; align-items: center; padding: 0 16px; border-radius: 8px; background-color: #e0f7f1; }
+.texto-25 { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: #00a5c4; }
+.filtro-2 { height: 38px; display: flex; align-items: center; padding: 0 16px; border-radius: 8px; background-color: #ffffff; outline: 1px solid #e2e8ec; cursor: pointer; }
+.orden-de-imagenes { display: flex; align-items: center; gap: 10px; }
+.galeria-clinica { align-self: stretch; display: flex; flex-direction: column; gap: 24px; }
+.grupo-de-fotografias { align-self: stretch; display: flex; align-items: flex-start; gap: 24px; }
+.imagen-clinica { flex: 1; height: 244px; display: flex; flex-direction: column; gap: 10px; padding: 24px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 3px 12px 0 rgba(90, 107, 124, 0.04); }
+.fotografia-o-radiografia { height: 132px; align-self: stretch; border-radius: 6px; background-color: #e0f7f1; object-fit: cover; }
+.fecha-y-opciones { align-self: stretch; display: flex; justify-content: space-between; align-items: center; }
+
+
+/* --- VISTA: RECETERO MÉDICO --- */
+.formulario-y-vista-previa { align-self: stretch; display: flex; align-items: flex-start; gap: 24px; }
+.formulario-de-medicamento { width: 443px; height: 608px; display: flex; flex-direction: column; gap: 20px; padding: 24px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 3px 12px 0 rgba(90, 107, 124, 0.04); }
+.texto-26 { font-family: 'Inter', sans-serif; font-size: 13px; color: #5a6b7c; }
+.agregar-medicamento { display: flex; justify-content: center; }
+.aviso-de-prescripcion { align-self: stretch; display: flex; align-items: flex-start; gap: 10px; padding: 16px; border-radius: 8px; background-color: #f5f7f8; }
+.texto-27 { flex: 1; font-family: 'Inter', sans-serif; font-size: 12px; color: #5a6b7c; }
+.vista-previa-de-receta { flex: 1; height: 608px; display: flex; flex-direction: column; gap: 12px; padding: 24px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 3px 12px 0 rgba(90, 107, 124, 0.04); position: relative; }
+.cabecera-de-vista-previa { align-self: stretch; display: flex; justify-content: space-between; align-items: flex-start; }
+.texto-28 { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: #5a6b7c; }
+.contenedor-de-hoja { align-self: stretch; display: flex; justify-content: center; }
+.receta-en-formato-a4 { width: 350px; height: 495px; display: flex; flex-direction: column; gap: 14px; padding: 24px; background-color: #ffffff; outline: 1px solid #e2e8ec; border-radius: 6px; box-shadow: 0 3px 12px 0 rgba(90, 107, 124, 0.04); }
+.membrete { align-self: stretch; display: flex; align-items: center; gap: 10px; }
+.simbolo-dental-2 { width: 25px; height: 25px; background-color: #00a5c4; border-radius: 4px; }
+.texto-30 { font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 600; color: #00a5c4; }
+.texto-31 { font-family: 'Inter', sans-serif; font-size: 9px; color: #5a6b7c; }
+.datos-de-prescripcion { align-self: stretch; display: flex; flex-direction: column; gap: 5px; }
+.texto-34 { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; color: #5a6b7c; }
+.simbolo-de-receta { font-family: 'Inter', sans-serif; font-size: 24px; font-weight: 600; color: #00a5c4; }
+.medicamentos-prescritos { align-self: stretch; display: flex; flex-direction: column; gap: 16px; }
+.texto-37 { font-family: 'Inter', sans-serif; font-size: 10px; color: #5a6b7c; }
+.firma-del-profesional { align-self: stretch; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.linea-de-firma { height: 1px; width: 180px; background-color: #5a6b7c; }
+.texto-42 { font-family: 'Inter', sans-serif; font-size: 8px; color: #5a6b7c; text-align: center; }
+.descargar-receta { position: absolute; left: 413px; top: 550px; width: 228px; height: 42px; display: flex; }
+.boton-3 { height: 42px; display: flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 8px; background-color: #00a5c4; cursor: pointer; }
+.etiqueta-6 { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: #ffffff; }
+
+/* --- VISTA: CONTROL DE INVENTARIO --- */
+.plus { flex-shrink: 0; width: 17px; height: 17px; background-color: #ffffff; border-radius: 4px; }
+.inventario-de-productos { height: 660px; align-self: stretch; display: flex; flex-direction: column; gap: 16px; padding: 24px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 3px 12px 0 rgba(90, 107, 124, 0.04); }
+.controles-de-inventario { height: 42px; align-self: stretch; display: flex; align-items: center; gap: 12px; }
+.buscar-producto { width: 310px; height: 42px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border-radius: 8px; outline: 1px solid #e2e8ec; }
+.aviso-de-stock { display: flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 8px; background-color: #fdecec; }
+.texto-19 { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: #d95c5c; }
+.tabla-de-inventario { height: 492px; align-self: stretch; display: flex; flex-direction: column; align-items: flex-start; }
+.encabezado-de-tabla { height: 44px; align-self: stretch; display: flex; align-items: center; border-radius: 8px; background-color: #f5f7f8; }
+.columna { width: 100px; display: flex; align-items: flex-start; padding: 0 16px; }
+.texto-20 { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: #5a6b7c; }
+.columna-2 { width: 390px; display: flex; align-items: flex-start; padding: 0 16px; }
+.columna-3 { width: 170px; display: flex; align-items: flex-start; padding: 0 16px; }
+.columna-4 { width: 200px; display: flex; align-items: flex-start; padding: 0 16px; }
+.columna-5 { width: 224px; display: flex; align-items: flex-start; padding: 0 16px; }
+.producto { height: 64px; align-self: stretch; display: flex; align-items: center; box-shadow: inset 0 -1px 0 0 #e2e8ec; }
+.descripcion { width: 390px; display: flex; flex-direction: column; gap: 3px; padding: 0 16px; }
+.texto-26 { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500; color: #5a6b7c; }
+.etiqueta-3 { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: #78c030; }
+.acciones-de-producto { width: 224px; display: flex; align-items: center; gap: 20px; padding: 0 16px; }
+.texto-29 { font-family: 'Inter', sans-serif; font-size: 12px; color: #00a5c4; cursor: pointer; }
+.estado-3 { display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 100px; background-color: #fdecec; }
+.indicador-3 { width: 6px; height: 6px; border-radius: 50%; background-color: #d95c5c; }
+.paginacion { height: 38px; align-self: stretch; display: flex; justify-content: space-between; align-items: center; }
+.texto-60 { font-family: 'Inter', sans-serif; font-size: 12px; color: #5a6b7c; }
+.controles-de-pagina { display: flex; align-items: center; gap: 12px; }
+.pagina-activa { width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; border-radius: 8px; background-color: #e0f7f1; }
+.informacion-de-inventario { align-self: stretch; display: flex; justify-content: space-between; align-items: flex-start; }
+
+/* --- VISTA: LOGIN / SIGN UP (AUTENTICACIÓN) --- */
+.auth-container {
+  width: 1440px;
+  height: 900px;
+  display: flex;
+  background-color: #f5f7f8;
+  font-family: 'Inter', sans-serif;
+}
+
+.auth-brand-panel {
+  flex: 1;
+  background: linear-gradient(135deg, #00a5c4 0%, #00778d 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 60px;
+  color: #ffffff;
+}
+
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo-box {
+  width: 40px;
+  height: 40px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.brand-title {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.brand-content {
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.brand-content h1 {
+  font-size: 38px;
+  font-weight: 700;
+  line-height: 48px;
+}
+
+.brand-content p {
+  font-size: 16px;
+  line-height: 24px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.brand-footer {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.auth-form-panel {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  background-color: #ffffff;
+}
+
+.auth-card {
+  width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.auth-tabs {
+  display: flex;
+  background-color: #f5f7f8;
+  padding: 4px;
+  border-radius: 10px;
+}
+
+.auth-tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #5a6b7c;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-tab.active {
+  background-color: #ffffff;
+  color: #00a5c4;
+  box-shadow: 0 2px 8px rgba(90, 107, 124, 0.08);
+}
+
+.auth-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.auth-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #5a6b7c;
+}
+
+.auth-input-wrapper {
+  height: 46px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-radius: 8px;
+  outline: 1px solid #e2e8ec;
+  background-color: #ffffff;
+  gap: 12px;
+}
+
+.auth-input-wrapper:focus-within {
+  outline: 2px solid #00a5c4;
+}
+
+.auth-input {
+  flex: 1;
+  font-size: 14px;
+  color: #5a6b7c;
+  outline: none;
+  border: none;
+  background: transparent;
+}
+
+.auth-btn-primary {
+  height: 46px;
+  background-color: #00a5c4;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.auth-btn-primary:hover {
+  background-color: #008fa9;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #5a6b7c;
+  font-size: 12px;
+  gap: 12px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e2e8ec;
+}
+
+.auth-forgot {
+  font-size: 13px;
+  color: #00a5c4;
+  text-align: right;
+  font-weight: 500;
+}

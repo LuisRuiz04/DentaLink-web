@@ -1,0 +1,71 @@
+doctype html
+html(lang="es")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title DentaLink | Gestión Clínica
+    link(rel="preconnect", href="https://fonts.googleapis.com")
+    link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin)
+    link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap")
+    link(rel="stylesheet", href="/css/style.css")
+  body
+    .agenda-de-citas
+      // BARRA LATERAL (Sidebar)
+      .barra-lateral
+        .marca
+          .simbolo-dental
+          p.logotipo DENTALINK
+        .clinica
+          .hospital
+          .datos-de-clinica
+            p.texto Clínica Sonrisa
+            p.texto-2 Consultorio principal
+          .chevrons-up-down
+        .navegacion-principal
+          p.etiqueta-de-menu ESPACIO CLÍNICO
+          a.opcion-de-navegacion(href="/")
+            .hospital
+            p.texto-3 Agenda
+          a.opcion-de-navegacion-2(href="#")
+            .hospital
+            p.texto-4 Pacientes
+          a.opcion-de-navegacion-2(href="#")
+            .hospital
+            p.texto-4 Odontograma
+          a.opcion-de-navegacion-2(href="#")
+            .hospital
+            p.texto-4 Inventario
+          a.opcion-de-navegacion-2(href="#")
+            .hospital
+            p.texto-4 Recetas
+        .espaciador
+        .ayuda
+          .circle-help
+          p.texto Estamos para ayudarte
+          p.texto-9 Encuentra respuestas en nuestro centro de ayuda.
+          p.texto-10 Visitar centro de ayuda ↗
+        .configuracion
+          .settings
+          p.texto-11 Configuración
+        p.texto-12 DentaLink · Gestión clínica integral
+
+      // ESPACIO DE TRABAJO (Área Derecha)
+      .espacio-de-trabajo
+        // BARRA SUPERIOR (Topbar)
+        .barra-superior
+          .buscador
+            .settings
+            p.texto-11 Buscar paciente...
+            .espaciador-2
+            p.texto-2 ⌘ K
+          .espaciador-2
+          .bell
+          .separador
+          .avatar-del-doctor
+          .perfil-del-doctor
+            p.texto Dr. Luis
+            p.texto-2 Odontólogo
+          .chevron-down
+
+        // CONTENIDO DINÁMICO (Aquí se insertará la vista hija)
+        block content
