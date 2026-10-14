@@ -1,0 +1,94 @@
+extends layout
+
+block content
+  .contenido
+    .encabezado-de-pagina
+      .titulo-y-descripcion
+        p.titulo Historial fotográfico
+        p.texto-11 Imágenes clínicas para documentar cada etapa del tratamiento.
+      .boton
+        .upload
+        p.etiqueta Subir nuevas fotos
+
+    // PACIENTE SELECCIONADO
+    .paciente-seleccionado
+      .iniciales
+        p.texto-10 AM
+      p.texto-19 Ana Martínez López
+      p.texto-20 ·
+      p.texto-11 34 años
+      p.texto-20 ·
+      p.texto-11 Expediente DL-00248
+      .espaciador-2
+      p.texto-20 Última visita: 12 Ago 2025
+      .chevron-down
+
+    // FILTROS DE IMÁGENES
+    .filtros-de-imagenes
+      .tipo-de-imagen
+        .filtro
+          p.texto-25 Todas · 8
+        .filtro-2
+          p.texto-11 Intraorales · 5
+        .filtro-2
+          p.texto-11 Radiografías · 3
+      .orden-de-imagenes
+        .chevron-down
+        p.texto-20 Más recientes primero
+        .chevrons-up-down
+
+    // GALERÍA CLÍNICA
+    .galeria-clinica
+      // Fila 1 (4 fotos)
+      .grupo-de-fotografias
+        .imagen-clinica
+          .fotografia-o-radiografia
+          p.texto Frontal en oclusión
+          .fecha-y-opciones
+            p.texto-2 12 Ago 2025
+            .settings
+        .imagen-clinica
+          .fotografia-o-radiografia
+          p.texto Oclusal superior
+          .fecha-y-opciones
+            p.texto-2 12 Ago 2025
+            .settings
+        .imagen-clinica
+          .fotografia-o-radiografia
+          p.texto Oclusal inferior
+          .fecha-y-opciones
+            p.texto-2 12 Ago 2025
+            .settings
+        .imagen-clinica
+          .fotografia-o-radiografia
+          p.texto Lateral derecha
+          .fecha-y-opciones
+            p.texto-2 12 Ago 2025
+            .settings
+
+      // Fila 2 (4 fotos)
+      .grupo-de-fotografias
+        .imagen-clinica
+          .fotografia-o-radiografia
+          p.texto Lateral izquierda
+          .fecha-y-opciones
+            p.texto-2 12 Ago 2025
+            .settings
+        .imagen-clinica
+          .fotografia-o-radiografia
+          p.texto Panorámica dental
+          .fecha-y-opciones
+            p.texto-2 12 Ago 2025
+            .settings
+        .imagen-clinica
+          .fotografia-o-radiografia
+          p.texto Periapical · Pieza 16
+          .fecha-y-opciones
+            p.texto-2 12 Ago 2025
+            .settings
+        .imagen-clinica
+          .fotografia-o-radiografia
+          p.texto Aleta de mordida
+          .fecha-y-opciones
+            p.texto-2 28 Ene 2025
+            .settings

@@ -1,0 +1,105 @@
+extends layout
+
+block content
+  .contenido
+    .encabezado-de-pagina
+      .titulo-y-descripcion
+        p.titulo Recetero médico
+        p.texto-11 Crea indicaciones claras y personalizadas para tus pacientes.
+      .boton
+        .history
+        p.texto-7 Recetas anteriores
+
+    // PACIENTE SELECCIONADO
+    .paciente-seleccionado
+      .iniciales
+        p.texto-10 AM
+      p.texto-19 Ana Martínez López
+      p.texto-20 ·
+      p.texto-11 34 años
+      p.texto-20 ·
+      p.texto-11 Expediente DL-00248
+      .espaciador-2
+      p.texto-20 Última visita: 12 Ago 2025
+      .chevron-down
+
+    // FORMULARIO Y VISTA PREVIA
+    .formulario-y-vista-previa
+      // PANEL IZQUIERDO: FORMULARIO
+      .formulario-de-medicamento
+        p.texto-25 Añadir medicamento
+        p.texto-26 Completa la dosis y las indicaciones para incluirlas en la receta.
+        
+        .navegacion-principal
+          p.etiqueta-2 Medicamento
+          .entrada
+            p.valor Ibuprofeno 400 mg
+            .chevron-down
+            
+        .navegacion-principal
+          p.etiqueta-2 Dosis
+          .entrada
+            p.valor 1 tableta por vía oral
+            
+        .navegacion-principal
+          p.etiqueta-2 Frecuencia
+          .entrada
+            p.valor Cada 8 horas durante 3 días
+            .chevron-down
+            
+        .agregar-medicamento
+          .boton-2
+            .history
+            p.texto-7 Agregar a receta
+            
+        .separador-2
+        
+        .aviso-de-prescripcion
+          .settings
+          p.texto-27 Verifica las alergias y los antecedentes del paciente antes de emitir la receta.
+
+      // PANEL DERECHO: VISTA PREVIA A4
+      .vista-previa-de-receta
+        .cabecera-de-vista-previa
+          p.texto-28 Vista previa de receta
+          p.texto-2 A4 · 1 página
+          
+        .contenedor-de-hoja
+          .receta-en-formato-a4
+            .membrete
+              .simbolo-dental-2
+              .perfil-del-doctor
+                p.texto-30 Clínica Sonrisa
+                p.texto-31 Odontología integral · Ciudad de México
+            .separador-2
+            
+            .datos-de-prescripcion
+              .cabecera-de-vista-previa
+                p.texto-31 12 de agosto de 2025
+                p.texto-31 Folio RX-00248
+              p.texto-34 Paciente: Ana Martínez López
+              p.texto-31 Edad: 34 años · Expediente: DL-00248
+              
+            p.simbolo-de-receta Rx
+            
+            .medicamentos-prescritos
+              .datos-de-prescripcion
+                p.texto-34 1. Ibuprofeno 400 mg
+                p.texto-37 Tomar 1 tableta por vía oral cada 8 horas durante 3 días, después de los alimentos.
+              .datos-de-prescripcion
+                p.texto-34 2. Clorhexidina 0.12%
+                p.texto-37 Enjuagar con 15 ml cada 12 horas durante 7 días. No ingerir.
+                
+            .espaciador
+            
+            .firma-del-profesional
+              .linea-de-firma
+              p.texto-34 Dr. Luis Hernández
+              p.texto-31 Odontólogo · Cédula profesional 7845123
+              
+            p.texto-42 Av. Insurgentes Sur 125 · Tel. 55 5555 0123 Esta receta es de uso exclusivo para el paciente indicado.
+
+        .descargar-receta
+          .boton-3
+            .history
+            p.etiqueta-6 Generar y Descargar PDF

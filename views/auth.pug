@@ -1,0 +1,99 @@
+doctype html
+html(lang="es")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title DentaLink · Acceso al Sistema
+    link(rel="preconnect" href="https://fonts.googleapis.com")
+    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+    link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap")
+    link(rel="stylesheet" href="/css/style.css")
+  body
+    .auth-container
+      // Panel Izquierdo: Branding y Propuesta de Valor
+      .auth-brand-panel
+        .brand-header
+          .brand-logo-box
+            // Simbolo dental minimalista
+            svg.simbolo-dental(width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00a5c4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round")
+              path(d="M7 3C4.23858 3 2 5.23858 2 8C2 11.5 4 14 6 16C7 17 8 19 8 21C8 21.5523 8.44772 22 9 22H15C15.5523 22 16 21.5523 16 21C16 19 17 17 18 16C20 14 22 11.5 22 8C22 5.23858 19.7614 3 17 3H7Z")
+          span.brand-title DENTALINK
+        
+        .brand-content
+          h1 Gestión clínica integral para odontólogos modernos.
+          p Controla tu agenda, expedientes digitales, odontogramas interactivos, historial fotográfico y recetas médicas en una sola plataforma diseñada para tu consultorio.
+        
+        .brand-footer
+          p DentaLink © 2026 · Todos los derechos reservados
+
+      // Panel Derecho: Formulario de Login / Sign Up Interactivo
+      .auth-form-panel
+        .auth-card
+          div(style="display: flex; flex-direction: column; gap: 6px;")
+            h2(style="font-size: 24px; font-weight: 700; color: #5a6b7c;") ¡Bienvenido de nuevo!
+            p(style="font-size: 13px; color: #5a6b7c;") Ingresa a tu cuenta o registra tu consultorio.
+
+          // Pestañas para cambiar entre Login y Sign Up
+          .auth-tabs
+            .auth-tab.active#tab-login(onclick="switchTab('login')") Iniciar Sesión
+            .auth-tab#tab-signup(onclick="switchTab('signup')") Registrarse
+
+          // FORMULARIO DE INICIO DE SESIÓN
+          form#form-login(action="/" method="GET" style="display: flex; flex-direction: column; gap: 16px;")
+            .auth-form-group
+              label.auth-label Correo electrónico
+              .auth-input-wrapper
+                input.auth-input(type="email", placeholder="doctor@dentalink.com", required)
+            
+            .auth-form-group
+              label.auth-label Contraseña
+              .auth-input-wrapper
+                input.auth-input(type="password", placeholder="••••••••", required)
+            
+            a.auth-forgot(href="#") ¿Olvidaste tu contraseña?
+
+            button.auth-btn-primary(type="submit") Entrar al Sistema
+
+          // FORMULARIO DE REGISTRO (SIGN UP) - Oculto por defecto
+          form#form-signup(action="/" method="GET" style="display: none; flex-direction: column; gap: 16px;")
+            .auth-form-group
+              label.auth-label Nombre completo del doctor
+              .auth-input-wrapper
+                input.auth-input(type="text", placeholder="Dr. Luis Hernández", required)
+
+            .auth-form-group
+              label.auth-label Nombre de la clínica
+              .auth-input-wrapper
+                input.auth-input(type="text", placeholder="Clínica Sonrisa", required)
+
+            .auth-form-group
+              label.auth-label Correo electrónico
+              .auth-input-wrapper
+                input.auth-input(type="email", placeholder="doctor@dentalink.com", required)
+            
+            .auth-form-group
+              label.auth-label Contraseña
+              .auth-input-wrapper
+                input.auth-input(type="password", placeholder="Mínimo 8 caracteres", required)
+
+            button.auth-btn-primary(type="submit") Crear Cuenta y Consultorio
+
+  script.
+    function switchTab(mode) {
+      const tabLogin = document.getElementById('tab-login');
+      const tabSignup = document.getElementById('tab-signup');
+      const formLogin = document.getElementById('form-login');
+      const formSignup = document.getElementById('form-signup');
+
+      if (mode === 'login') {
+        tabLogin.classList.add('active');
+        tabSignup.classList.remove('active');
+        formLogin.style.display = 'flex';
+        formSignup.style.display = 'none';
+      } else {
+        tabSignup.classList.add('active');
+        tabLogin.classList.remove('active');
+        formSignup.style.display = 'flex';
+        formLogin.style.display = 'none';
+      }
+    }

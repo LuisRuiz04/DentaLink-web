@@ -1,0 +1,119 @@
+extends layout
+
+block content
+  .contenido
+    .encabezado-de-pagina
+      .titulo-y-descripcion
+        p.titulo Agenda de citas
+        p.texto-11 Organiza tu día y acompaña cada sonrisa.
+      .boton
+        p.etiqueta + Nueva Cita
+
+    .calendario-y-citas
+      // CALENDARIO MENSUAL
+      .calendario-mensual
+        .navegacion-del-calendario
+          .mes
+            p.texto-18 Agosto 2025
+            .chevron-down
+          .controles-del-calendario
+            .boton-2
+              p.texto-3 Hoy
+            .hospital
+            .hospital
+        .separador-2
+        .dias-de-la-semana
+          p.dia-de-la-semana LUN
+          p.dia-de-la-semana MAR
+          p.dia-de-la-semana MIÉ
+          p.dia-de-la-semana JUE
+          p.dia-de-la-semana VIE
+          p.dia-de-la-semana SÁB
+          p.dia-de-la-semana DOM
+        .fechas-del-mes
+          // Ejemplo de Semana (Puedes replicar estos bloques para llenar el mes)
+          .semana
+            .dia-del-calendario
+              .fecha: p.numero-de-dia 28
+            .dia-del-calendario
+              .fecha: p.numero-de-dia 29
+            .dia-del-calendario
+              .fecha: p.numero-de-dia 30
+            .dia-del-calendario
+              .fecha: p.numero-de-dia 31
+            .dia-del-calendario
+              .fecha: p.numero-de-dia-5 1
+              .citas-programadas
+                .indicador-de-cita
+                .indicador-de-cita
+            .dia-del-calendario
+              .fecha: p.numero-de-dia-5 2
+            .dia-del-calendario
+              .fecha: p.numero-de-dia-5 3
+          // Semana con el día actual (12)
+          .semana
+            .dia-del-calendario
+              .fecha: p.numero-de-dia-5 11
+              .citas-programadas
+                .indicador-de-cita
+                .indicador-de-cita
+            .dia-del-calendario-16
+              .fecha-16: p.numero-de-dia-16 12
+              .citas-programadas
+                .indicador-de-cita
+                .indicador-de-cita
+                .indicador-de-cita
+            .dia-del-calendario
+              .fecha: p.numero-de-dia-5 13
+              .citas-programadas
+                .indicador-de-cita
+            .dia-del-calendario
+              .fecha: p.numero-de-dia-5 14
+            .dia-del-calendario
+              .fecha: p.numero-de-dia-5 15
+            .dia-del-calendario
+              .fecha: p.numero-de-dia-5 16
+            .dia-del-calendario
+              .fecha: p.numero-de-dia-5 17
+        .separador-2
+        .leyenda-del-calendario
+          .citas
+            .indicador
+            p.texto-19 Citas programadas
+          p.texto-19 32 citas este mes
+
+      // CITAS DE HOY (Panel Derecho)
+      .citas-de-hoy
+        .leyenda-del-calendario
+          p.texto-21 Citas de Hoy
+          .total
+            p.texto-3 5
+        p.texto-11 Martes, 12 de agosto de 2025
+        
+        .cita
+          .leyenda-del-calendario
+            p.texto-24 09:00 AM
+            p.texto-25 Completada
+          p.texto Carlos Ruiz
+          p.texto-2 Limpieza y profilaxis
+          
+        .cita-2
+          .leyenda-del-calendario
+            p.texto-24 10:00 AM
+            p.texto-12 En consulta
+          p.texto Ana Martínez López
+          p.texto-2 Restauración con resina
+          
+        .cita
+          .leyenda-del-calendario
+            p.texto-24 11:30 AM
+            p.texto-12 Confirmada
+          p.texto María Fernández
+          p.texto-2 Control de ortodoncia
+          
+        .ver-agenda
+          p.texto-44 Ver todas las citas →
+
+    .estado-de-sincronizacion
+      .chevrons-up-down
+      p.texto-2 Agenda sincronizada · Última actualización a las 10:15 AM
