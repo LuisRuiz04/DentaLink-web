@@ -12,15 +12,18 @@ html(lang="es")
     .agenda-de-citas
       // BARRA LATERAL (Sidebar)
       .barra-lateral
-        .marca
-          .simbolo-dental
-          p.logotipo DENTALINK
+        // Rompemos la caja fija del CSS externo para que se adapte al logo completo
+        .marca(style="display: flex; align-items: center; justify-content: center; height: auto !important; min-height: 80px; padding: 15px 0; margin-bottom: 15px; overflow: visible !important;")
+          // Le damos un ancho de 150px para que encaje perfecto en la barra
+          img(src="/img/logo.png" alt="DentaLink Logo" style="width: 150px; height: auto; object-fit: contain; display: block;")
+        
         .clinica
           .hospital
           .datos-de-clinica
             p.texto Clínica Sonrisa
             p.texto-2 Consultorio principal
           .chevrons-up-down
+        
         .navegacion-principal
           p.etiqueta-de-menu ESPACIO CLÍNICO
           a.opcion-de-navegacion(href="/")
