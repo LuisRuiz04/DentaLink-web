@@ -1,4 +1,5 @@
 import express from 'express';
+import { registrarDoctor } from '../controllers/doctorController.js'; // ¡Importación del controlador!
 
 const route = express.Router();
 
@@ -6,6 +7,9 @@ const route = express.Router();
 route.get('/auth', (req, res) => {
     res.render('auth');
 });
+
+// NUEVA RUTA: Recibe los datos del formulario de registro y los guarda en Supabase
+route.post('/registro', registrarDoctor);
 
 // Ruta para ver el Dashboard de Citas (después de iniciar sesión)
 route.get('/', (req, res) => {

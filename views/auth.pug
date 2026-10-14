@@ -76,38 +76,45 @@ html(lang="es")
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Correo electrónico
               .auth-input-wrapper
-                input.auth-input(type="email", placeholder="doctor@dentalink.com", required)
+                // Agregué el atributo name="email" para cuando hagamos el login
+                input.auth-input(type="email", name="email", placeholder="doctor@dentalink.com", required)
             
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Contraseña
               .auth-input-wrapper
-                input.auth-input(type="password", placeholder="••••••••", required)
+                // Agregué el atributo name="password" para cuando hagamos el login
+                input.auth-input(type="password", name="password", placeholder="••••••••", required)
             
             a.auth-forgot(href="#") ¿Olvidaste tu contraseña?
 
             button.auth-btn-primary(type="submit") Entrar al Sistema
 
           // FORMULARIO DE REGISTRO (SIGN UP) - Oculto por defecto
-          form#form-signup(action="/" method="GET" style="display: none; flex-direction: column; gap: 16px;")
+          // ¡Actualizado: action="/registro" y method="POST"!
+          form#form-signup(action="/registro" method="POST" style="display: none; flex-direction: column; gap: 16px;")
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Nombre completo del doctor
               .auth-input-wrapper
-                input.auth-input(type="text", placeholder="Dr. Luis Hernández", required)
+                // ¡Actualizado: name="nombre_doctor"!
+                input.auth-input(type="text", name="nombre_doctor", placeholder="Dr. Luis Hernández", required)
 
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Nombre de la clínica
               .auth-input-wrapper
-                input.auth-input(type="text", placeholder="Clínica Sonrisa", required)
+                // ¡Actualizado: name="nombre_clinica"!
+                input.auth-input(type="text", name="nombre_clinica", placeholder="Clínica Sonrisa", required)
 
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Correo electrónico
               .auth-input-wrapper
-                input.auth-input(type="email", placeholder="doctor@dentalink.com", required)
+                // ¡Actualizado: name="email"!
+                input.auth-input(type="email", name="email", placeholder="doctor@dentalink.com", required)
             
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Contraseña
               .auth-input-wrapper
-                input.auth-input(type="password", placeholder="Mínimo 8 caracteres", required)
+                // ¡Actualizado: name="password"!
+                input.auth-input(type="password", name="password", placeholder="Mínimo 8 caracteres", required)
 
             button.auth-btn-primary(type="submit") Crear Cuenta y Consultorio
 
