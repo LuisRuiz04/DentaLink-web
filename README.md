@@ -56,16 +56,27 @@ http://localhost:3000
 ## Estructura del Proyecto (MVC)
 
 DentaLink/
+
 ├── config/         # Configuracion de base de datos y conexiones
+
 ├── controllers/    # Logica de controladores de la aplicacion
+
 ├── middleware/     # Funciones intermedias (autenticacion, validaciones, cookie-parser)
+
 ├── models/         # Modelos de Sequelize (PostgreSQL)
+
 ├── public/         # Archivos estaticos (CSS, imagenes, scripts de cliente)
+
 ├── routes/         # Definicion de rutas web y endpoints de Express
+
 ├── views/          # Vistas modulares en Pug (dashboard, expediente, receta, etc.)
+
 ├── .env            # Variables de entorno locales
+
 ├── .gitignore      # Archivos ignorados por Git
+
 ├── index.js        # Archivo principal de entrada al servidor Express
+
 └── package.json    # Dependencias y scripts del proyecto
 
 ---
