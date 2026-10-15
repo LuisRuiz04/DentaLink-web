@@ -12,9 +12,7 @@ html(lang="es")
     .agenda-de-citas
       // BARRA LATERAL (Sidebar)
       .barra-lateral
-        // Rompemos la caja fija del CSS externo para que se adapte al logo completo
         .marca(style="display: flex; align-items: center; justify-content: center; height: auto !important; min-height: 80px; padding: 15px 0; margin-bottom: 15px; overflow: visible !important;")
-          // Le damos un ancho de 150px para que encaje perfecto en la barra
           img(src="/img/logo.png" alt="DentaLink Logo" style="width: 150px; height: auto; object-fit: contain; display: block;")
         
         .clinica
@@ -26,21 +24,23 @@ html(lang="es")
         
         .navegacion-principal
           p.etiqueta-de-menu ESPACIO CLÍNICO
+          
           a.opcion-de-navegacion(href="/")
             .hospital
             p.texto-3 Agenda
-          a.opcion-de-navegacion-2(href="#")
+            
+          a.opcion-de-navegacion-2(href="/expediente")
             .hospital
             p.texto-4 Pacientes
-          a.opcion-de-navegacion-2(href="#")
-            .hospital
-            p.texto-4 Odontograma
-          a.opcion-de-navegacion-2(href="#")
+            
+          a.opcion-de-navegacion-2(href="/inventario")
             .hospital
             p.texto-4 Inventario
-          a.opcion-de-navegacion-2(href="#")
+            
+          a.opcion-de-navegacion-2(href="/receta")
             .hospital
             p.texto-4 Recetas
+            
         .espaciador
         .ayuda
           .circle-help
@@ -55,20 +55,26 @@ html(lang="es")
       // ESPACIO DE TRABAJO (Área Derecha)
       .espacio-de-trabajo
         // BARRA SUPERIOR (Topbar)
-        .barra-superior
+        .barra-superior(style="display: flex; justify-content: space-between; align-items: center;")
           .buscador
             .settings
             p.texto-11 Buscar paciente...
             .espaciador-2
             p.texto-2 ⌘ K
-          .espaciador-2
-          .bell
-          .separador
-          .avatar-del-doctor
-          .perfil-del-doctor
-            p.texto Dr. Luis
-            p.texto-2 Odontólogo
-          .chevron-down
+          
+          // Contenedor derecho del Topbar
+          div(style="display: flex; align-items: center; gap: 20px;")
+            .bell
+            .separador
+            div(style="display: flex; align-items: center; gap: 10px;")
+              .avatar-del-doctor
+              .perfil-del-doctor
+                p.texto Dr. Luis
+                p.texto-2 Odontólogo
+              .chevron-down
+            
+            // BOTÓN DE CERRAR SESIÓN
+            a(href="/cerrar-sesion" style="text-decoration: none; color: #dc2626; font-size: 13px; font-weight: 600; padding: 6px 12px; border: 1px solid #fca5a5; border-radius: 6px; background-color: #fef2f2; transition: all 0.2s;") Cerrar Sesión
 
         // CONTENIDO DINÁMICO (Aquí se insertará la vista hija)
         block content
