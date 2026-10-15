@@ -1,15 +1,21 @@
 import express from 'express';
-import { registrarDoctor } from '../controllers/doctorController.js'; // ¡Importación del controlador!
+import { registrarDoctor, autenticarDoctor } from '../controllers/doctorController.js';
 
 const route = express.Router();
 
 // Ruta para la pantalla de Login y Sign Up unificada
 route.get('/auth', (req, res) => {
-    res.render('auth');
+    // Capturamos el parámetro 'error' de la URL (si existe)
+    const error = req.query.error; 
+    // Se lo pasamos a la vista Pug
+    res.render('auth', { error }); 
 });
 
-// NUEVA RUTA: Recibe los datos del formulario de registro y los guarda en Supabase
+// Ruta para procesar el Registro
 route.post('/registro', registrarDoctor);
+
+// NUEVA RUTA: Procesar el Inicio de Sesión
+route.post('/login', autenticarDoctor);
 
 // Ruta para ver el Dashboard de Citas (después de iniciar sesión)
 route.get('/', (req, res) => {

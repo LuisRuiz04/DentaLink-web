@@ -66,23 +66,31 @@ html(lang="es")
             h2(style="font-size: 24px; font-weight: 700; color: #00a5c4;") ¡Bienvenido de nuevo!
             p(style="font-size: 13px; color: #5a6b7c;") Ingresa a tu cuenta o registra tu consultorio.
 
+          // NUEVO: Alertas de Error dinámicas
+          if error == '1'
+            div(style="background-color: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; text-align: center; border: 1px solid #f87171;")
+              strong ¡Ups! 
+              | Correo o contraseña incorrectos.
+          if error == '2'
+            div(style="background-color: #fef08a; color: #a16207; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; text-align: center; border: 1px solid #facc15;")
+              strong Error del servidor. 
+              | Intenta de nuevo más tarde.
+
           // Pestañas para cambiar entre Login y Sign Up
           .auth-tabs
             .auth-tab.active#tab-login(onclick="switchTab('login')") Iniciar Sesión
             .auth-tab#tab-signup(onclick="switchTab('signup')") Registrarse
 
           // FORMULARIO DE INICIO DE SESIÓN
-          form#form-login(action="/" method="GET" style="display: flex; flex-direction: column; gap: 16px;")
+          form#form-login(action="/login" method="POST" style="display: flex; flex-direction: column; gap: 16px;")
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Correo electrónico
               .auth-input-wrapper
-                // Agregué el atributo name="email" para cuando hagamos el login
                 input.auth-input(type="email", name="email", placeholder="doctor@dentalink.com", required)
             
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Contraseña
               .auth-input-wrapper
-                // Agregué el atributo name="password" para cuando hagamos el login
                 input.auth-input(type="password", name="password", placeholder="••••••••", required)
             
             a.auth-forgot(href="#") ¿Olvidaste tu contraseña?
@@ -90,30 +98,25 @@ html(lang="es")
             button.auth-btn-primary(type="submit") Entrar al Sistema
 
           // FORMULARIO DE REGISTRO (SIGN UP) - Oculto por defecto
-          // ¡Actualizado: action="/registro" y method="POST"!
           form#form-signup(action="/registro" method="POST" style="display: none; flex-direction: column; gap: 16px;")
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Nombre completo del doctor
               .auth-input-wrapper
-                // ¡Actualizado: name="nombre_doctor"!
                 input.auth-input(type="text", name="nombre_doctor", placeholder="Dr. Luis Hernández", required)
 
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Nombre de la clínica
               .auth-input-wrapper
-                // ¡Actualizado: name="nombre_clinica"!
                 input.auth-input(type="text", name="nombre_clinica", placeholder="Clínica Sonrisa", required)
 
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Correo electrónico
               .auth-input-wrapper
-                // ¡Actualizado: name="email"!
                 input.auth-input(type="email", name="email", placeholder="doctor@dentalink.com", required)
             
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Contraseña
               .auth-input-wrapper
-                // ¡Actualizado: name="password"!
                 input.auth-input(type="password", name="password", placeholder="Mínimo 8 caracteres", required)
 
             button.auth-btn-primary(type="submit") Crear Cuenta y Consultorio
