@@ -1,92 +1,102 @@
 extends layout
 
 block content
-  .contenido
-    .encabezado-de-pagina
-      .titulo-y-descripcion
-        p.titulo Expediente clínico digital
-        p.texto-11 Pacientes / Ana Martínez López / Datos generales
-      .boton
-        .history
-        p.texto-4 Ver historial
-
-    // PERFIL DEL PACIENTE
-    .perfil-del-paciente
-      .identificacion-del-paciente
-        .foto-de-paciente
-        .datos-de-paciente
-          .nombre-y-estado
-            p.texto-24px Ana Martínez López
-            .estado
-              .indicador
-              p.etiqueta-2 Activo
-          .informacion-personal
-            p.texto-11 34 años · Femenino
-            p.texto-11 Tel. +52 55 1234 5678
-            p.texto-11 Tipo sanguíneo: O+
-          p.texto-2 Expediente DL-00248 · Paciente desde enero de 2024
-        .boton-2
-          .history
-          p.texto-4 Nueva cita
-
-    // ÁREA DE FORMULARIO
-    .datos-generales-del-paciente
-      // Pestañas de Navegación
-      .pestanas
-        .pestana
-          p.texto-4 Datos Generales
-        .pestana-2
-          p.texto-3 Historial Médico
-        .pestana-2
-          p.texto-3 Tratamientos
+  .contenido-principal(style="padding: 30px; width: 100%; box-sizing: border-box; font-family: 'Inter', sans-serif;")
+    
+    // Encabezado
+    .header-pacientes(style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;")
+      div
+        h1(style="font-size: 24px; font-weight: 700; color: #1e293b; margin: 0 0 8px 0;") Directorio de Pacientes
+        p(style="font-size: 14px; color: #64748b; margin: 0;") Gestiona los expedientes clínicos y odontogramas de tus pacientes.
       
-      // Formulario
-      .formulario-de-datos-generales
-        .datos-personales
-          .campo-de-formulario
-            p.etiqueta-4 Nombre completo
-            .entrada
-              p.valor Ana Martínez López
-          .campo-de-formulario
-            p.etiqueta-4 Fecha de nacimiento
-            .entrada
-              p.valor 15 Feb 1991
-              .chevron-down
+      // Botón de Nuevo Paciente
+      button(onclick="document.getElementById('modalNuevoPaciente').style.display='flex'" style="background-color: #00A5C4; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: background 0.3s;")
+        span(style="font-size: 18px; line-height: 1;") +
+        | Nuevo Paciente
 
-        .datos-personales
-          .campo-de-formulario
-            p.etiqueta-4 Teléfono
-            .entrada
-              p.valor +52 55 1234 5678
-          .campo-de-formulario
-            p.etiqueta-4 Correo electrónico
-            .entrada
-              p.valor ana.martinez@correo.com
+    // Contenedor de la Tabla
+    .tabla-contenedor(style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden;")
+      table(style="width: 100%; border-collapse: collapse; text-align: left;")
+        thead(style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;")
+          tr
+            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569;") Nombre del Paciente
+            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569;") Teléfono
+            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569;") Última Visita
+            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569; text-align: center;") Acciones
+        
+        tbody
+          // Aquí entra la lógica dinámica: Si hay pacientes, los imprimimos
+          if pacientes && pacientes.length > 0
+            each paciente in pacientes
+              tr(style="border-bottom: 1px solid #f1f5f9;")
+                td(style="padding: 16px 20px;")
+                  div(style="display: flex; align-items: center; gap: 12px;")
+                    // Círculo con las iniciales dinámicas (Nombre y Apellido)
+                    div(style="width: 36px; height: 36px; border-radius: 50%; background-color: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; text-transform: uppercase;") #{paciente.nombre.charAt(0)}#{paciente.apellidos.charAt(0)}
+                    div
+                      // Nombre y correo dinámicos
+                      p(style="margin: 0; font-weight: 500; color: #1e293b; font-size: 14px;") #{paciente.nombre} #{paciente.apellidos}
+                      p(style="margin: 0; color: #64748b; font-size: 12px;") #{paciente.correo}
+                
+                // Teléfono dinámico
+                td(style="padding: 16px 20px; color: #475569; font-size: 14px;") #{paciente.telefono}
+                
+                // Fecha de última visita (Lo dejamos fijo por ahora)
+                td(style="padding: 16px 20px; color: #475569; font-size: 14px;") -
+                
+                td(style="padding: 16px 20px; text-align: center;")
+                  .acciones(style="display: flex; justify-content: center; gap: 12px;")
+                    a(href="#" style="color: #00A5C4; text-decoration: none; font-size: 13px; font-weight: 600;") Expediente
+                    span(style="color: #cbd5e1;") |
+                    a(href="#" style="color: #00A5C4; text-decoration: none; font-size: 13px; font-weight: 600;") Odontograma
+          else
+            // Si la base de datos no encuentra nada, muestra este mensaje
+            tr
+              td(colspan="4" style="text-align: center; padding: 30px; color: #64748b; font-size: 14px;") Aún no tienes pacientes registrados. ¡Agrega el primero!
 
-        .datos-personales
-          .campo-de-formulario
-            p.etiqueta-4 Tipo sanguíneo
-            .entrada
-              p.valor O+
-              .chevron-down
-          .campo-de-formulario
-            p.etiqueta-4 Dirección
-            .entrada
-              p.valor Av. Insurgentes Sur 125, Ciudad de México
+    // Modal para Registrar Nuevo Paciente (REDISEÑADO)
+    #modalNuevoPaciente(style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000;")
+      .modal-content(style="background: white; padding: 40px; border-radius: 20px; width: 550px; max-width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative;")
+        
+        // Botón de cerrar (X)
+        button(type="button" onclick="document.getElementById('modalNuevoPaciente').style.display='none'" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 28px; color: #94a3b8; cursor: pointer; line-height: 1; padding: 0;") &times;
 
-      // Info de Emergencia
-      .contacto-de-emergencia
-        .hospital
-        p.texto-11 Contacto de emergencia: Roberto Martínez · +52 55 9876 5432
-      
-      // Acciones (Guardar)
-      .acciones-del-expediente
-        .privacidad
-          .chevron-down
-          p.texto-2 Información clínica protegida y confidencial
-        .acciones
-          .boton
-            p.texto-4 Cancelar
-          .boton-4
-            .history
-            p.etiqueta-11 Guardar cambios
+        div(style="text-align: center; margin-bottom: 30px;")
+          h2(style="margin: 0; color: #1e293b; font-size: 24px; font-weight: 700;") Nuevo Paciente
+          p(style="margin: 8px 0 0 0; color: #64748b; font-size: 14px;") Crea su perfil y cuenta de acceso para la app móvil.
+
+        form(action="/pacientes/nuevo" method="POST" style="display: flex; flex-direction: column; gap: 20px;")
+          
+          // Fila 1: Nombre y Apellidos
+          div(style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;")
+            div(style="display: flex; flex-direction: column; gap: 6px;")
+              label(style="font-size: 13px; font-weight: 600; color: #475569;") Nombre(s)
+              input(type="text" name="nombre" placeholder="Ej. Abraham" required style="padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 14px; outline: none;")
+            
+            div(style="display: flex; flex-direction: column; gap: 6px;")
+              label(style="font-size: 13px; font-weight: 600; color: #475569;") Apellidos
+              input(type="text" name="apellidos" placeholder="Ej. Raúl" required style="padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 14px; outline: none;")
+
+          // Fila 2: Teléfono y Dirección
+          div(style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;")
+            div(style="display: flex; flex-direction: column; gap: 6px;")
+              label(style="font-size: 13px; font-weight: 600; color: #475569;") Teléfono
+              input(type="tel" name="telefono" placeholder="10 dígitos" required style="padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 14px; outline: none;")
+            
+            div(style="display: flex; flex-direction: column; gap: 6px;")
+              label(style="font-size: 13px; font-weight: 600; color: #475569;") Dirección
+              input(type="text" name="direccion" placeholder="Calle y número" required style="padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 14px; outline: none;")
+
+          // Fila 3: Correo y Contraseña
+          div(style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;")
+            div(style="display: flex; flex-direction: column; gap: 6px;")
+              label(style="font-size: 13px; font-weight: 600; color: #475569;") Correo Electrónico
+              input(type="email" name="correo" placeholder="correo@ejemplo.com" required style="padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 14px; outline: none;")
+            
+            div(style="display: flex; flex-direction: column; gap: 6px;")
+              label(style="font-size: 13px; font-weight: 600; color: #475569;") Contraseña (App)
+              input(type="password" name="password" placeholder="Mínimo 6 caracteres" required style="padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 14px; outline: none;")
+          
+          // Botón Guardar
+          div(style="margin-top: 15px;")
+            button(type="submit" style="width: 100%; padding: 14px; background: #00A5C4; border: none; border-radius: 10px; cursor: pointer; color: white; font-weight: 600; font-size: 15px; box-shadow: 0 4px 6px -1px rgba(0, 165, 196, 0.2); transition: background 0.3s;") Guardar Paciente
