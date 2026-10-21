@@ -1,156 +1,204 @@
 extends layout
 
 block content
-  .contenido
-    .encabezado-de-pagina
-      .titulo-y-descripcion
-        p.titulo Control de inventario
-        p.texto-11 Mantén tus insumos al día y tu clínica siempre preparada.
-      .boton
-        .plus
-        p.etiqueta Agregar producto
+  .contenido-principal(style="padding: 30px; width: 100%; box-sizing: border-box; font-family: 'Inter', sans-serif;")
+    
+    .header-inventario(style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;")
+      div
+        h1(style="font-size: 24px; font-weight: 700; color: #1e293b; margin: 0 0 8px 0;") Control de inventario
+        p(style="font-size: 14px; color: #64748b; margin: 0;") Mantén tus insumos al día y tu clínica siempre preparada.
+      
+      button(onclick="document.getElementById('modalNuevoProducto').style.display='flex'" style="background-color: #00A5C4; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: background 0.3s;")
+        span(style="font-size: 18px; line-height: 1;") +
+        | Nuevo Producto
 
-    .inventario-de-productos
-      .controles-de-inventario
-        .buscar-producto
-          .settings
-          p.texto-11 Buscar producto o ID...
-        .boton-2
-          .plus
-          p.texto-6 Todas las categorías
-        .espaciador-2
-        .aviso-de-stock
-          .chevron-down
-          p.texto-19 2 con bajo stock
+    .tabla-contenedor(style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden;")
+      
+      div(style="padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;")
+        form(action="/inventario" method="GET" style="display: flex; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 15px; border-radius: 8px; width: 350px; gap: 10px;")
+          i(data-lucide="search" style="width: 18px; height: 18px; color: #94a3b8;")
+          input(type="text" name="q" value=busqueda placeholder="Buscar producto por nombre..." style="border: none; background: transparent; outline: none; width: 100%; font-family: 'Inter', sans-serif; font-size: 14px; color: #1e293b;")
+          if busqueda
+            a(href="/inventario" style="color: #94a3b8; text-decoration: none; font-size: 18px; font-weight: bold;") &times;
+        
+        - let bajoStockCount = productos ? productos.filter(p => p.cantidad <= p.stock_minimo).length : 0
+        if bajoStockCount > 0
+          div(style="display: flex; align-items: center; gap: 8px; color: #ef4444; background: #fef2f2; padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: 600;")
+            i(data-lucide="alert-triangle" style="width: 16px; height: 16px;")
+            span #{bajoStockCount} con bajo stock
 
-      .tabla-de-inventario
-        .encabezado-de-tabla
-          .columna: p.texto-20 ID
-          .columna-2: p.texto-20 Nombre del Producto
-          .columna-3: p.texto-20 Cantidad
-          .columna-4: p.texto-20 Estado
-          .columna-5: p.texto-20 Acciones
+      table(style="width: 100%; border-collapse: collapse; text-align: left;")
+        thead(style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;")
+          tr
+            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569;") ID
+            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569;") Nombre del Producto
+            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569;") Cantidad
+            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569;") Estado
+            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569; text-align: left; width: 150px;") Acciones
+        
+        tbody
+          if productos && productos.length > 0
+            each producto in productos
+              tr(style="border-bottom: 1px solid #f1f5f9;")
+                td(style="padding: 16px 20px; color: #64748b; font-size: 13px; font-weight: 500;") INV-#{String(producto.id).padStart(3, '0')}
+                
+                td(style="padding: 16px 20px;")
+                  p(style="margin: 0; font-weight: 600; color: #1e293b; font-size: 14px;") #{producto.nombre}
+                  p(style="margin: 0; color: #64748b; font-size: 12px; margin-top: 4px;") #{producto.categoria || 'Sin categoría'} · #{producto.descripcion}
+                
+                // CELDA DE CANTIDAD
+                td(style="padding: 16px 20px;")
+                  form(action=`/inventario/ajustar-stock/${producto.id}` method="POST" style="margin: 0; display: flex; align-items: center; gap: 8px;")
+                    
+                    // Botón Menos
+                    button(type="button" onclick=`cambiarLocal('${producto.id}', -1)` style="width: 24px; height: 24px; border-radius: 50%; background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; padding: 0; transition: all 0.2s;") -
+                    
+                    // Input: Se agregó data-original y oninput
+                    input(type="number" id=`input_${producto.id}` name="cantidad" value=producto.cantidad min="0" data-original=producto.cantidad oninput=`verificarCambio('${producto.id}')` style="color: #475569; font-size: 14px; width: 45px; text-align: center; border: none; background: transparent; outline: none; font-family: 'Inter', sans-serif;")
+                    
+                    // Botón Más
+                    button(type="button" onclick=`cambiarLocal('${producto.id}', 1)` style="width: 24px; height: 24px; border-radius: 50%; background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; padding: 0; transition: all 0.2s;") +
 
-        // Producto 1
-        .producto
-          .columna: p.texto-2 INV-001
-          .descripcion
-            p.texto-26 Resina compuesta A2
-            p.texto-2 Restauración · Jeringa de 4 g
-          .columna-3: p.texto-11 24 unidades
-          .columna-4
-            .estado
-              .indicador
-              p.etiqueta-3 Suficiente
-          .acciones-de-producto
-            .plus
-            p.texto-29 Actualizar
-            .settings
+                    // BOTÓN GUARDAR: Inicia en gris (sin cambios)
+                    button(type="submit" id=`btn_save_${producto.id}` title="Guardar Cambios" style="margin-left: 8px; background: #f8fafc; border: 1px solid #e2e8f0; color: #cbd5e1; cursor: pointer; padding: 4px 6px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;")
+                      i(data-lucide="save" style="width: 15px; height: 15px;")
 
-        // Producto 2
-        .producto
-          .columna: p.texto-2 INV-002
-          .descripcion
-            p.texto-26 Brackets metálicos
-            p.texto-2 Ortodoncia · Kit completo
-          .columna-3: p.texto-11 18 kits
-          .columna-4
-            .estado
-              .indicador
-              p.etiqueta-3 Suficiente
-          .acciones-de-producto
-            .plus
-            p.texto-29 Actualizar
-            .settings
+                // CELDA DE ESTADO
+                td(style="padding: 16px 20px;")
+                  if producto.cantidad <= producto.stock_minimo
+                    span(style="display: inline-flex; align-items: center; gap: 6px; background-color: #fef2f2; color: #ef4444; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;")
+                      span(style="width: 6px; height: 6px; border-radius: 50%; background-color: #ef4444;")
+                      | Bajo Stock
+                  else
+                    span(style="display: inline-flex; align-items: center; gap: 6px; background-color: #ecfdf5; color: #10b981; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;")
+                      span(style="width: 6px; height: 6px; border-radius: 50%; background-color: #10b981;")
+                      | Suficiente
+                
+                // ACCIONES
+                td(style="padding: 16px 20px; text-align: left;")
+                  div(style="display: flex; gap: 10px; align-items: center;")
+                    button(type="button" onclick=`abrirModalEditar('${producto.id}', '${producto.nombre}', '${producto.categoria || ''}', '${producto.descripcion || ''}', '${producto.cantidad}', '${producto.stock_minimo}')` style="background: none; border: none; color: #00A5C4; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 0;")
+                      i(data-lucide="edit-2" style="width: 14px; height: 14px;")
+                      | Editar
+                    
+                    form(action=`/inventario/eliminar/${producto.id}` method="POST" style="margin: 0;" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');")
+                      button(type="submit" style="background: none; border: none; color: #ef4444; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 0;")
+                        i(data-lucide="trash-2" style="width: 14px; height: 14px;")
+                        | Eliminar
+          else
+            tr
+              td(colspan="5" style="text-align: center; padding: 40px; color: #64748b; font-size: 14px;")
+                i(data-lucide="package-x" style="width: 48px; height: 48px; color: #cbd5e1; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;")
+                | Aún no tienes productos registrados o tu búsqueda no dio resultados.
 
-        // Producto 3 (Bajo stock)
-        .producto
-          .columna: p.texto-2 INV-003
-          .descripcion
-            p.texto-26 Guantes de nitrilo M
-            p.texto-2 Protección · Caja de 100 piezas
-          .columna-3: p.texto-11 4 cajas
-          .columna-4
-            .estado-3
-              .indicador-3
-              p.texto-19 Bajo Stock
-          .acciones-de-producto
-            .plus
-            p.texto-29 Actualizar
-            .settings
+    div(style="padding: 20px 0; display: flex; justify-content: space-between; align-items: center; color: #64748b; font-size: 12px;")
+      p(style="margin: 0;") Mostrando #{productos ? productos.length : 0} productos
 
-        // Producto 4
-        .producto
-          .columna: p.texto-2 INV-004
-          .descripcion
-            p.texto-26 Anestesia lidocaína 2%
-            p.texto-2 Anestésicos · Caja de 50 cartuchos
-          .columna-3: p.texto-11 12 cajas
-          .columna-4
-            .estado
-              .indicador
-              p.etiqueta-3 Suficiente
-          .acciones-de-producto
-            .plus
-            p.texto-29 Actualizar
-            .settings
+    datalist#listaCategorias
+      if categoriasUnicas
+        each cat in categoriasUnicas
+          option(value=cat)
 
-        // Producto 5 (Bajo stock)
-        .producto
-          .columna: p.texto-2 INV-005
-          .descripcion
-            p.texto-26 Agujas dentales cortas
-            p.texto-2 Desechables · Caja de 100 piezas
-          .columna-3: p.texto-11 3 cajas
-          .columna-4
-            .estado-3
-              .indicador-3
-              p.texto-19 Bajo Stock
-          .acciones-de-producto
-            .plus
-            p.texto-29 Actualizar
-            .settings
+    #modalNuevoProducto(style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000;")
+      .modal-content(style="background: white; padding: 30px 40px; border-radius: 16px; width: 450px; max-width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative; box-sizing: border-box;")
+        button(type="button" onclick="document.getElementById('modalNuevoProducto').style.display='none'" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; line-height: 1; padding: 0;") &times;
+        h2(style="margin: 0 0 20px 0; color: #1e293b; font-size: 20px; font-weight: 700; text-align: center;") Nuevo Producto
+        
+        form(action="/inventario/nuevo" method="POST" style="display: flex; flex-direction: column; gap: 15px;")
+          div(style="display: flex; flex-direction: column; gap: 4px;")
+            label(style="font-size: 12px; font-weight: 600; color: #475569;") Nombre del producto
+            input(type="text" name="nombre" placeholder="Ej. Resina compuesta A2" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
+          
+          div(style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;")
+            div(style="display: flex; flex-direction: column; gap: 4px;")
+              label(style="font-size: 12px; font-weight: 600; color: #475569;") Categoría
+              input(type="text" name="categoria" list="listaCategorias" placeholder="Ej. Restauración" autocomplete="off" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
+            div(style="display: flex; flex-direction: column; gap: 4px;")
+              label(style="font-size: 12px; font-weight: 600; color: #475569;") Descripción
+              input(type="text" name="descripcion" placeholder="Ej. Jeringa de 4 g" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
+          
+          div(style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;")
+            div(style="display: flex; flex-direction: column; gap: 4px;")
+              label(style="font-size: 12px; font-weight: 600; color: #475569;") Cantidad Actual
+              input(type="number" name="cantidad" value="0" min="0" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
+            div(style="display: flex; flex-direction: column; gap: 4px;")
+              label(style="font-size: 12px; font-weight: 600; color: #475569;") Stock Mínimo (Alerta)
+              input(type="number" name="stock_minimo" value="5" min="0" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
+          
+          button(type="submit" style="margin-top: 10px; width: 100%; padding: 12px; background: #00A5C4; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: 600; font-size: 14px;") Agregar Producto
 
-        // Producto 6
-        .producto
-          .columna: p.texto-2 INV-006
-          .descripcion
-            p.texto-26 Clorhexidina 0.12%
-            p.texto-2 Antisépticos · Frasco de 250 ml
-          .columna-3: p.texto-11 32 frascos
-          .columna-4
-            .estado
-              .indicador
-              p.etiqueta-3 Suficiente
-          .acciones-de-producto
-            .plus
-            p.texto-29 Actualizar
-            .settings
+    #modalEditarProducto(style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000;")
+      .modal-content(style="background: white; padding: 30px 40px; border-radius: 16px; width: 450px; max-width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative; box-sizing: border-box;")
+        button(type="button" onclick="document.getElementById('modalEditarProducto').style.display='none'" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; line-height: 1; padding: 0;") &times;
+        h2(style="margin: 0 0 20px 0; color: #1e293b; font-size: 20px; font-weight: 700; text-align: center;") Editar Producto
+        
+        form#formEditar(method="POST" style="display: flex; flex-direction: column; gap: 15px;")
+          div(style="display: flex; flex-direction: column; gap: 4px;")
+            label(style="font-size: 12px; font-weight: 600; color: #475569;") Nombre del producto
+            input(type="text" id="edit_nombre" name="nombre" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
+          
+          div(style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;")
+            div(style="display: flex; flex-direction: column; gap: 4px;")
+              label(style="font-size: 12px; font-weight: 600; color: #475569;") Categoría
+              input(type="text" id="edit_categoria" name="categoria" list="listaCategorias" autocomplete="off" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
+            div(style="display: flex; flex-direction: column; gap: 4px;")
+              label(style="font-size: 12px; font-weight: 600; color: #475569;") Descripción
+              input(type="text" id="edit_descripcion" name="descripcion" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
+          
+          div(style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;")
+            div(style="display: flex; flex-direction: column; gap: 4px;")
+              label(style="font-size: 12px; font-weight: 600; color: #475569;") Cantidad Actual
+              input(type="number" id="edit_cantidad" name="cantidad" min="0" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
+            div(style="display: flex; flex-direction: column; gap: 4px;")
+              label(style="font-size: 12px; font-weight: 600; color: #475569;") Stock Mínimo
+              input(type="number" id="edit_stock_minimo" name="stock_minimo" min="0" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
+          
+          button(type="submit" style="margin-top: 10px; width: 100%; padding: 12px; background: #10b981; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: 600; font-size: 14px;") Guardar Cambios
 
-        // Producto 7
-        .producto
-          .columna: p.texto-2 INV-007
-          .descripcion
-            p.texto-26 Mascarillas quirúrgicas
-            p.texto-2 Protección · Caja de 50 piezas
-          .columna-3: p.texto-11 20 cajas
-          .columna-4
-            .estado
-              .indicador
-              p.etiqueta-3 Suficiente
-          .acciones-de-producto
-            .plus
-            p.texto-29 Actualizar
-            .settings
+    script.
+      // Modifica la cantidad en pantalla y luego valida si hubo cambio
+      function cambiarLocal(id, cambio) {
+          const input = document.getElementById('input_' + id);
+          let nuevaCantidad = parseInt(input.value) + cambio;
+          
+          if (nuevaCantidad >= 0) {
+              input.value = nuevaCantidad;
+              verificarCambio(id); // Llamamos a la validación de color
+          }
+      }
 
-      .paginacion
-        p.texto-60 Mostrando 1–7 de 7 productos
-        .controles-de-pagina
-          .chevron-down
-          .pagina-activa
-            p.texto-10 1
-          .chevron-down
+      // Valida y cambia el color del botón de guardado
+      function verificarCambio(id) {
+          const input = document.getElementById('input_' + id);
+          const btnSave = document.getElementById('btn_save_' + id);
+          
+          // data-original tiene el número intacto que trajo de la base de datos
+          const original = parseInt(input.getAttribute('data-original'));
+          const actual = parseInt(input.value);
 
-    .informacion-de-inventario
-      p.texto-2 El estado de stock se actualiza según el mínimo definido para cada producto.
-      p.texto-2 Última actualización: 12 Ago 2025, 10:15 AM
+          if (actual !== original) {
+              // Si cambió: Activo (VERDE)
+              btnSave.style.background = '#ecfdf5';
+              btnSave.style.borderColor = '#10b981';
+              btnSave.style.color = '#10b981';
+          } else {
+              // Si regresó a la normalidad: Inactivo (GRIS)
+              btnSave.style.background = '#f8fafc';
+              btnSave.style.borderColor = '#e2e8f0';
+              btnSave.style.color = '#cbd5e1';
+          }
+      }
+
+      function abrirModalEditar(id, nombre, categoria, descripcion, cantidad, stock_minimo) {
+          document.getElementById('formEditar').action = '/inventario/editar/' + id;
+          document.getElementById('edit_nombre').value = nombre;
+          document.getElementById('edit_categoria').value = categoria;
+          document.getElementById('edit_descripcion').value = descripcion;
+          document.getElementById('edit_cantidad').value = cantidad;
+          document.getElementById('edit_stock_minimo').value = stock_minimo;
+          document.getElementById('modalEditarProducto').style.display = 'flex';
+      }
+      
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }

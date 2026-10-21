@@ -1,105 +1,143 @@
 extends layout
 
 block content
-  .contenido
-    .encabezado-de-pagina
+  .contenido(style="padding: 30px; font-family: 'Inter', sans-serif; background-color: #f1f5f9; min-height: calc(100vh - 60px);")
+    .encabezado-de-pagina(style="display: flex; justify-content: space-between; margin-bottom: 30px;")
       .titulo-y-descripcion
-        p.titulo Recetero médico
-        p.texto-11 Crea indicaciones claras y personalizadas para tus pacientes.
-      .boton
-        .history
-        p.texto-7 Recetas anteriores
+        h1(style="font-size: 26px; font-weight: 700; color: #1e293b; margin: 0 0 8px 0;") Emisión de Recetas
+        p(style="color: #64748b; margin: 0; font-size: 15px;") Crea indicaciones claras y profesionales para tus pacientes.
 
-    // PACIENTE SELECCIONADO
-    .paciente-seleccionado
-      .iniciales
-        p.texto-10 AM
-      p.texto-19 Ana Martínez López
-      p.texto-20 ·
-      p.texto-11 34 años
-      p.texto-20 ·
-      p.texto-11 Expediente DL-00248
-      .espaciador-2
-      p.texto-20 Última visita: 12 Ago 2025
-      .chevron-down
-
-    // FORMULARIO Y VISTA PREVIA
-    .formulario-y-vista-previa
-      // PANEL IZQUIERDO: FORMULARIO
-      .formulario-de-medicamento
-        p.texto-25 Añadir medicamento
-        p.texto-26 Completa la dosis y las indicaciones para incluirlas en la receta.
+    .layout-receta(style="display: grid; grid-template-columns: 450px 1fr; gap: 30px; align-items: start;")
+      
+      // PANEL IZQUIERDO: FORMULARIO (Estilo Tarjeta)
+      .panel-izquierdo(style="background: white; padding: 30px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);")
         
-        .navegacion-principal
-          p.etiqueta-2 Medicamento
-          .entrada
-            p.valor Ibuprofeno 400 mg
-            .chevron-down
-            
-        .navegacion-principal
-          p.etiqueta-2 Dosis
-          .entrada
-            p.valor 1 tableta por vía oral
-            
-        .navegacion-principal
-          p.etiqueta-2 Frecuencia
-          .entrada
-            p.valor Cada 8 horas durante 3 días
-            .chevron-down
-            
-        .agregar-medicamento
-          .boton-2
-            .history
-            p.texto-7 Agregar a receta
-            
-        .separador-2
-        
-        .aviso-de-prescripcion
-          .settings
-          p.texto-27 Verifica las alergias y los antecedentes del paciente antes de emitir la receta.
+        // 1. Selección de Paciente
+        div(style="margin-bottom: 30px;")
+          label(style="font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #00A5C4; display: block; margin-bottom: 12px;") 1. Datos del Paciente
+          select#pacienteSelect(style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; background-color: #f8fafc; color: #1e293b; outline: none; cursor: pointer; transition: all 0.3s;")
+            option(value="" disabled selected) -- Selecciona al paciente --
+            if pacientes
+              each paciente in pacientes
+                option(value=paciente.id) #{paciente.nombre} #{paciente.apellidos}
 
-      // PANEL DERECHO: VISTA PREVIA A4
-      .vista-previa-de-receta
-        .cabecera-de-vista-previa
-          p.texto-28 Vista previa de receta
-          p.texto-2 A4 · 1 página
+        div(style="border-bottom: 1px dashed #cbd5e1; margin-bottom: 30px;")
+        
+        // 2. Formulario de Medicamentos
+        div(style="margin-bottom: 25px;")
+          label(style="font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #00A5C4; display: block; margin-bottom: 5px;") 2. Prescripción Médica
+          p(style="font-size: 13px; color: #64748b; margin-bottom: 20px; margin-top: 0;") Completa los campos para añadir a la receta.
           
-        .contenedor-de-hoja
-          .receta-en-formato-a4
-            .membrete
-              .simbolo-dental-2
-              .perfil-del-doctor
-                p.texto-30 Clínica Sonrisa
-                p.texto-31 Odontología integral · Ciudad de México
-            .separador-2
+          div(style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;")
+            div
+              label(style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;") Medicamento
+              input#medNombre(type="text" placeholder="Ej. Amoxicilina" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; box-sizing: border-box; font-size: 14px; outline: none; transition: border 0.3s;")
             
-            .datos-de-prescripcion
-              .cabecera-de-vista-previa
-                p.texto-31 12 de agosto de 2025
-                p.texto-31 Folio RX-00248
-              p.texto-34 Paciente: Ana Martínez López
-              p.texto-31 Edad: 34 años · Expediente: DL-00248
+            div
+              label(style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;") Dosis y Presentación
+              input#medDosis(type="text" placeholder="Ej. 500 mg - 1 cápsula" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; box-sizing: border-box; font-size: 14px; outline: none; transition: border 0.3s;")
+            
+            div
+              label(style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;") Frecuencia e Indicaciones
+              input#medFrecuencia(type="text" placeholder="Ej. Cada 8 horas por 7 días" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; box-sizing: border-box; font-size: 14px; outline: none; transition: border 0.3s;")
               
-            p.simbolo-de-receta Rx
-            
-            .medicamentos-prescritos
-              .datos-de-prescripcion
-                p.texto-34 1. Ibuprofeno 400 mg
-                p.texto-37 Tomar 1 tableta por vía oral cada 8 horas durante 3 días, después de los alimentos.
-              .datos-de-prescripcion
-                p.texto-34 2. Clorhexidina 0.12%
-                p.texto-37 Enjuagar con 15 ml cada 12 horas durante 7 días. No ingerir.
-                
-            .espaciador
-            
-            .firma-del-profesional
-              .linea-de-firma
-              p.texto-34 Dr. Luis Hernández
-              p.texto-31 Odontólogo · Cédula profesional 7845123
-              
-            p.texto-42 Av. Insurgentes Sur 125 · Tel. 55 5555 0123 Esta receta es de uso exclusivo para el paciente indicado.
+          button(type="button" onclick="agregarMedicamentoUI()" style="width: 100%; padding: 14px; background: #ecfdf5; border: 1px solid #10b981; color: #10b981; font-weight: 600; border-radius: 10px; font-size: 14px; cursor: pointer; transition: all 0.2s;") + Agregar a la receta
 
-        .descargar-receta
-          .boton-3
-            .history
-            p.etiqueta-6 Generar y Descargar PDF
+      // PANEL DERECHO: VISTA PREVIA (Estilo Hoja Flotante)
+      .panel-derecho(style="background: #e2e8f0; padding: 40px; border-radius: 16px; display: flex; flex-direction: column; align-items: center;")
+        
+        // El "Papel" de la receta
+        #hojaPreview(style="background: white; width: 100%; max-width: 550px; min-height: 400px; border-radius: 8px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); padding: 40px; position: relative;")
+          
+          div(style="border-bottom: 2px solid #00A5C4; padding-bottom: 15px; margin-bottom: 20px;")
+            h3(style="font-size: 18px; margin: 0; color: #1e293b;") Vista previa de medicamentos
+            p(style="margin: 5px 0 0 0; font-size: 12px; color: #64748b;") El diseño final del PDF incluirá tu logotipo y firma.
+
+          // Contenedor dinámico donde se verán los medicamentos
+          #listaVistaPrevia(style="flex-grow: 1;")
+            p#placeholderTexto(style="color: #94a3b8; text-align: center; margin-top: 80px; font-style: italic;") El recetero está vacío. <br> Agrega medicamentos para comenzar.
+
+        // Botón Final debajo de la hoja
+        button(type="button" onclick="enviarReceta()" style="margin-top: 30px; width: 100%; max-width: 550px; padding: 16px; background: #00A5C4; color: white; border: none; font-weight: bold; border-radius: 10px; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0, 165, 196, 0.3); transition: all 0.3s;") Generar y Descargar PDF
+
+    // LOGICA JAVASCRIPT DEL FRONTEND
+    script.
+      let listaMeds = [];
+
+      // Efecto focus bonito para los inputs
+      document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('focus', (e) => { e.target.style.border = '1px solid #00A5C4'; e.target.style.backgroundColor = '#ffffff'; });
+        input.addEventListener('blur', (e) => { e.target.style.border = '1px solid #e2e8f0'; e.target.style.backgroundColor = '#f8fafc'; });
+      });
+
+      function agregarMedicamentoUI() {
+          const nombre = document.getElementById('medNombre').value;
+          const dosis = document.getElementById('medDosis').value;
+          const frecuencia = document.getElementById('medFrecuencia').value;
+
+          if(!nombre || !dosis || !frecuencia) {
+              alert("Por favor completa todos los campos del medicamento.");
+              return;
+          }
+
+          listaMeds.push({ nombre, dosis, frecuencia });
+
+          document.getElementById('medNombre').value = '';
+          document.getElementById('medDosis').value = '';
+          document.getElementById('medFrecuencia').value = '';
+
+          renderizarVistaPrevia();
+      }
+
+      function renderizarVistaPrevia() {
+          const contenedor = document.getElementById('listaVistaPrevia');
+          
+          if(listaMeds.length === 0) {
+              contenedor.innerHTML = '<p id="placeholderTexto" style="color: #94a3b8; text-align: center; margin-top: 80px; font-style: italic;">El recetero está vacío. <br> Agrega medicamentos para comenzar.</p>';
+              return;
+          }
+
+          let html = '<h2 style="margin-top:0; font-size: 28px; color: #00A5C4; font-weight: 800;">Rx</h2>';
+          listaMeds.forEach((med, index) => {
+              html += `
+                <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed #e2e8f0;">
+                  <p style="margin: 0; font-weight: 700; color: #1e293b; font-size: 15px;">${index + 1}. ${med.nombre} - <span style="font-weight: 500; color: #475569;">${med.dosis}</span></p>
+                  <p style="margin: 6px 0 0 0; color: #64748b; font-size: 13px; line-height: 1.5;">${med.frecuencia}</p>
+                </div>
+              `;
+          });
+          contenedor.innerHTML = html;
+      }
+
+      function enviarReceta() {
+          const pacienteId = document.getElementById('pacienteSelect').value;
+          
+          if(!pacienteId) {
+              alert("Selecciona al paciente para emitir la receta.");
+              return;
+          }
+          if(listaMeds.length === 0) {
+              alert("Debes agregar al menos un medicamento.");
+              return;
+          }
+
+          fetch('/receta/generar', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ pacienteId, medicamentos: listaMeds })
+          })
+          .then(res => res.json())
+          .then(data => {
+              if (data.success) {
+                  window.open(data.url_pdf, '_blank');
+                  listaMeds = [];
+                  renderizarVistaPrevia();
+                  document.getElementById('pacienteSelect').value = '';
+              } else {
+                  alert("Error al generar la receta.");
+              }
+          })
+          .catch(err => console.error(err));
+      }

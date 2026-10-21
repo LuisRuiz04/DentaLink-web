@@ -32,8 +32,8 @@ const Paciente = db.define('pacientes', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    // Este campo es la clave foránea (Foreign Key) para saber de qué doctor es
-    doctorId: { 
+    // Este campo es la clave foránea para saber a qué CLÍNICA pertenece
+    clinicaId: { 
         type: DataTypes.INTEGER,
         allowNull: false
     }
