@@ -1,14 +1,18 @@
 import express from 'express';
-import { registrarDoctor, autenticarDoctor, cerrarSesion } from '../controllers/doctorController.js'; // Importamos cerrarSesion
+import { Op } from 'sequelize'; 
+import { registrarDoctor, autenticarDoctor, cerrarSesion, editarPerfil } from '../controllers/doctorController.js'; 
 import { registrarPaciente } from '../controllers/pacienteController.js'; 
+import { agregarProducto, actualizarProducto, ajustarStock, eliminarProducto } from '../controllers/inventarioController.js'; 
+import { vistaReceta, generarReceta } from '../controllers/recetaController.js'; 
+
+// IMPORTAMOS LOS CONTROLADORES DE CLÍNICA (Nuevos añadidos)
+import { agregarClinica, cambiarClinica, editarClinica, eliminarClinica } from '../controllers/clinicaController.js'; 
+
 import protegerRuta from '../middleware/authMiddleware.js'; 
 import Paciente from '../models/pacienteModel.js';
+import Inventario from '../models/inventarioModel.js';
 
 const route = express.Router();
-
-// ==========================================
-// RUTAS PÚBLICAS
-// ==========================================
 
 route.get('/auth', (req, res) => {
     const error = req.query.error; 
@@ -17,50 +21,75 @@ route.get('/auth', (req, res) => {
 
 route.post('/registro', registrarDoctor);
 route.post('/login', autenticarDoctor);
-
-// NUEVA RUTA: Cerrar sesión
 route.get('/cerrar-sesion', cerrarSesion);
 
-// ==========================================
-// RUTAS PRIVADAS (Protegidas)
-// ==========================================
+// --- RUTAS MULTI-CLÍNICA ---
+route.post('/clinica/nueva', protegerRuta, agregarClinica);
+route.get('/cambiar-clinica/:id', protegerRuta, cambiarClinica);
+route.post('/clinica/editar/:id', protegerRuta, editarClinica);
+route.post('/clinica/eliminar/:id', protegerRuta, eliminarClinica);
+
+// --- RUTA DEL PERFIL ---
+route.post('/perfil/editar', protegerRuta, editarPerfil);
 
 route.get('/', protegerRuta, (req, res) => {
-    res.render('dashboard', { doctor: req.doctor });
+    // res.locals ya inyecta doctor y clinicaActiva automáticamente gracias al middleware
+    res.render('dashboard', { pagina: 'agenda' });
 });
 
-// Ruta para ver el Expediente Clínico (Directorio de Pacientes)
 route.get('/expediente', protegerRuta, async (req, res) => {
     try {
-        // Buscamos TODOS los pacientes que pertenezcan al doctor que inició sesión
-        const pacientes = await Paciente.findAll({
-            where: { doctorId: req.doctor.id }
-        });
+        // AHORA BUSCAMOS LOS PACIENTES DE LA CLÍNICA ACTIVA, NO DEL DOCTOR
+        const clinicaId = req.clinicaActiva ? req.clinicaActiva.id : null;
+        const pacientes = clinicaId ? await Paciente.findAll({ where: { clinicaId } }) : [];
         
-        // Le mandamos a la vista los pacientes reales
-        res.render('expediente', { pacientes }); 
+        res.render('expediente', { pacientes, pagina: 'pacientes' }); 
     } catch (error) {
         console.log(error);
-        res.render('expediente', { pacientes: [] });
+        res.render('expediente', { pacientes: [], pagina: 'pacientes' });
     }
 });
 
 route.post('/pacientes/nuevo', protegerRuta, registrarPaciente);
 
 route.get('/odontograma', protegerRuta, (req, res) => {
-    res.render('odontograma');
+    res.render('odontograma', { pagina: 'odontograma' });
 });
 
 route.get('/historial', protegerRuta, (req, res) => {
-    res.render('historial-fotos');
+    res.render('historial-fotos', { pagina: 'historial' });
 });
 
-route.get('/receta', protegerRuta, (req, res) => {
-    res.render('receta');
+route.get('/receta', protegerRuta, vistaReceta); 
+route.post('/receta/generar', protegerRuta, generarReceta); 
+
+route.get('/inventario', protegerRuta, async (req, res) => {
+    const { q } = req.query; 
+    try {
+        // AHORA BUSCAMOS EL INVENTARIO DE LA CLÍNICA ACTIVA
+        const clinicaId = req.clinicaActiva ? req.clinicaActiva.id : null;
+        let condicion = clinicaId ? { clinicaId } : { clinicaId: null }; 
+        
+        if (q) {
+            condicion.nombre = { [Op.iLike]: `%${q}%` }; 
+        }
+        
+        const productos = clinicaId ? await Inventario.findAll({
+            where: condicion,
+            order: [['id', 'DESC']]
+        }) : [];
+        
+        const categoriasUnicas = [...new Set(productos.map(p => p.categoria).filter(c => c))];
+        res.render('inventario', { pagina: 'inventario', productos, busqueda: q, categoriasUnicas });
+    } catch (error) {
+        console.log(error);
+        res.render('inventario', { pagina: 'inventario', productos: [], busqueda: q, categoriasUnicas: [] });
+    }
 });
 
-route.get('/inventario', protegerRuta, (req, res) => {
-    res.render('inventario');
-});
+route.post('/inventario/nuevo', protegerRuta, agregarProducto);
+route.post('/inventario/editar/:id', protegerRuta, actualizarProducto);
+route.post('/inventario/ajustar-stock/:id', protegerRuta, ajustarStock);
+route.post('/inventario/eliminar/:id', protegerRuta, eliminarProducto);
 
 export default route;

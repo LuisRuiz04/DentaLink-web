@@ -9,64 +9,28 @@ html(lang="es")
     link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap")
     link(rel="stylesheet" href="/css/style.css")
     style.
-      /* Reset de margenes para quitar la linea blanca a la derecha */
-      html, body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        overflow-x: hidden;
-      }
-      .auth-container {
-        display: flex;
-        width: 100vw;
-        min-height: 100vh;
-      }
-      /* Invertimos los colores y forzamos a ocupar el 50% exacto cada lado */
-      .auth-brand-panel {
-        background: #FFFFFF !important;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem;
-      }
-      .auth-form-panel {
-        background: #00A5C4 !important;
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem;
-      }
+      html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow-x: hidden; }
+      .auth-container { display: flex; width: 100vw; min-height: 100vh; }
+      .auth-brand-panel { background: #FFFFFF !important; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+      .auth-form-panel { background: #00A5C4 !important; flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; }
   body
     .auth-container
-      // Panel Izquierdo: Branding (Blanco y centrado)
       .auth-brand-panel
-        // Ambos lados ahora tienen margin-top: -120px para subir en conjunto
         div(style="display: flex; flex-direction: column; align-items: center; max-width: 500px; text-align: center; margin-top: -120px;")
-          
-          // Aumentamos muchísimo el margin-bottom a 6rem porque la imagen ya no tiene espacio transparente abajo
           .brand-logo-box(style="background: transparent; width: 100%; display: flex; justify-content: center; margin-bottom: 6rem;")
             img(src="/img/logo.png" alt="DentaLink Logo" style="width: 100%; max-width: 480px; height: auto; object-fit: contain;")
-          
           .brand-content
             h1(style="color: #00a5c4; font-weight: 700; margin-bottom: 15px;") Gestión clínica integral para odontólogos modernos.
             p(style="color: #5a6b7c; font-size: 1.1rem; line-height: 1.6;") Controla tu agenda, expedientes digitales, odontogramas interactivos, historial fotográfico y recetas médicas en una sola plataforma diseñada para tu consultorio.
-          
           .brand-footer(style="margin-top: 2rem;")
             p(style="color: #94a3b8; font-size: 0.9rem;") DentaLink © 2026 · Todos los derechos reservados
 
-      // Panel Derecho: Formulario (Azul)
       .auth-form-panel
-        // Tarjeta blanca flotante con margin-top: -120px para alinearse con el logo
         .auth-card(style="background-color: #FFFFFF; border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); margin-top: -120px;")
           div(style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 25px;")
             h2(style="font-size: 24px; font-weight: 700; color: #00a5c4;") ¡Bienvenido de nuevo!
             p(style="font-size: 13px; color: #5a6b7c;") Ingresa a tu cuenta o registra tu consultorio.
 
-          // NUEVO: Alertas de Error dinámicas
           if error == '1'
             div(style="background-color: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; text-align: center; border: 1px solid #f87171;")
               strong ¡Ups! 
@@ -76,44 +40,51 @@ html(lang="es")
               strong Error del servidor. 
               | Intenta de nuevo más tarde.
 
-          // Pestañas para cambiar entre Login y Sign Up
           .auth-tabs
             .auth-tab.active#tab-login(onclick="switchTab('login')") Iniciar Sesión
             .auth-tab#tab-signup(onclick="switchTab('signup')") Registrarse
 
-          // FORMULARIO DE INICIO DE SESIÓN
           form#form-login(action="/login" method="POST" style="display: flex; flex-direction: column; gap: 16px;")
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Correo electrónico
               .auth-input-wrapper
                 input.auth-input(type="email", name="email", placeholder="doctor@dentalink.com", required)
-            
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Contraseña
               .auth-input-wrapper
                 input.auth-input(type="password", name="password", placeholder="••••••••", required)
-            
             a.auth-forgot(href="#") ¿Olvidaste tu contraseña?
-
             button.auth-btn-primary(type="submit") Entrar al Sistema
 
-          // FORMULARIO DE REGISTRO (SIGN UP) - Oculto por defecto
           form#form-signup(action="/registro" method="POST" style="display: none; flex-direction: column; gap: 16px;")
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Nombre completo del doctor
               .auth-input-wrapper
                 input.auth-input(type="text", name="nombre_doctor", placeholder="Dr. Luis Hernández", required)
-
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Nombre de la clínica
               .auth-input-wrapper
                 input.auth-input(type="text", name="nombre_clinica", placeholder="Clínica Sonrisa", required)
+            
+            // --- NUEVOS CAMPOS ---
+            .auth-form-group
+              label.auth-label(style="color: #5a6b7c;") Teléfono del consultorio
+              .auth-input-wrapper
+                input.auth-input(type="tel", name="telefono", placeholder="Ej. 452 123 4567", required)
+            .auth-form-group
+              label.auth-label(style="color: #5a6b7c;") Cédula Profesional
+              .auth-input-wrapper
+                input.auth-input(type="text", name="cedula", placeholder="Ej. 7845123", required)
+            .auth-form-group
+              label.auth-label(style="color: #5a6b7c;") Dirección del Consultorio
+              .auth-input-wrapper
+                input.auth-input(type="text", name="direccion", placeholder="Av. Principal #123, Uruapan", required)
+            // ---------------------
 
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Correo electrónico
               .auth-input-wrapper
                 input.auth-input(type="email", name="email", placeholder="doctor@dentalink.com", required)
-            
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Contraseña
               .auth-input-wrapper

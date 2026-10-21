@@ -1,31 +1,43 @@
 import Doctor from '../models/doctorModel.js';
+import Clinica from '../models/clinicaModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-// Función 1: Registrar Doctor
+// Función 1: Registrar Doctor y su Primera Clínica
 const registrarDoctor = async (req, res) => {
-    const { nombre_doctor, nombre_clinica, email, password } = req.body;
+    // Extraemos todos los campos del formulario
+    const { nombre_doctor, nombre_clinica, email, password, telefono, cedula, direccion } = req.body;
 
     try {
         const existeDoctor = await Doctor.findOne({ where: { email } });
         
         if (existeDoctor) {
             console.log("El correo ya está registrado");
-            return res.render('auth'); 
+            return res.redirect('/auth'); 
         }
 
-        await Doctor.create({
+        // 1. CREAMOS AL DOCTOR (Solo sus datos personales y profesionales)
+        const nuevoDoctor = await Doctor.create({
             nombre_doctor,
-            nombre_clinica,
             email,
-            password
+            password,
+            cedula
         });
 
-        console.log("¡Doctor registrado con éxito!");
+        // 2. CREAMOS SU PRIMERA CLÍNICA AUTOMÁTICAMENTE
+        await Clinica.create({
+            nombre_clinica,
+            telefono,
+            direccion,
+            doctorId: nuevoDoctor.id // Lo vinculamos al doctor recién creado
+        });
+
+        console.log("¡Doctor y Clínica registrados con éxito!");
         res.redirect('/auth'); 
 
     } catch (error) {
-        console.log("Error al registrar al doctor: ", error);
+        console.log("Error al registrar al doctor y clínica: ", error);
+        res.redirect('/auth');
     }
 };
 
@@ -64,10 +76,38 @@ const autenticarDoctor = async (req, res) => {
     }
 };
 
-// Función 3: Cerrar Sesión (¡NUEVA!)
+// Función 3: Cerrar Sesión
 const cerrarSesion = (req, res) => {
-    // Destruimos la cookie y mandamos al login
-    return res.clearCookie('_token').redirect('/auth');
+    // Borramos tanto la sesión del doctor como la memoria de la clínica que tenía abierta
+    return res.clearCookie('_token').clearCookie('_clinicaActivaId').redirect('/auth');
 };
 
-export { registrarDoctor, autenticarDoctor, cerrarSesion };
+// Función 4: Editar Datos Personales del Doctor
+const editarPerfil = async (req, res) => {
+    const { nombre_doctor, cedula, email, password } = req.body;
+    
+    try {
+        const doctor = await Doctor.findByPk(req.doctor.id);
+        
+        if (doctor) {
+            doctor.nombre_doctor = nombre_doctor;
+            doctor.cedula = cedula;
+            doctor.email = email;
+            
+            // Solo actualizamos la contraseña si el usuario escribió una nueva
+            if (password && password.trim() !== '') {
+                const salt = await bcrypt.genSalt(10);
+                doctor.password = await bcrypt.hash(password, salt);
+            }
+            
+            await doctor.save();
+        }
+        
+        res.redirect(req.get('referer') || '/');
+    } catch (error) {
+        console.log("Error al actualizar el perfil:", error);
+        res.redirect('/');
+    }
+};
+
+export { registrarDoctor, autenticarDoctor, cerrarSesion, editarPerfil };
