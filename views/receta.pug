@@ -101,7 +101,7 @@ block content
           listaMeds.forEach((med, index) => {
               html += `
                 <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed #e2e8f0;">
-                  <p style="margin: 0; font-weight: 700; color: #1e293b; font-size: 15px;">${index + 1}. ${med.nombre} - <span style="font-weight: 500; color: #475569;">${med.dosis}</span></p>
+                  <p style="margin: 0; font-weight: 700; color: #1e293b; font-size: 15px;">${index + 1}. ${med.nombre} <span style="font-weight: 500; color: #475569;">${med.dosis}</span></p>
                   <p style="margin: 6px 0 0 0; color: #64748b; font-size: 13px; line-height: 1.5;">${med.frecuencia}</p>
                 </div>
               `;
@@ -131,7 +131,12 @@ block content
           .then(res => res.json())
           .then(data => {
               if (data.success) {
-                  window.open(data.url_pdf, '_blank');
+                  // MAGIA DEL FRONTEND:
+                  // Mandamos al navegador a la ruta de descarga. No refresca la página,
+                  // solo dispara la ventana de guardar de Windows.
+                  window.location.href = `/receta/descargar/${data.id}`;
+                  
+                  // Limpiamos la pantalla
                   listaMeds = [];
                   renderizarVistaPrevia();
                   document.getElementById('pacienteSelect').value = '';
