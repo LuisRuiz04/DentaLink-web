@@ -3,9 +3,10 @@ import { Op } from 'sequelize';
 import { registrarDoctor, autenticarDoctor, cerrarSesion, editarPerfil } from '../controllers/doctorController.js'; 
 import { registrarPaciente } from '../controllers/pacienteController.js'; 
 import { agregarProducto, actualizarProducto, ajustarStock, eliminarProducto } from '../controllers/inventarioController.js'; 
-import { vistaReceta, generarReceta } from '../controllers/recetaController.js'; 
 
-// IMPORTAMOS LOS CONTROLADORES DE CLÍNICA (Nuevos añadidos)
+// Importación actualizada para recetas
+import { vistaReceta, generarReceta, descargarReceta } from '../controllers/recetaController.js'; 
+
 import { agregarClinica, cambiarClinica, editarClinica, eliminarClinica } from '../controllers/clinicaController.js'; 
 
 import protegerRuta from '../middleware/authMiddleware.js'; 
@@ -39,7 +40,6 @@ route.get('/', protegerRuta, (req, res) => {
 
 route.get('/expediente', protegerRuta, async (req, res) => {
     try {
-        // AHORA BUSCAMOS LOS PACIENTES DE LA CLÍNICA ACTIVA, NO DEL DOCTOR
         const clinicaId = req.clinicaActiva ? req.clinicaActiva.id : null;
         const pacientes = clinicaId ? await Paciente.findAll({ where: { clinicaId } }) : [];
         
@@ -60,13 +60,14 @@ route.get('/historial', protegerRuta, (req, res) => {
     res.render('historial-fotos', { pagina: 'historial' });
 });
 
+// --- RUTAS DE RECETAS ---
 route.get('/receta', protegerRuta, vistaReceta); 
 route.post('/receta/generar', protegerRuta, generarReceta); 
+route.get('/receta/descargar/:id', protegerRuta, descargarReceta); // ¡NUEVA RUTA!
 
 route.get('/inventario', protegerRuta, async (req, res) => {
     const { q } = req.query; 
     try {
-        // AHORA BUSCAMOS EL INVENTARIO DE LA CLÍNICA ACTIVA
         const clinicaId = req.clinicaActiva ? req.clinicaActiva.id : null;
         let condicion = clinicaId ? { clinicaId } : { clinicaId: null }; 
         

@@ -9,10 +9,6 @@ const Receta = db.define('recetas', {
     medicamentos: {
         type: DataTypes.JSON, // Guardaremos el arreglo de medicinas aquí
         allowNull: false
-    },
-    ruta_pdf: {
-        type: DataTypes.STRING,
-        allowNull: false
     }
 });
 

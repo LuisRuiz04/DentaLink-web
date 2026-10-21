@@ -1,12 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import PDFDocument from 'pdfkit';
 import Receta from '../models/recetaModel.js';
 import Paciente from '../models/pacienteModel.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export const vistaReceta = async (req, res) => {
     try {
@@ -24,25 +18,48 @@ export const generarReceta = async (req, res) => {
     
     try {
         const paciente = await Paciente.findByPk(pacienteId);
-        
-        // Obtenemos ambas variables gracias a nuestro authMiddleware
-        const doctorInfo = req.doctor; 
-        const clinicaInfo = req.clinicaActiva; 
-        
         if (!paciente) return res.status(404).json({ success: false, msg: 'Paciente no encontrado' });
 
-        const directorioRecetas = path.join(__dirname, '../public/recetas');
-        if (!fs.existsSync(directorioRecetas)) {
-            fs.mkdirSync(directorioRecetas, { recursive: true });
-        }
-
         const folio = `RX-${Date.now().toString().slice(-5)}`;
-        const nombreArchivo = `${folio}_${paciente.nombre.replace(/\s+/g, '_')}.pdf`;
-        const rutaCompleta = path.join(directorioRecetas, nombreArchivo);
+        
+        const nuevaReceta = await Receta.create({
+            folio, 
+            medicamentos, 
+            clinicaId: req.clinicaActiva.id,
+            pacienteId: paciente.id
+        });
+
+        // Devolvemos el ID de la receta generada en la base de datos
+        res.json({ success: true, id: nuevaReceta.id });
+
+    } catch (error) {
+        console.log("Error al guardar receta en BD:", error);
+        res.status(500).json({ success: false, msg: 'Error interno' });
+    }
+};
+
+export const descargarReceta = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const receta = await Receta.findOne({ where: { id, clinicaId: req.clinicaActiva.id } });
+        if (!receta) return res.status(404).send('Receta no encontrada');
+
+        const paciente = await Paciente.findByPk(receta.pacienteId);
+        
+        const doctorInfo = req.doctor; 
+        const clinicaInfo = req.clinicaActiva; 
+
+        const nombreArchivo = `${receta.folio}_${paciente.nombre.replace(/\s+/g, '_')}.pdf`;
+
+        // Configurar headers para forzar la descarga del PDF en el navegador
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${nombreArchivo}"`);
 
         const doc = new PDFDocument({ margin: 50, size: 'A4' });
-        const stream = fs.createWriteStream(rutaCompleta);
-        doc.pipe(stream);
+        
+        // Conectar el stream del PDF directamente a la respuesta HTTP (sin pasarlo por el disco duro)
+        doc.pipe(res);
 
         const colorCyan = '#00A5C4';
         const colorOscuro = '#1e293b';
@@ -50,12 +67,9 @@ export const generarReceta = async (req, res) => {
         const colorGrisClaro = '#e2e8f0';
 
         // --- VARIABLES DINÁMICAS MULTI-TENANT ---
-        // 1. Datos de la Clínica Activa
         const nombreClinica = clinicaInfo.nombre_clinica || 'Clínica Dental';
         const dir = clinicaInfo.direccion || 'Dirección no registrada';
         const tel = clinicaInfo.telefono || 'Sin teléfono';
-        
-        // 2. Datos del Doctor
         const nombreDoctor = doctorInfo.nombre_doctor || 'Doctor';
         const numCedula = doctorInfo.cedula || 'En trámite';
 
@@ -70,7 +84,7 @@ export const generarReceta = async (req, res) => {
         // 3. METADATOS
         const fechaActual = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
         doc.fillColor(colorGris).fontSize(10).text(fechaActual, 50, 130);
-        doc.fillColor(colorCyan).fontSize(10).text(`Folio ${folio}`, 400, 130, { align: 'right', width: 145 });
+        doc.fillColor(colorCyan).fontSize(10).text(`Folio ${receta.folio}`, 400, 130, { align: 'right', width: 145 });
 
         // 4. DATOS PACIENTE
         const nombreCompletoP = `${paciente.nombre} ${paciente.apellidos || ''}`.trim();
@@ -80,9 +94,9 @@ export const generarReceta = async (req, res) => {
         // 5. SÍMBOLO Rx
         doc.font('Helvetica-Bold').fillColor(colorCyan).fontSize(30).text('Rx', 50, 220);
 
-        // 6. MEDICAMENTOS
+        // 6. MEDICAMENTOS (Obtenidos directo de la base de datos)
         let currentY = 280;
-        medicamentos.forEach((med, index) => {
+        receta.medicamentos.forEach((med, index) => {
             if (currentY > 600) {
                 doc.addPage();
                 currentY = 50;
@@ -100,21 +114,11 @@ export const generarReceta = async (req, res) => {
         doc.font('Helvetica').fillColor(colorGris).fontSize(9).text(`Odontólogo · Cédula profesional ${numCedula}`, 180, footerY + 6, { align: 'center', width: 235 });
         doc.fillColor(colorGris).fontSize(8).text(`${dir} · Tel. ${tel} | Esta receta es de uso exclusivo para el paciente indicado.`, 50, footerY + 35, { align: 'center', width: 495 });
 
+        // Esto cierra el archivo y envía la descarga
         doc.end();
 
-        stream.on('finish', async () => {
-            const nuevaReceta = await Receta.create({
-                folio, 
-                medicamentos, 
-                ruta_pdf: `/recetas/${nombreArchivo}`, 
-                clinicaId: clinicaInfo.id, // ¡Vinculado a la clínica correcta!
-                pacienteId: paciente.id
-            });
-            res.json({ success: true, url_pdf: nuevaReceta.ruta_pdf });
-        });
-
     } catch (error) {
-        console.log("Error al generar receta:", error);
-        res.status(500).json({ success: false, msg: 'Error interno' });
+        console.log("Error al generar PDF:", error);
+        res.status(500).send('Error interno al generar el PDF');
     }
 };
