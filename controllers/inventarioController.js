@@ -9,7 +9,7 @@ const agregarProducto = async (req, res) => {
             descripcion,
             cantidad,
             stock_minimo,
-            clinicaId: req.clinicaActiva.id // Vinculado a la clínica
+            clinicaId: req.clinicaActiva.id // ¡Vinculado exclusivamente a la clínica actual!
         });
         res.redirect('/inventario');
     } catch (error) {
@@ -22,7 +22,8 @@ const actualizarProducto = async (req, res) => {
     const { id } = req.params;
     const { nombre, categoria, descripcion, cantidad, stock_minimo } = req.body;
     try {
-        const producto = await Inventario.findOne({ where: { id, clinicaId: req.clinicaActiva.id } }); // Búsqueda segura
+        // Buscamos que el producto exista y que además pertenezca a la clínica activa
+        const producto = await Inventario.findOne({ where: { id, clinicaId: req.clinicaActiva.id } });
         if (producto) {
             await producto.update({ 
                 nombre, 
@@ -39,7 +40,6 @@ const actualizarProducto = async (req, res) => {
     }
 };
 
-// FUNCIÓN ACTUALIZADA: Recibe la cantidad y recarga la página
 const ajustarStock = async (req, res) => {
     const { id } = req.params;
     const { cantidad } = req.body; 

@@ -1,8 +1,12 @@
 import { DataTypes } from 'sequelize';
-import db from '../config/dbconfig.js'; // Asegúrate de que esta ruta sea la de tu conexión
-import Doctor from './doctorModel.js';
+import db from '../config/dbconfig.js';
 
 const Inventario = db.define('inventarios', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
     nombre: {
         type: DataTypes.STRING,
         allowNull: false
@@ -12,7 +16,7 @@ const Inventario = db.define('inventarios', {
         allowNull: true
     },
     descripcion: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true
     },
     cantidad: {
@@ -25,8 +29,8 @@ const Inventario = db.define('inventarios', {
         allowNull: false,
         defaultValue: 5
     },
-    // Relación con el doctor
-    doctorId: {
+    // ¡AQUÍ ESTABA EL BUG! Lo cambiamos a clinicaId
+    clinicaId: { 
         type: DataTypes.INTEGER,
         allowNull: false
     }
