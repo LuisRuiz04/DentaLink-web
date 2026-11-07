@@ -9,6 +9,7 @@ import { vistaReceta, generarReceta, descargarReceta } from '../controllers/rece
 import { agregarClinica, cambiarClinica, editarClinica, eliminarClinica } from '../controllers/clinicaController.js'; 
 import { obtenerCitas, agendarCita, completarCita, cancelarCita, editarCita } from '../controllers/citaController.js';
 import { verOdontograma, guardarOdontograma } from '../controllers/odontogramaController.js';
+import { verExpedienteDetalle, agregarNotaExpediente } from '../controllers/expedienteController.js';
 
 // Middlewares y Modelos
 import protegerRuta from '../middleware/authMiddleware.js'; 
@@ -73,6 +74,10 @@ route.get('/expediente', protegerRuta, async (req, res) => {
 });
 
 route.post('/pacientes/nuevo', protegerRuta, registrarPaciente);
+
+// --- RUTAS DE DETALLE DE EXPEDIENTE Y NOTAS CLÍNICAS ---
+route.get('/expediente/detalle', protegerRuta, verExpedienteDetalle);
+route.post('/expediente/nota/nueva', protegerRuta, agregarNotaExpediente);
 
 // --- RUTAS DE ODONTOGRAMA E HISTORIAL ---
 route.get('/odontograma', protegerRuta, verOdontograma);

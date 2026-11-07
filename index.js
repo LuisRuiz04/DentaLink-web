@@ -12,6 +12,7 @@ import Inventario from './models/inventarioModel.js';
 import Receta from './models/recetaModel.js'; 
 import Cita from './models/citaModel.js';
 import Odontograma from './models/odontogramaModel.js';
+import ExpedienteNota from './models/expedienteModel.js';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -67,6 +68,14 @@ Odontograma.belongsTo(Clinica, { foreignKey: 'clinicaId' });
 // 9. Un Paciente tiene un Odontograma
 Paciente.hasOne(Odontograma, { foreignKey: 'pacienteId' });
 Odontograma.belongsTo(Paciente, { foreignKey: 'pacienteId' });
+
+// 10. Una Clínica tiene muchas Notas de Expediente
+Clinica.hasMany(ExpedienteNota, { foreignKey: 'clinicaId' });
+ExpedienteNota.belongsTo(Clinica, { foreignKey: 'clinicaId' });
+
+// 11. Un Paciente tiene muchas Notas de Expediente
+Paciente.hasMany(ExpedienteNota, { foreignKey: 'pacienteId' });
+ExpedienteNota.belongsTo(Paciente, { foreignKey: 'pacienteId' });
 
 // ==========================================
 

@@ -1,162 +1,139 @@
 extends layout
 
 block content
+  .contenido-principal(style="padding: 30px; width: 100%; box-sizing: border-box; font-family: 'Inter', sans-serif; background-color: #f8fafc; min-height: 100vh;")
+    
+    // Encabezado Superior y Datos del Paciente
+    .header-odontograma(style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 20px 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 24px;")
+      div
+        a(href="/expediente" style="color: #00A5C4; text-decoration: none; font-size: 13px; font-weight: 600; display: inline-block; margin-bottom: 6px;") ← Volver al Directorio
+        h1(style="font-size: 22px; font-weight: 700; color: #1e293b; margin: 0;") Odontograma Digital
+        p(style="font-size: 13px; color: #64748b; margin: 4px 0 0 0;") Registra el estado dental y da seguimiento clínico a cada tratamiento.
+      
+      div(style="text-align: right; background: #f8fafc; padding: 10px 16px; border-radius: 8px; border: 1px solid #e2e8f0;")
+        if paciente
+          p(style="margin: 0; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase;") Paciente Seleccionado
+          h3(style="margin: 2px 0 0 0; font-size: 15px; color: #1e293b; font-weight: 700;") #{paciente.nombre} #{paciente.apellidos}
+          p(style="margin: 2px 0 0 0; font-size: 12px; color: #00A5C4;") Tel: #{paciente.telefono}
+        else
+          h3(style="margin: 0; font-size: 15px; color: #ef4444; font-weight: 700;") Sin Paciente Asignado
+
+    // Contenedor General en Grid (Izquierda: Gráfico | Derecha: Herramientas)
+    .odontograma-grid(style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;")
+      
+      // PANEL IZQUIERDO: GRÁFICO DEL ODONTOGRAMA
+      .panel-izquierdo(style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02);")
+        div(style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;")
+          span(style="font-weight: 700; color: #1e293b; font-size: 15px;") Dentición Permanente
+          span(style="color: #64748b; font-size: 13px; background: #f1f5f9; padding: 4px 10px; border-radius: 6px; font-weight: 600;") 32 Piezas
+        
+        // ARCADA SUPERIOR
+        .arcada(style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-bottom: 30px;")
+          // Cuadrante 1 (Superior Derecho)
+          .cuadrante(style="display: flex; gap: 4px;")
+            each val in [18, 17, 16, 15, 14, 13, 12, 11]
+              .pieza-container(data-pieza=val style="text-align: center; cursor: pointer; transition: transform 0.15s;")
+                .numero-pieza(style="font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;")= val
+                .diente-svg.estado-sano(id="diente-"+val style="width: 32px; height: 48px; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #f8fafc; position: relative; overflow: hidden; transition: all 0.2s;")
+          
+          .linea-media(style="width: 2px; height: 55px; background: #cbd5e1; margin: 0 12px;")
+          
+          // Cuadrante 2 (Superior Izquierdo)
+          .cuadrante(style="display: flex; gap: 4px;")
+            each val in [21, 22, 23, 24, 25, 26, 27, 28]
+              .pieza-container(data-pieza=val style="text-align: center; cursor: pointer; transition: transform 0.15s;")
+                .numero-pieza(style="font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;")= val
+                .diente-svg.estado-sano(id="diente-"+val style="width: 32px; height: 48px; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #f8fafc; position: relative; overflow: hidden; transition: all 0.2s;")
+        
+        // Separador visual de arcadas
+        div(style="height: 1px; background: #e2e8f0; margin: 24px 0;")
+        
+        // ARCADA INFERIOR
+        .arcada(style="display: flex; justify-content: center; align-items: center; gap: 6px;")
+          // Cuadrante 4 (Inferior Derecho)
+          .cuadrante(style="display: flex; gap: 4px;")
+            each val in [48, 47, 46, 45, 44, 43, 42, 41]
+              .pieza-container(data-pieza=val style="text-align: center; cursor: pointer; transition: transform 0.15s;")
+                .diente-svg.estado-sano(id="diente-"+val style="width: 32px; height: 48px; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #f8fafc; position: relative; overflow: hidden; transition: all 0.2s;")
+                .numero-pieza(style="font-size: 11px; font-weight: 600; color: #64748b; margin-top: 4px;")= val
+          
+          .linea-media(style="width: 2px; height: 55px; background: #cbd5e1; margin: 0 12px;")
+          
+          // Cuadrante 3 (Inferior Izquierdo)
+          .cuadrante(style="display: flex; gap: 4px;")
+            each val in [31, 32, 33, 34, 35, 36, 37, 38]
+              .pieza-container(data-pieza=val style="text-align: center; cursor: pointer; transition: transform 0.15s;")
+                .diente-svg.estado-sano(id="diente-"+val style="width: 32px; height: 48px; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #f8fafc; position: relative; overflow: hidden; transition: all 0.2s;")
+                .numero-pieza(style="font-size: 11px; font-weight: 600; color: #64748b; margin-top: 4px;")= val
+
+      // PANEL DERECHO: HERRAMIENTAS Y HALLAZGOS
+      .panel-derecho(style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: space-between;")
+        
+        div
+          h3(style="margin: 0 0 4px 0; font-size: 16px; color: #1e293b; font-weight: 700;") Herramientas Clínicas
+          p(style="font-size: 13px; color: #64748b; margin: 0 0 16px 0;") Selecciona una opción y haz clic en el diente.
+
+          .grid-herramientas(style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;")
+            button.btn-herramienta(data-tool="caries" style="padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-weight: 600; color: #475569; font-size: 13px; transition: all 0.2s;") Caries
+            button.btn-herramienta(data-tool="resina" style="padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-weight: 600; color: #475569; font-size: 13px; transition: all 0.2s;") Resina
+            button.btn-herramienta(data-tool="extraccion" style="padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-weight: 600; color: #475569; font-size: 13px; transition: all 0.2s;") Extracción
+            button.btn-herramienta(data-tool="corona" style="padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-weight: 600; color: #475569; font-size: 13px; transition: all 0.2s;") Corona
+            button.btn-herramienta(data-tool="sano" style="grid-column: span 2; padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-weight: 600; color: #475569; font-size: 13px; transition: all 0.2s;") Marcar como Sano
+
+          div(style="background: #f8fafc; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px;")
+            p(style="margin: 0; font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;") Estado Activo:
+            p#herramienta-activa-texto(style="margin: 4px 0 0 0; font-size: 14px; font-weight: 600; color: #1e293b;") Ninguna herramienta seleccionada
+          
+          h3(style="font-size: 15px; color: #1e293b; font-weight: 700; margin: 0 0 12px 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;") Hallazgos Registrados
+          
+          ul.lista-hallazgos#contenedor-hallazgos(style="list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto;")
+            li(style="font-size: 13px; color: #64748b; text-align: center; padding: 20px 0;") No hay hallazgos registrados aún.
+
+        // Botón Guardar inferior
+        div(style="margin-top: 20px;")
+          button.btn-guardar#btnGuardarOdontograma(style="width: 100%; padding: 12px; background: #00A5C4; color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0, 165, 196, 0.2); transition: background 0.3s;") Guardar Odontograma
+
+  // Estilos CSS adicionales para clases dinámicas del estado dental y herramientas activas
   style.
-    /* ESTILOS DEL ODONTOGRAMA */
-    .odontograma-container { display: flex; gap: 24px; font-family: 'Inter', sans-serif; margin-top: 20px; }
-    .panel-izquierdo { flex: 2; background: white; padding: 24px; border-radius: 12px; border: 1px solid #e5e7eb; }
-    .panel-derecho { flex: 1; background: white; padding: 24px; border-radius: 12px; border: 1px solid #e5e7eb; }
-    
-    /* CUADRANTES Y GRID */
-    .arcada { display: flex; justify-content: center; gap: 4px; margin-bottom: 24px; position: relative; }
-    .cuadrante { display: flex; gap: 4px; }
-    .linea-media { width: 2px; background: #e5e7eb; margin: 0 16px; }
-    
-    /* DIENTES */
-    .pieza-container { text-align: center; cursor: pointer; transition: transform 0.1s; }
-    .pieza-container:hover { transform: scale(1.05); }
-    .numero-pieza { font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 4px; }
-    .diente-svg { width: 32px; height: 44px; border: 2px solid #d1d5db; border-radius: 6px; background: #f9fafb; position: relative; overflow: hidden; transition: all 0.2s; }
-    
-    /* ESTADOS CLÍNICOS (COLORES Y FORMAS) */
-    .estado-sano { border-color: #d1d5db; background: #f9fafb; }
-    
-    .estado-caries { border-color: #ef4444; background: #fee2e2; }
+    .pieza-container:hover { transform: scale(1.06); }
+    .estado-sano { border-color: #cbd5e1 !important; background: #f8fafc !important; }
+    .estado-caries { border-color: #ef4444 !important; background: #fee2e2 !important; }
     .estado-caries::after { content: ''; position: absolute; top: 35%; left: 35%; width: 30%; height: 30%; background: #ef4444; border-radius: 50%; }
-    
-    .estado-resina { border-color: #3b82f6; background: #dbeafe; }
+    .estado-resina { border-color: #3b82f6 !important; background: #dbeafe !important; }
     .estado-resina::after { content: ''; position: absolute; top: 35%; left: 35%; width: 30%; height: 30%; background: #3b82f6; border-radius: 50%; }
-    
-    .estado-extraccion { border-color: #9ca3af; background: #f3f4f6; }
-    .estado-extraccion::before, .estado-extraccion::after { content: ''; position: absolute; top: 10%; left: 45%; width: 2px; height: 80%; background: #9ca3af; }
+    .estado-extraccion { border-color: #64748b !important; background: #f1f5f9 !important; }
+    .estado-extraccion::before, .estado-extraccion::after { content: ''; position: absolute; top: 10%; left: 48%; width: 2px; height: 80%; background: #64748b; }
     .estado-extraccion::before { transform: rotate(45deg); }
     .estado-extraccion::after { transform: rotate(-45deg); }
-    
-    .estado-corona { border-color: #f59e0b; background: #fef3c7; }
+    .estado-corona { border-color: #f59e0b !important; background: #fef3c7 !important; }
     .estado-corona::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 30%; background: #f59e0b; }
 
-    /* HERRAMIENTAS */
-    .grid-herramientas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
-    .btn-herramienta { padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; text-align: center; font-weight: 600; color: #4b5563; font-size: 13px; transition: 0.2s; }
-    .btn-herramienta:hover { border-color: #9ca3af; }
-    
-    /* CLASES ACTIVAS PARA HERRAMIENTAS */
     .tool-active-caries { border-color: #ef4444 !important; background: #fee2e2 !important; color: #b91c1c !important; }
     .tool-active-resina { border-color: #3b82f6 !important; background: #dbeafe !important; color: #1d4ed8 !important; }
-    .tool-active-extraccion { border-color: #9ca3af !important; background: #f3f4f6 !important; color: #374151 !important; }
+    .tool-active-extraccion { border-color: #64748b !important; background: #f1f5f9 !important; color: #334155 !important; }
     .tool-active-corona { border-color: #f59e0b !important; background: #fef3c7 !important; color: #b45309 !important; }
     .tool-active-sano { border-color: #10b981 !important; background: #d1fae5 !important; color: #047857 !important; }
 
-    /* LISTA DE HALLAZGOS */
-    .lista-hallazgos { list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto; }
-    .item-hallazgo { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
-    .item-hallazgo span { font-weight: 600; color: #111827; }
-    .tag-estado { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
-    
-    .btn-guardar { width: 100%; padding: 14px; background: #111827; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.2s; }
-    .btn-guardar:hover { background: #374151; }
-
-  .contenido
-    .encabezado-de-pagina
-      div
-        h2(style="margin:0; font-size:24px; color:#111827;") Odontograma Digital
-        p(style="margin:5px 0 0 0; color:#6b7280; font-size:14px;") Registra el estado dental y da seguimiento a cada tratamiento.
-      
-      div(style="text-align:right;")
-        if paciente
-          h3(style="margin:0; font-size:16px; color:#111827;") #{paciente.nombre} #{paciente.apellidos}
-          p(style="margin:0; color:#6b7280; font-size:13px;") Tel: #{paciente.telefono}
-        else
-          h3(style="margin:0; font-size:16px; color:#111827;") Paciente Desconocido
-
-    .odontograma-container
-      
-      // PANEL IZQUIERDO: EL GRÁFICO
-      .panel-izquierdo
-        div(style="display:flex; justify-content:space-between; margin-bottom:30px;")
-          span(style="font-weight:bold; color:#374151;") Denticion Permanente
-          span(style="color:#6b7280; font-size:14px;") 32 piezas
-        
-        // ARCADA SUPERIOR
-        .arcada
-          // Cuadrante 1 (Superior Derecho)
-          .cuadrante
-            each val in [18, 17, 16, 15, 14, 13, 12, 11]
-              .pieza-container(data-pieza=val)
-                .numero-pieza= val
-                .diente-svg.estado-sano(id="diente-"+val)
-          
-          .linea-media
-          
-          // Cuadrante 2 (Superior Izquierdo)
-          .cuadrante
-            each val in [21, 22, 23, 24, 25, 26, 27, 28]
-              .pieza-container(data-pieza=val)
-                .numero-pieza= val
-                .diente-svg.estado-sano(id="diente-"+val)
-        
-        // Separador visual
-        div(style="height: 1px; background: #e5e7eb; margin: 30px 0;")
-        
-        // ARCADA INFERIOR
-        .arcada
-          // Cuadrante 4 (Inferior Derecho)
-          .cuadrante
-            each val in [48, 47, 46, 45, 44, 43, 42, 41]
-              .pieza-container(data-pieza=val)
-                .diente-svg.estado-sano(id="diente-"+val)
-                .numero-pieza(style="margin-top:4px; margin-bottom:0;")= val
-          
-          .linea-media
-          
-          // Cuadrante 3 (Inferior Izquierdo)
-          .cuadrante
-            each val in [31, 32, 33, 34, 35, 36, 37, 38]
-              .pieza-container(data-pieza=val)
-                .diente-svg.estado-sano(id="diente-"+val)
-                .numero-pieza(style="margin-top:4px; margin-bottom:0;")= val
-
-      // PANEL DERECHO: HERRAMIENTAS Y RESUMEN
-      .panel-derecho
-        h3(style="margin-top:0; font-size:16px; color:#111827;") Herramientas Clinicas
-        p(style="font-size:12px; color:#6b7280; margin-bottom:15px;") Selecciona una herramienta y haz clic en un diente para aplicar el estado.
-
-        .grid-herramientas
-          button.btn-herramienta(data-tool="caries") Caries
-          button.btn-herramienta(data-tool="resina") Resina
-          button.btn-herramienta(data-tool="extraccion") Extraccion
-          button.btn-herramienta(data-tool="corona") Corona
-          button.btn-herramienta(data-tool="sano" style="grid-column: span 2;") Marcar como Sano
-
-        div(style="background:#f9fafb; padding:15px; border-radius:8px; margin-bottom:20px;")
-          p(style="margin:0; font-size:12px; color:#6b7280; font-weight:bold;") ESTADO ACTUAL:
-          p#herramienta-activa-texto(style="margin:5px 0 0 0; font-size:14px; font-weight:bold; color:#111827;") Ninguna herramienta seleccionada
-        
-        h3(style="font-size:16px; color:#111827; margin-bottom:15px; border-bottom:1px solid #e5e7eb; padding-bottom:10px;") Hallazgos de esta sesion
-        
-        ul.lista-hallazgos#contenedor-hallazgos
-          li(style="font-size:13px; color:#6b7280; text-align:center; padding:20px 0;") No hay hallazgos registrados aun.
-
-        button.btn-guardar#btnGuardarOdontograma Guardar Expediente
+    .item-hallazgo { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+    .item-hallazgo span { font-weight: 600; color: #1e293b; }
+    .tag-estado { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
 
   // ==========================================
   // SCRIPT: LÓGICA DEL ODONTOGRAMA
   // ==========================================
   script.
     document.addEventListener('DOMContentLoaded', () => {
-      
-      // 1. VARIABLES DE ESTADO
       let herramientaActiva = null;
       let estadoDientes = !{JSON.stringify(hallazgosPrevios ? hallazgosPrevios : {})}; 
 
       const coloresEstado = {
         'caries': { bg: '#fee2e2', text: '#ef4444', label: 'Caries' },
         'resina': { bg: '#dbeafe', text: '#3b82f6', label: 'Resina' },
-        'extraccion': { bg: '#f3f4f6', text: '#4b5563', label: 'Extraccion' },
+        'extraccion': { bg: '#f1f5f9', text: '#475569', label: 'Extracción' },
         'corona': { bg: '#fef3c7', text: '#d97706', label: 'Corona' },
       };
 
-      // PINTAR LOS DIENTES EXISTENTES AL CARGAR LA PÁGINA
+      // Pintar dientes al cargar
       Object.keys(estadoDientes).forEach(pieza => {
           const dienteGrafico = document.getElementById('diente-' + pieza);
           if(dienteGrafico) {
@@ -166,7 +143,7 @@ block content
       });
       actualizarListaHallazgos(); 
 
-      // 2. SELECCIÓN DE HERRAMIENTAS
+      // Selección de herramientas
       const botonesHerramienta = document.querySelectorAll('.btn-herramienta');
       const textoHerramientaActiva = document.getElementById('herramienta-activa-texto');
 
@@ -177,22 +154,25 @@ block content
           
           botonesHerramienta.forEach(b => {
              b.className = 'btn-herramienta'; 
+             b.style.borderColor = '#e2e8f0';
+             b.style.background = 'white';
+             b.style.color = '#475569';
           });
           
           this.classList.add('tool-active-' + tool);
           
-          const nombresLegibles = { 'caries': 'Caries', 'resina': 'Resina', 'extraccion': 'Extraccion', 'corona': 'Corona', 'sano': 'Sano (Borrador)' };
+          const nombresLegibles = { 'caries': 'Caries', 'resina': 'Resina', 'extraccion': 'Extracción', 'corona': 'Corona', 'sano': 'Marcar como Sano' };
           textoHerramientaActiva.innerText = `Aplicando: ${nombresLegibles[tool]}`;
         });
       });
 
-      // 3. CLIC EN LOS DIENTES
+      // Clic en los dientes
       const contenedoresPiezas = document.querySelectorAll('.pieza-container');
       
       contenedoresPiezas.forEach(contenedor => {
         contenedor.addEventListener('click', function() {
           if (!herramientaActiva) {
-            alert('Por favor, selecciona una herramienta clinica primero.');
+            alert('Por favor, selecciona una herramienta clínica primero.');
             return;
           }
 
@@ -213,7 +193,7 @@ block content
         });
       });
 
-      // 4. ACTUALIZAR LISTA DE HALLAZGOS (PANEL DERECHO)
+      // Actualizar lista lateral
       function actualizarListaHallazgos() {
         const contenedor = document.getElementById('contenedor-hallazgos');
         contenedor.innerHTML = ''; 
@@ -221,7 +201,7 @@ block content
         const piezasModificadas = Object.keys(estadoDientes);
 
         if (piezasModificadas.length === 0) {
-          contenedor.innerHTML = '<li style="font-size:13px; color:#6b7280; text-align:center; padding:20px 0;">Todos los dientes marcados como sanos.</li>';
+          contenedor.innerHTML = '<li style="font-size:13px; color:#64748b; text-align:center; padding:20px 0;">No hay hallazgos registrados aún.</li>';
           return;
         }
 
@@ -247,12 +227,12 @@ block content
         });
       }
 
-      // 5. ENVIAR DATOS AL BACKEND (FETCH REAL)
+      // Guardar con fetch real
       document.getElementById('btnGuardarOdontograma').addEventListener('click', async function() {
         const pacienteId = new URLSearchParams(window.location.search).get('paciente');
         
         if(!pacienteId) {
-            alert('Error: No se detecto al paciente. Abre el odontograma desde la agenda.');
+            alert('Error: No se detectó al paciente.');
             return;
         }
 
@@ -264,7 +244,7 @@ block content
         const btn = this;
         const textoOriginal = btn.innerText;
         btn.innerText = 'Guardando...';
-        btn.style.background = '#00A5C4';
+        btn.style.background = '#0ea5e9';
         
         try {
             const respuesta = await fetch('/odontograma/guardar', {
@@ -277,23 +257,22 @@ block content
 
             if(respuesta.ok) {
                 btn.innerText = 'Guardado Correctamente';
-                btn.style.background = '#10B981';
+                btn.style.background = '#10b981';
             } else {
                 alert(resultado.mensaje);
                 btn.innerText = textoOriginal;
-                btn.style.background = '#111827';
+                btn.style.background = '#00A5C4';
             }
         } catch(error) {
             console.error(error);
-            alert('Error de conexion al guardar.');
+            alert('Error de conexión al guardar.');
             btn.innerText = textoOriginal;
-            btn.style.background = '#111827';
+            btn.style.background = '#00A5C4';
         }
 
         setTimeout(() => {
             btn.innerText = textoOriginal;
-            btn.style.background = '#111827';
+            btn.style.background = '#00A5C4';
         }, 2500);
       });
-      
     });
