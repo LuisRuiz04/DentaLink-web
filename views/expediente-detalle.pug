@@ -1,0 +1,49 @@
+extends layout
+
+block content
+  .contenido-principal(style="padding: 30px; width: 100%; box-sizing: border-box; font-family: 'Inter', sans-serif;")
+    
+    // Botón de Volver y Encabezado
+    div(style="margin-bottom: 20px;")
+      a(href="/expediente" style="color: #00A5C4; text-decoration: none; font-size: 14px; font-weight: 600;") ← Volver al Directorio
+
+    .header-expediente(style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 24px;")
+      div
+        h1(style="font-size: 22px; font-weight: 700; color: #1e293b; margin: 0 0 4px 0;") #{paciente.nombre} #{paciente.apellidos}
+        p(style="font-size: 14px; color: #64748b; margin: 0;") Teléfono: #{paciente.telefono} | Correo: #{paciente.correo}
+      
+      div(style="display: flex; gap: 10px;")
+        a(href=`/odontograma?paciente=${paciente.id}` style="background-color: #00A5C4; color: white; padding: 10px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; text-decoration: none;") Ver Odontograma
+        button(onclick="document.getElementById('modalNota').style.display='flex'" style="background-color: #1e293b; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;") + Agregar Incidencia
+
+    // Lista de Historial de Notas
+    h2(style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 16px;") Historial Clínico y Notas
+    
+    .contenedor-notas(style="display: flex; flex-direction: column; gap: 12px;")
+      if notas && notas.length > 0
+        each nota in notas
+          div(style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02);")
+            div(style="display: flex; justify-content: space-between; margin-bottom: 8px;")
+              span(style="font-size: 12px; font-weight: 600; color: #0284c7; background: #e0f2fe; padding: 2px 8px; border-radius: 4px;") Nota Clínica
+              span(style="font-size: 12px; color: #94a3b8;") #{new Date(nota.createdAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            p(style="margin: 0; font-size: 14px; color: #334155; line-height: 1.5; white-space: pre-wrap;")= nota.nota
+      else
+        div(style="background: white; padding: 40px; text-align: center; border-radius: 12px; border: 1px solid #e2e8f0; color: #64748b;")
+          p(style="margin: 0; font-size: 14px;") No hay notas o incidencias registradas en este expediente todavía.
+
+    // Modal para Agregar Incidencia Rápida
+    #modalNota(style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000;")
+      .modal-content(style="background: white; padding: 30px; border-radius: 20px; width: 500px; max-width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative;")
+        
+        button(type="button" onclick="document.getElementById('modalNota').style.display='none'" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer;") &times;
+
+        h2(style="margin: 0 0 6px 0; color: #1e293b; font-size: 20px; font-weight: 700;") Registrar Incidencia
+        p(style="margin: 0 0 20px 0; color: #64748b; font-size: 13px;") Escribe los detalles del tratamiento o cambio realizado (ej. cambio de arco a .18).
+
+        form(action="/expediente/nota/nueva" method="POST" style="display: flex; flex-direction: column; gap: 15px;")
+          input(type="hidden" name="pacienteId" value=paciente.id)
+          
+          div(style="display: flex; flex-direction: column; gap: 6px;")
+            textarea(name="nota" rows="4" placeholder="Escribe la nota aquí..." required style="padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 14px; outline: none; resize: none;")
+
+          button(type="submit" style="width: 100%; padding: 12px; background: #00A5C4; border: none; border-radius: 10px; cursor: pointer; color: white; font-weight: 600; font-size: 14px;") Guardar Incidencia
