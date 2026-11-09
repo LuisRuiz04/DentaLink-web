@@ -13,6 +13,9 @@ html(lang="es")
       .auth-container { display: flex; width: 100vw; min-height: 100vh; }
       .auth-brand-panel { background: #FFFFFF !important; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
       .auth-form-panel { background: #00A5C4 !important; flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+      .signup-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+      .signup-grid-2 > .auth-form-group { min-width: 0; }
+      .auth-card input.auth-input, .auth-card .auth-input-wrapper { width: 100% !important; box-sizing: border-box !important; }
   body
     .auth-container
       .auth-brand-panel
@@ -26,8 +29,8 @@ html(lang="es")
             p(style="color: #94a3b8; font-size: 0.9rem;") DentaLink © 2026 · Todos los derechos reservados
 
       .auth-form-panel
-        .auth-card(style="background-color: #FFFFFF; border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); margin-top: -120px;")
-          div(style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 25px;")
+        .auth-card(style="background-color: #FFFFFF; border-radius: 16px; padding: 32px 36px; width: 100%; max-width: 440px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); margin-top: -120px; box-sizing: border-box;")
+          div(style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px;")
             h2(style="font-size: 24px; font-weight: 700; color: #00a5c4;") ¡Bienvenido de nuevo!
             p(style="font-size: 13px; color: #5a6b7c;") Ingresa a tu cuenta o registra tu consultorio.
 
@@ -56,41 +59,43 @@ html(lang="es")
             a.auth-forgot(href="#") ¿Olvidaste tu contraseña?
             button.auth-btn-primary(type="submit") Entrar al Sistema
 
-          form#form-signup(action="/registro" method="POST" style="display: none; flex-direction: column; gap: 16px;")
-            .auth-form-group
-              label.auth-label(style="color: #5a6b7c;") Nombre completo del doctor
-              .auth-input-wrapper
-                input.auth-input(type="text", name="nombre_doctor", placeholder="Dr. Luis Hernández", required)
-            .auth-form-group
-              label.auth-label(style="color: #5a6b7c;") Nombre de la clínica
-              .auth-input-wrapper
-                input.auth-input(type="text", name="nombre_clinica", placeholder="Clínica Sonrisa", required)
-            
-            // --- NUEVOS CAMPOS ---
-            .auth-form-group
-              label.auth-label(style="color: #5a6b7c;") Teléfono del consultorio
-              .auth-input-wrapper
-                input.auth-input(type="tel", name="telefono", placeholder="Ej. 452 123 4567", required)
-            .auth-form-group
-              label.auth-label(style="color: #5a6b7c;") Cédula Profesional
-              .auth-input-wrapper
-                input.auth-input(type="text", name="cedula", placeholder="Ej. 7845123", required)
+          form#form-signup(action="/registro" method="POST" style="display: none; flex-direction: column; gap: 10px;")
+            .signup-grid-2
+              .auth-form-group
+                label.auth-label(style="color: #5a6b7c;") Nombre del doctor
+                .auth-input-wrapper
+                  input.auth-input(type="text", name="nombre_doctor", placeholder="Dr. Luis Hernández", required)
+              .auth-form-group
+                label.auth-label(style="color: #5a6b7c;") Nombre de la clínica
+                .auth-input-wrapper
+                  input.auth-input(type="text", name="nombre_clinica", placeholder="Clínica Sonrisa", required)
+
+            .signup-grid-2
+              .auth-form-group
+                label.auth-label(style="color: #5a6b7c;") Teléfono
+                .auth-input-wrapper
+                  input.auth-input(type="tel", name="telefono", placeholder="452 123 4567", required)
+              .auth-form-group
+                label.auth-label(style="color: #5a6b7c;") Cédula Profesional
+                .auth-input-wrapper
+                  input.auth-input(type="text", name="cedula", placeholder="7845123", required)
+
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Dirección del Consultorio
               .auth-input-wrapper
                 input.auth-input(type="text", name="direccion", placeholder="Av. Principal #123, Uruapan", required)
-            // ---------------------
 
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Correo electrónico
               .auth-input-wrapper
                 input.auth-input(type="email", name="email", placeholder="doctor@dentalink.com", required)
+
             .auth-form-group
               label.auth-label(style="color: #5a6b7c;") Contraseña
               .auth-input-wrapper
                 input.auth-input(type="password", name="password", placeholder="Mínimo 8 caracteres", required)
 
-            button.auth-btn-primary(type="submit") Crear Cuenta y Consultorio
+            button.auth-btn-primary(type="submit", style="margin-top: 6px; width: 100%;") Crear Cuenta y Consultorio
 
   script.
     function switchTab(mode) {
