@@ -1,382 +1,179 @@
 extends layout
 
 block content
-  style.
-    #calendario { font-family: 'Inter', sans-serif; width: 100%; }
-    .fc .fc-toolbar-title { font-size: 1.25rem !important; font-weight: 700 !important; color: #111827 !important; text-transform: capitalize; }
-    .fc .fc-button-primary { background-color: #374151 !important; border: none !important; font-family: 'Inter', sans-serif; text-transform: capitalize; }
-    .fc .fc-button-primary:not(:disabled).fc-button-active, .fc .fc-button-primary:not(:disabled):active { background-color: #111827 !important; }
-    .fc-theme-standard th { border: none !important; padding: 10px 0; color: #6b7280; }
-    .fc-theme-standard td, .fc-theme-standard th { border-color: #f3f4f6 !important; }
-    .fc-scrollgrid { border: none !important; }
-    .fc-daygrid-day-number { color: #111827; font-weight: 500; text-decoration: none; padding: 8px !important; }
-    .fc-event { cursor: pointer; border: none; border-radius: 6px; padding: 4px; font-size: 12px; }
-    
-    /* MODALES ESTÉTICOS */
-    .modal-oculto { display: none !important; }
-    .modal-activo { display: flex; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
-    .modal-caja { background: white; padding: 32px; border-radius: 16px; width: 100%; max-width: 480px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-    
-    .modal-caja, .modal-caja * { font-family: 'Inter', sans-serif !important; }
-    
-    .input-modal { width: 100%; padding: 10px; margin-bottom: 16px; border: 1px solid #e5e7eb; border-radius: 8px; font-size:14px; }
-    .btn-submit { color: white; border: none; padding: 10px; border-radius: 8px; width: 100%; font-weight: 600; cursor: pointer; transition: 0.2s; }
-    
-    .btn-cerrar { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: #fee2e2; color: #ef4444; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.2s; border: none; }
-    .btn-cerrar:hover { background: #fca5a5; }
+  .page
+    header.page-head
+      div
+        h1.page-title Agenda
+        p.page-sub Organiza tu día y acompaña cada sonrisa.
+      a.btn.btn--ghost(href="/citas" data-prefetch)
+        +icon('list', 18)
+        | Ver todas las citas
 
-    .cita-tarjeta { margin-bottom:15px; padding:12px; border:1px solid #f3f4f6; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-    .cita-tarjeta:hover { background: #f9fafb; border-color: #e5e7eb; transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+    //- Cita en curso / siguiente: un clic y estás en la consulta
+    section#hero.card.hero(aria-live="polite")
+      .skeleton(style="height: 52px; width: 100%")
 
-    /* ESTILOS PARA LOS MOTIVOS MODERNOS (CHIPS) */
-    .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-    .chip-radio { display: none; }
-    .chip-label { padding: 8px 14px; border-radius: 20px; border: 1px solid #e5e7eb; cursor: pointer; font-size: 12px; font-weight: 600; color: #6b7280; background: white; transition: all 0.2s; user-select: none; }
-    .chip-label:hover { border-color: #00A5C4; color: #00A5C4; }
-    .chip-radio:checked + .chip-label { background: #00A5C4; color: white; border-color: #00A5C4; box-shadow: 0 4px 6px rgba(0, 165, 196, 0.2); }
+    .agenda
+      section.card(aria-label="Calendario de citas")
+        #calendario
+        .legend
+          span
+            i(style="background: var(--primary)")
+            | Pendientes
+          span
+            i(style="background: var(--ok)")
+            | Completadas
+          span
+            i(style="background: var(--danger)")
+            | Canceladas
+          span.count#contador-mes
 
-  .contenido
-    .encabezado-de-pagina
-      .titulo-y-descripcion
-        p.titulo Agenda de citas
-        p.texto-11 Organiza tu dia y acompana cada sonrisa.
-      .boton#btn-nueva-cita(style="cursor: pointer;")
-        p.etiqueta + Nueva Cita
+      aside.card(aria-label="Citas de hoy")
+        .card__head
+          h2 Citas de hoy
+          span.badge.badge--tint#total-hoy 0
+        p.hoy-date#fecha-hoy-texto
+        #lista-citas-hoy.hoy-list
+          .skeleton(style="height: 68px")
+          .skeleton(style="height: 68px")
+        a.back(href="/citas" data-prefetch style="margin: 14px 0 0") Ver todas las citas
 
-    .calendario-y-citas
-      .calendario-mensual
-        #calendario 
-        .separador-2(style="margin-top: 20px;")
-        .leyenda-del-calendario
-          .citas
-            .indicador(style="background-color: #00A5C4;")
-            p.texto-19 Pendientes
-          .citas
-            .indicador(style="background-color: #10B981;")
-            p.texto-19 Completadas
-          p.texto-19#contador-mes Cargando citas...
-
-      .citas-de-hoy
-        .leyenda-del-calendario
-          p.texto-21 Citas de Hoy
-          .total
-            p.texto-3#total-hoy 0
-        p.texto-11#fecha-hoy-texto 
-        
-        #lista-citas-hoy
-          p.texto-12(style="margin-top:20px; color:#6b7280;") Cargando agenda...
-
-    .estado-de-sincronizacion
-      .chevrons-up-down
-      p.texto-2 Agenda sincronizada · Ultima actualizacion hace un momento
-
-  // ==========================================
-  // 1. MODAL: NUEVA CITA
-  // ==========================================
-  #modalNuevaCita.modal-oculto
-    .modal-caja
-      .encabezado-modal(style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;")
-        h3.titulo(style="font-size:18px; margin:0;") Agendar Cita
-        button.btn-cerrar#cerrarNuevaCita &times;
-      
-      form(action="/cita/agendar" method="POST")
-        label(style="font-size: 13px; color:#374151; font-weight:600;") Paciente:
-        select.input-modal(name="pacienteId" required)
-          option(value="" disabled selected) Selecciona un paciente...
-          if pacientes && pacientes.length > 0
-            each paciente in pacientes
-              option(value=paciente.id) #{paciente.nombre} #{paciente.apellidos}
-          else
-            option(value="" disabled) No hay pacientes registrados
-
-        label(style="font-size: 13px; color:#374151; font-weight:600;") Fecha:
-        input.input-modal#inputFechaNueva(type="date" name="fecha" required)
-        
-        div(style="display:flex; gap:10px;")
-          div(style="width:50%;")
-            label(style="font-size: 13px; color:#374151; font-weight:600;") Hora Inicio:
-            input.input-modal(type="time" name="hora_inicio" required)
-          div(style="width:50%;")
-            label(style="font-size: 13px; color:#374151; font-weight:600;") Hora Fin:
-            input.input-modal(type="time" name="hora_fin" required)
-            
-        //- SELECCIÓN MODERNA DE MOTIVO (CHIPS)
-        label(style="font-size: 13px; color:#374151; font-weight:600; display:block; margin-bottom: 8px;") Motivo de consulta:
-        input#motivoFinal(type="hidden" name="motivo" value="Consulta de Valoracion")
-        
-        .chip-group
-          input.chip-radio#mot1(type="radio" name="chip_motivo" value="Consulta de Valoracion" checked)
-          label.chip-label(for="mot1") Valoracion
-          
-          input.chip-radio#mot2(type="radio" name="chip_motivo" value="Limpieza Dental")
-          label.chip-label(for="mot2") Limpieza
-          
-          input.chip-radio#mot3(type="radio" name="chip_motivo" value="Caries / Resina")
-          label.chip-label(for="mot3") Caries / Resina
-          
-          input.chip-radio#mot4(type="radio" name="chip_motivo" value="Endodoncia")
-          label.chip-label(for="mot4") Endodoncia
-          
-          input.chip-radio#mot5(type="radio" name="chip_motivo" value="Extraccion")
-          label.chip-label(for="mot5") Extraccion
-          
-          input.chip-radio#mot6(type="radio" name="chip_motivo" value="Control de Ortodoncia")
-          label.chip-label(for="mot6") Ortodoncia
-          
-          input.chip-radio#mot7(type="radio" name="chip_motivo" value="Corona / Puente")
-          label.chip-label(for="mot7") Corona / Puente
-
-          input.chip-radio#motOtro(type="radio" name="chip_motivo" value="Otro")
-          label.chip-label(for="motOtro") Otro
-        
-        input.input-modal#inputMotivoTexto(type="text" placeholder="Especificar otro motivo..." style="display:none; margin-bottom: 16px;")
-        
-        button.btn-submit(type="submit" style="background:#00A5C4;") Guardar Cita
-
-  // ==========================================
-  // 2. MODAL UNIFICADO: ACCIONES DE CITA 
-  // ==========================================
-  #modalAccionesCita.modal-oculto
-    .modal-caja(style="max-width: 500px;")
-      .encabezado-modal(style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;")
-        h3.titulo(style="font-size:18px; margin:0;") Opciones de Cita
-        button.btn-cerrar#cerrarAccionesCita &times;
-
-      //- NUEVO BOTÓN: ACCESO DIRECTO AL ODONTOGRAMA DEL PACIENTE
-      div(style="margin-bottom: 20px;")
-        a#btnAbrirOdontograma(href="#" style="display:block; text-align:center; background:#f3f4f6; color:#111827; padding:12px; border-radius:8px; font-weight:600; text-decoration:none; border:1px solid #e5e7eb; transition: 0.2s;") Abrir Expediente y Odontograma
-      
-      // BLOQUE A: REAGENDAR O ELIMINAR 
-      div(style="background:#f9fafb; padding:16px; border-radius:12px; border:1px solid #e5e7eb; margin-bottom:20px;")
-        p(style="font-weight:700; color:#374151; margin-bottom:12px; font-size:14px;") Reagendar o Modificar
-        form#formEditarCita(method="POST")
-          div(style="display:flex; gap:10px; margin-bottom:5px; align-items:flex-end;")
-            div(style="width:50%;")
-              label(style="font-size: 12px; font-weight:600; color:#4b5563;") Nueva Fecha:
-              input.input-modal#editFecha(type="date" name="fecha" required style="margin-bottom:10px;")
-            div(style="width:50%;")
-              label(style="font-size: 12px; font-weight:600; color:#4b5563;") O sumar dias (Ej. 22):
-              input.input-modal#inputSumarDias(type="number" placeholder="Ej. 22" style="margin-bottom:10px;")
-          
-          div(style="display:flex; gap:10px; margin-bottom:5px;")
-             div(style="width:50%;")
-               label(style="font-size: 12px; font-weight:600; color:#4b5563;") Hora Inicio:
-               input.input-modal#editInicio(type="time" name="hora_inicio" required style="margin-bottom:10px;")
-             div(style="width:50%;")
-               label(style="font-size: 12px; font-weight:600; color:#4b5563;") Hora Fin:
-               input.input-modal#editFin(type="time" name="hora_fin" required style="margin-bottom:10px;")
-          
-          label(style="font-size: 12px; font-weight:600; color:#4b5563;") Motivo:
-          input.input-modal#editMotivo(type="text" name="motivo" required style="margin-bottom:15px;")
-          
-          div(style="display:flex; gap:10px;")
-            button.btn-submit(type="submit" style="background:#374151; padding:8px; flex:1;") Actualizar Cita
-            button.btn-submit#btnEliminarCita(type="submit" formnovalidate style="background:#ef4444; padding:8px; flex:1;") Eliminar Cita
-
-      // BLOQUE B: MARCAR COMPLETADA 
-      div(style="background:#f0fdf4; padding:16px; border-radius:12px; border:1px solid #bbf7d0;")
-        p(style="font-weight:700; color:#166534; margin-bottom:12px; font-size:14px;") Marcar como Completada
-        form#formCompletarCita(method="POST")
-          label(style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:600; font-size:13px; color:#166534; margin-bottom:15px;")
-            input#checkSeguimiento(type="checkbox" name="crear_seguimiento" value="si" style="width:16px; height:16px;")
-            | Programar seguimiento automatico
-            
-          #opcionesSeguimiento(style="display:none; margin-bottom:15px;")
-            label(style="font-size: 12px; font-weight:600; color:#166534;") ¿En cuantos dias sera la proxima cita?
-            input.input-modal(type="number" name="dias_siguiente_cita" placeholder="Ej. 22" style="margin-bottom:0; padding:8px; border-color:#bbf7d0;")
-              
-          button.btn-submit(type="submit" style="background:#10B981; padding:8px;") Confirmar y Completar
-
-  // ==========================================
-  // SCRIPTS FRONTEND
-  // ==========================================
-  script(src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js')
   script.
-    let fechaOriginalSeleccionada = "";
+    (() => {
+      const $ = (s) => document.querySelector(s);
+      const COLOR = { Pendiente: '#00A5C4', Completada: '#10B981', Cancelada: '#EF4444' };
+      const mm = (t) => { const [h, m] = String(t).split(':'); return (parseInt(h, 10) || 0) * 60 + (parseInt(m, 10) || 0); };
+      const hm = (t) => String(t).slice(0, 5);
+      const nombre = (c) => (c.paciente ? `${c.paciente.nombre} ${c.paciente.apellidos}` : 'Paciente');
+      let cal = null;
+      let timer = null;
+      DL.cleanups.push(() => { if (cal) cal.destroy(); clearInterval(timer); });
 
-    // LÓGICA GLOBAL DE MODALES Y ODONTOGRAMA
-    window.abrirOpcionesCita = function(id, pacienteId, estado, fecha, inicio, fin, motivo) {
-        if(estado !== 'Pendiente') {
-            alert(`Esta cita ya esta marcada como ${estado}`);
+      DL.ready(() => {
+        const hoy = new Date();
+        const p2 = (n) => String(n).padStart(2, '0');
+        const hoyISO = `${hoy.getFullYear()}-${p2(hoy.getMonth() + 1)}-${p2(hoy.getDate())}`;
+        $('#fecha-hoy-texto').textContent = hoy.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        let deHoy = [];
+
+        // ---- Tarjeta "cita en curso / siguiente"
+        const pintarHero = () => {
+          const el = $('#hero');
+          if (!el) return;
+          const pend = deHoy.filter((c) => c.estado === 'Pendiente');
+          if (!pend.length) {
+            el.className = 'card hero hero--idle';
+            el.innerHTML = `<div class="hero__main"><h2>${deHoy.length ? 'Terminaste las citas de hoy' : 'Hoy no tienes citas'}</h2><p>${deHoy.length ? 'Buen trabajo. Puedes agendar la siguiente cuando quieras.' : 'Aprovecha para agendar a tus próximos pacientes.'}</p></div><button type="button" class="btn btn--primary" data-wizard>Agendar cita</button>`;
             return;
-        }
-        
-        fechaOriginalSeleccionada = fecha;
-        document.getElementById('inputSumarDias').value = ''; 
-
-        // Configurar el boton del Odontograma para este paciente
-        document.getElementById('btnAbrirOdontograma').href = `/odontograma?paciente=${pacienteId}`;
-
-        // Configurar rutas para los formularios
-        document.getElementById('formEditarCita').action = `/cita/editar/${id}`;
-        document.getElementById('btnEliminarCita').formAction = `/cita/cancelar/${id}`; 
-        document.getElementById('formCompletarCita').action = `/cita/completar/${id}`;
-
-        // Llenar datos visuales
-        document.getElementById('editFecha').value = fecha;
-        document.getElementById('editInicio').value = inicio;
-        document.getElementById('editFin').value = fin;
-        document.getElementById('editMotivo').value = motivo;
-
-        document.getElementById('modalAccionesCita').classList.remove('modal-oculto');
-        document.getElementById('modalAccionesCita').classList.add('modal-activo');
-    };
-
-    document.addEventListener('DOMContentLoaded', async function() {
-      // 1. EVENTOS BÁSICOS
-      document.getElementById('btn-nueva-cita').addEventListener('click', () => {
-         document.getElementById('inputFechaNueva').value = '';
-         document.getElementById('modalNuevaCita').classList.remove('modal-oculto');
-         document.getElementById('modalNuevaCita').classList.add('modal-activo');
-      });
-
-      document.getElementById('cerrarNuevaCita').addEventListener('click', () => {
-         document.getElementById('modalNuevaCita').classList.remove('modal-activo');
-         document.getElementById('modalNuevaCita').classList.add('modal-oculto');
-      });
-
-      document.getElementById('cerrarAccionesCita').addEventListener('click', () => {
-         document.getElementById('modalAccionesCita').classList.remove('modal-activo');
-         document.getElementById('modalAccionesCita').classList.add('modal-oculto');
-      });
-
-      document.getElementById('btnEliminarCita').addEventListener('click', function(e) {
-          if(!confirm('¿Estas seguro de que deseas eliminar esta cita?')) {
-              e.preventDefault(); 
           }
-      });
+          const n = new Date(); const ahora = n.getHours() * 60 + n.getMinutes();
+          let c = pend.find((x) => mm(x.hora_inicio) <= ahora && ahora < mm(x.hora_fin));
+          let etiqueta = 'En curso ahora', estado = 'live';
+          if (!c) {
+            c = pend.find((x) => mm(x.hora_inicio) > ahora);
+            estado = 'next';
+            if (c) { const falta = mm(c.hora_inicio) - ahora; etiqueta = falta <= 90 ? `Siguiente cita, en ${falta} min` : `Siguiente cita a las ${hm(c.hora_inicio)}`; }
+          }
+          if (!c) { c = pend[0]; etiqueta = 'Pendiente de atender'; estado = 'late'; }
+          const otras = pend.length - 1;
+          el.className = `card hero hero--${estado}`;
+          el.innerHTML = `
+            <div class="hero__main">
+              <div class="hero__tag"><i></i>${DL.esc(etiqueta)}</div>
+              <h2>${DL.esc(nombre(c))}</h2>
+              <p>${DL.esc(hm(c.hora_inicio))} a ${DL.esc(hm(c.hora_fin))} h, ${DL.esc(c.motivo)}${otras > 0 ? `. Después ${otras === 1 ? 'tienes 1 cita más' : 'tienes ' + otras + ' citas más'} hoy.` : ''}</p>
+            </div>
+            <a class="btn btn--primary" href="/consulta?cita=${DL.esc(c.id)}" data-prefetch>${estado === 'live' ? 'Continuar consulta' : 'Atender ahora'}</a>`;
+        };
 
-      const checkSeguimiento = document.getElementById('checkSeguimiento');
-      const divOpciones = document.getElementById('opcionesSeguimiento');
-      checkSeguimiento.addEventListener('change', function() {
-          divOpciones.style.display = this.checked ? 'block' : 'none';
-      });
+        // ---- Ventana de reagendar / cancelar (desde el calendario)
+        let actual = {};
+        $('#modalAccionesCita').addEventListener('modal:open', (e) => {
+          actual = (e.detail.trigger && e.detail.trigger.dataset) || {};
+          $('#accionesResumen').textContent = `${actual.paciente || 'Paciente'}, ${hm(actual.inicio || '')} h, ${actual.motivo || ''}`;
+        });
+        // Cambiar fecha u hora: el mismo asistente, en modo edición (valida horarios ocupados)
+        $('#btnReagendar').addEventListener('click', () => {
+          DL.close($('#modalAccionesCita'));
+          DL.wizard.open({ edit: actual });
+        });
 
-      document.getElementById('inputSumarDias').addEventListener('input', function() {
-          const dias = parseInt(this.value);
-          if(!isNaN(dias)) {
-              const f = new Date(fechaOriginalSeleccionada + 'T12:00:00');
-              f.setDate(f.getDate() + dias);
-              document.getElementById('editFecha').value = f.toISOString().split('T')[0];
+        // Un clic en una cita: pendiente -> opciones; completada -> consulta; cancelada -> aviso
+        const abrir = (d) => {
+          if (d.estado === 'Cancelada') return DL.toast('Esta cita fue cancelada.');
+          if (d.estado === 'Completada') return DL.go('/consulta?cita=' + encodeURIComponent(d.id));
+          DL.open('modalAccionesCita', { dataset: Object.assign({}, d, { inicio: hm(d.inicio), fin: hm(d.fin) }) });
+        };
+
+        Promise.all([fetch('/api/citas').then((r) => r.json()), DL.load(DL.FC)]).then(([citas]) => {
+          if (!document.getElementById('calendario')) return;       // el usuario ya cambió de vista
+
+          deHoy = citas.filter((c) => c.fecha === hoyISO).sort((a, b) => String(a.hora_inicio).localeCompare(String(b.hora_inicio)));
+          $('#total-hoy').textContent = deHoy.length;
+          $('#contador-mes').textContent = `${citas.length} citas en total`;
+          pintarHero();
+          timer = setInterval(pintarHero, 30000);
+
+          const lista = $('#lista-citas-hoy');
+          if (!deHoy.length) {
+            lista.innerHTML = '<div class="empty" style="padding:28px 8px"><strong>Día libre</strong><span>No hay citas programadas para hoy.</span></div>';
           } else {
-              document.getElementById('editFecha').value = fechaOriginalSeleccionada;
-          }
-      });
-
-      // Lógica de los Motivos Modernos (Chips)
-      const radiosMotivo = document.querySelectorAll('input[name="chip_motivo"]');
-      const inputMotivoTexto = document.getElementById('inputMotivoTexto');
-      const motivoFinal = document.getElementById('motivoFinal');
-
-      radiosMotivo.forEach(radio => {
-          radio.addEventListener('change', function() {
-              if (this.value === 'Otro') {
-                  inputMotivoTexto.style.display = 'block';
-                  inputMotivoTexto.required = true;
-                  motivoFinal.value = inputMotivoTexto.value;
-              } else {
-                  inputMotivoTexto.style.display = 'none';
-                  inputMotivoTexto.required = false;
-                  motivoFinal.value = this.value;
-              }
-          });
-      });
-
-      inputMotivoTexto.addEventListener('input', function() {
-          motivoFinal.value = this.value;
-      });
-
-      // 2. LÓGICA DE DATOS
-      try {
-          const response = await fetch('/api/citas');
-          const citasDB = await response.json();
-          
-          const hoyObj = new Date();
-          const anio = hoyObj.getFullYear();
-          const mes = String(hoyObj.getMonth() + 1).padStart(2, '0');
-          const dia = String(hoyObj.getDate()).padStart(2, '0');
-          const fechaHoyLocal = `${anio}-${mes}-${dia}`; 
-
-          const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-          document.getElementById('fecha-hoy-texto').innerText = hoyObj.toLocaleDateString('es-MX', opcionesFecha);
-
-          const citasHoy = citasDB.filter(c => c.fecha === fechaHoyLocal);
-          
-          document.getElementById('total-hoy').innerText = citasHoy.length;
-          document.getElementById('contador-mes').innerText = `${citasDB.length} citas en total`;
-          
-          const contenedorHoy = document.getElementById('lista-citas-hoy');
-          contenedorHoy.innerHTML = '';
-          
-          if(citasHoy.length === 0) {
-              contenedorHoy.innerHTML = '<p class="texto-12" style="margin-top:10px;">Dia libre. No hay citas programadas.</p>';
-          } else {
-              citasHoy.forEach(cita => {
-                  const nombre = cita.paciente ? `${cita.paciente.nombre} ${cita.paciente.apellidos}` : 'Paciente';
-                  const colorEstado = cita.estado === 'Completada' ? '#10B981' : (cita.estado === 'Cancelada' ? '#EF4444' : '#00A5C4');
-                  
-                  // Se agregó cita.pacienteId a los parametros
-                  contenedorHoy.innerHTML += `
-                    <div class="cita-tarjeta" onclick="abrirOpcionesCita('${cita.id}', '${cita.pacienteId}', '${cita.estado}', '${cita.fecha}', '${cita.hora_inicio}', '${cita.hora_fin}', '${cita.motivo}')">
-                      <div class="leyenda-del-calendario" style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        <p class="texto-24" style="font-weight:bold;">${cita.hora_inicio.slice(0,5)}</p>
-                        <p class="texto-12" style="color:${colorEstado}; font-weight:600;">${cita.estado}</p>
-                      </div>
-                      <p class="texto" style="font-weight:600; color:#111827;">${nombre}</p>
-                      <p class="texto-2" style="color:#6b7280; font-size:13px;">${cita.motivo}</p>
-                    </div>
-                  `;
-              });
+            lista.innerHTML = deHoy.map((c) => `
+              <button type="button" class="cita is-${DL.esc(String(c.estado).toLowerCase())}" data-id="${DL.esc(c.id)}" data-estado="${DL.esc(c.estado)}">
+                <span class="cita__top"><span class="cita__time">${DL.esc(hm(c.hora_inicio))}</span><span class="cita__state">${DL.esc(c.estado)}</span></span>
+                <span class="cita__name">${DL.esc(nombre(c))}</span><br>
+                <span class="cita__why">${DL.esc(c.motivo)}</span>
+              </button>`).join('');
+            lista.onclick = (e) => {
+              const b = e.target.closest('.cita');
+              if (!b) return;
+              if (b.dataset.estado === 'Cancelada') return DL.toast('Esta cita fue cancelada.');
+              DL.go('/consulta?cita=' + encodeURIComponent(b.dataset.id));
+            };
           }
 
-          const eventosCalendario = citasDB.map(cita => {
-             const pacienteNombre = cita.paciente ? cita.paciente.nombre + ' ' + cita.paciente.apellidos : 'Sin Nombre';
-             let colorFondo = '#00A5C4'; 
-             if(cita.estado === 'Completada') colorFondo = '#10B981';
-             if(cita.estado === 'Cancelada') colorFondo = '#EF4444';
-
-             return {
-                id: cita.id,
-                title: `${pacienteNombre} - ${cita.motivo}`,
-                start: `${cita.fecha}T${cita.hora_inicio}`,
-                end: `${cita.fecha}T${cita.hora_fin}`,
-                backgroundColor: colorFondo,
-                extendedProps: { 
-                    pacienteId: cita.pacienteId,
-                    estado: cita.estado,
-                    fechaOriginal: cita.fecha,
-                    inicioOriginal: cita.hora_inicio,
-                    finOriginal: cita.hora_fin,
-                    motivoOriginal: cita.motivo
-                }
-             }
-          });
-
-          const calendarEl = document.getElementById('calendario');
-          const calendar = new FullCalendar.Calendar(calendarEl, {
+          cal = new FullCalendar.Calendar($('#calendario'), {
             initialView: 'dayGridMonth',
             locale: 'es',
-            height: 'auto', 
-            contentHeight: 'auto',
+            height: 'auto',
+            nowIndicator: true,
+            dayMaxEvents: 3,
+            allDayText: 'Todo el día',
+            moreLinkText: (n) => `+${n} más`,
             headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
-            buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana', day: 'Dia' },
-            events: eventosCalendario,
-            
-            dateClick: function(info) {
-               document.getElementById('inputFechaNueva').value = info.dateStr;
-               document.getElementById('modalNuevaCita').classList.remove('modal-oculto');
-               document.getElementById('modalNuevaCita').classList.add('modal-activo');
-            },
-            
-            eventClick: function(info) {
-               const idCita = info.event.id;
-               const props = info.event.extendedProps;
-               // Se agregó props.pacienteId a los parametros
-               abrirOpcionesCita(idCita, props.pacienteId, props.estado, props.fechaOriginal, props.inicioOriginal, props.finOriginal, props.motivoOriginal);
-            }
+            buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana', day: 'Día' },
+            events: citas.map((c) => ({
+              id: c.id,
+              title: `${nombre(c)} - ${c.motivo}`,
+              start: `${c.fecha}T${c.hora_inicio}`,
+              end: `${c.fecha}T${c.hora_fin}`,
+              backgroundColor: COLOR[c.estado] || COLOR.Pendiente,
+              extendedProps: { d: { id: c.id, pacienteId: c.pacienteId, estado: c.estado, fecha: c.fecha, inicio: c.hora_inicio, fin: c.hora_fin, motivo: c.motivo, paciente: nombre(c) } }
+            })),
+            dateClick: (info) => DL.wizard.open({ fecha: info.dateStr.slice(0, 10) }),
+            eventClick: (info) => abrir(info.event.extendedProps.d)
           });
-          calendar.render();
-      } catch (error) {
-          console.error("Error cargando la agenda:", error);
-      }
-    });
+          cal.render();
+        }).catch((err) => {
+          console.error('Error cargando la agenda:', err);
+          $('#hero').innerHTML = '<div class="hero__main"><h2>No se pudo cargar la agenda</h2><p>Revisa tu conexión y recarga la página.</p></div>';
+          $('#lista-citas-hoy').innerHTML = '';
+        });
+      });
+    })();
+
+block modals
+  +modal('modalAccionesCita', 'Opciones de la cita')
+    p.muted#accionesResumen(style="margin: -6px 0 16px")
+    .stack
+      a.btn.btn--primary.btn--block(data-href="/consulta?cita={id}" href="#" style="height: 46px")
+        +icon('smile', 18)
+        | Atender consulta
+      button.btn.btn--ghost.btn--block#btnReagendar(type="button" style="height: 44px")
+        +icon('calendar', 16)
+        | Cambiar fecha u hora
+      form(method="POST" data-action="/cita/cancelar/{id}" data-confirm="¿Cancelar esta cita? Seguirá visible en el calendario como cancelada." data-confirm-ok="Cancelar cita" data-toast="Cita cancelada")
+        button.btn.btn--danger-soft.btn--block(type="submit" style="height: 44px")
+          +icon('x', 16)
+          | Cancelar cita

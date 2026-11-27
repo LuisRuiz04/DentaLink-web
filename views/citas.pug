@@ -1,0 +1,185 @@
+extends layout
+
+block content
+  .page
+    a.back(href="/" data-prefetch)
+      +icon('arrow-left', 16)
+      | Agenda
+
+    header.page-head
+      div
+        h1.page-title Todas las citas
+        p.page-sub Busca, reagenda o cancela cualquier cita del consultorio.
+      button.btn.btn--primary(type="button" data-wizard)
+        +icon('plus', 18)
+        | Nueva cita
+
+    .card.card--flush
+      .toolbar
+        label.search
+          +icon('search', 18)
+          input#filtro(type="search" placeholder="Buscar por paciente o motivo" autocomplete="off" aria-label="Buscar cita")
+        .chips#chips(role="group" aria-label="Filtrar citas")
+          button.chip(type="button" data-f="proximas" aria-pressed="true") Próximas
+          button.chip(type="button" data-f="hoy" aria-pressed="false") Hoy
+          button.chip(type="button" data-f="pasadas" aria-pressed="false") Pasadas
+          button.chip(type="button" data-f="completadas" aria-pressed="false") Completadas
+          button.chip(type="button" data-f="canceladas" aria-pressed="false") Canceladas
+          button.chip(type="button" data-f="todas" aria-pressed="false") Todas
+        span.count#conteo
+
+      #lista.clist(aria-live="polite")
+        .clist__group
+          .skeleton(style="height: 64px; margin: 16px 20px")
+          .skeleton(style="height: 64px; margin: 0 20px 16px")
+
+  script.
+    (() => {
+      DL.ready(() => {
+        const $ = (s) => document.querySelector(s);
+        const p2 = (n) => String(n).padStart(2, '0');
+        const hm = (t) => String(t || '').slice(0, 5);
+        const n = new Date();
+        const hoy = `${n.getFullYear()}-${p2(n.getMonth() + 1)}-${p2(n.getDate())}`;
+        const m = new Date(n); m.setDate(m.getDate() + 1);
+        const manana = `${m.getFullYear()}-${p2(m.getMonth() + 1)}-${p2(m.getDate())}`;
+        const limpiar = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        const nombre = (c) => (c.paciente ? `${c.paciente.nombre} ${c.paciente.apellidos}` : 'Paciente');
+        const tituloDia = (f) => {
+          if (f === hoy) return 'Hoy';
+          if (f === manana) return 'Mañana';
+          const t = new Date(f + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: f.slice(0, 4) === hoy.slice(0, 4) ? undefined : 'numeric' });
+          return t.charAt(0).toUpperCase() + t.slice(1);
+        };
+
+        const ICO = {
+          pencil: '<svg class="icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
+          x: '<svg class="icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+        };
+
+        // Filtro inicial: el de la URL (?f=) para que "atrás" y recargar lo respeten
+        const FILTROS = ['proximas', 'hoy', 'pasadas', 'completadas', 'canceladas', 'todas'];
+        let modo = new URLSearchParams(location.search).get('f');
+        if (!FILTROS.includes(modo)) modo = 'proximas';
+        let citas = [];
+
+        const pasa = (c) => {
+          switch (modo) {
+            case 'proximas': return c.estado === 'Pendiente' && c.fecha >= hoy;
+            case 'hoy': return c.fecha === hoy;
+            case 'pasadas': return c.fecha < hoy && c.estado !== 'Cancelada';
+            case 'completadas': return c.estado === 'Completada';
+            case 'canceladas': return c.estado === 'Cancelada';
+            default: return true;
+          }
+        };
+        const VACIO = {
+          proximas: ['No hay citas próximas', 'Agenda una nueva cita para empezar.'],
+          hoy: ['Hoy no hay citas', 'Tu día está libre.'],
+          pasadas: ['Sin citas pasadas', 'Aquí aparecerán las citas de días anteriores.'],
+          completadas: ['Sin citas completadas', 'Las consultas que finalices aparecerán aquí.'],
+          canceladas: ['Sin citas canceladas', '¡Bien! Nadie ha cancelado.'],
+          todas: ['Aún no hay citas', 'Agenda la primera con el botón “Nueva cita”.']
+        };
+
+        const estadoBadge = (c) => {
+          if (c.estado === 'Completada') return '<span class="badge badge--ok badge--dot">Completada</span>';
+          if (c.estado === 'Cancelada') return '<span class="badge badge--danger badge--dot">Cancelada</span>';
+          if (c.fecha < hoy) return '<span class="badge badge--warn badge--dot">Sin atender</span>';
+          return '<span class="badge badge--tint badge--dot">Pendiente</span>';
+        };
+
+        const fila = (c) => {
+          const pend = c.estado === 'Pendiente';
+          const datos = `data-id="${DL.esc(c.id)}" data-paciente-id="${DL.esc(c.pacienteId)}" data-paciente="${DL.esc(nombre(c))}" data-fecha="${DL.esc(c.fecha)}" data-inicio="${DL.esc(hm(c.hora_inicio))}" data-fin="${DL.esc(hm(c.hora_fin))}" data-motivo="${DL.esc(c.motivo)}"`;
+          const acciones = pend
+            ? `<a class="btn btn--soft btn--sm" href="/consulta?cita=${DL.esc(c.id)}" data-prefetch>Atender</a>
+               <button type="button" class="icon-btn icon-btn--primary" data-editar ${datos} title="Cambiar fecha u hora" aria-label="Editar la cita de ${DL.esc(nombre(c))}">${ICO.pencil}</button>
+               <button type="button" class="icon-btn icon-btn--danger" data-cancelar ${datos} title="Cancelar cita" aria-label="Cancelar la cita de ${DL.esc(nombre(c))}">${ICO.x}</button>`
+            : (c.estado === 'Completada' ? `<a class="btn btn--ghost btn--sm" href="/consulta?cita=${DL.esc(c.id)}" data-prefetch>Ver consulta</a>` : '');
+          return `
+            <li class="crow is-${DL.esc(String(c.estado).toLowerCase())}">
+              <div class="crow__time"><strong>${DL.esc(hm(c.hora_inicio))}</strong><span>${DL.esc(hm(c.hora_fin))}</span></div>
+              <div class="crow__main">
+                <a class="crow__name" href="/expediente/detalle?paciente=${DL.esc(c.pacienteId)}" data-prefetch>${DL.esc(nombre(c))}</a>
+                <span class="crow__why">${DL.esc(c.motivo)}</span>
+              </div>
+              <div class="crow__state">${estadoBadge(c)}</div>
+              <div class="crow__actions">${acciones}</div>
+            </li>`;
+        };
+
+        const pintar = () => {
+          const q = limpiar($('#filtro').value.trim());
+          const desc = ['pasadas', 'completadas', 'canceladas'].includes(modo);   // lo reciente primero
+          const lista = citas
+            .filter(pasa)
+            .filter((c) => !q || limpiar(`${nombre(c)} ${c.motivo}`).includes(q))
+            .sort((a, b) => {
+              const k = `${a.fecha} ${a.hora_inicio}`.localeCompare(`${b.fecha} ${b.hora_inicio}`);
+              return desc ? -k : k;
+            });
+
+          $('#conteo').textContent = lista.length + (lista.length === 1 ? ' cita' : ' citas');
+          if (!lista.length) {
+            const [t, d] = q ? ['Sin resultados', 'Prueba con otro nombre o motivo.'] : VACIO[modo];
+            $('#lista').innerHTML = `<div class="empty"><strong>${t}</strong><span>${d}</span></div>`;
+            return;
+          }
+          const grupos = [];
+          lista.forEach((c) => {
+            const g = grupos[grupos.length - 1];
+            if (g && g.fecha === c.fecha) g.items.push(c); else grupos.push({ fecha: c.fecha, items: [c] });
+          });
+          $('#lista').innerHTML = grupos.map((g) => `
+            <section class="clist__group">
+              <h2 class="clist__day${g.fecha === hoy ? ' is-today' : ''}">${DL.esc(tituloDia(g.fecha))}<span>${g.items.length}</span></h2>
+              <ul>${g.items.map(fila).join('')}</ul>
+            </section>`).join('');
+        };
+
+        const cargar = () => fetch('/api/citas', { credentials: 'same-origin' })
+          .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+          .then((data) => { citas = Array.isArray(data) ? data : []; if (document.getElementById('lista')) pintar(); })
+          .catch(() => { $('#lista').innerHTML = '<div class="empty"><strong>No se pudieron cargar las citas</strong><span>Recarga la página para intentarlo de nuevo.</span></div>'; });
+
+        // Filtros
+        const chips = document.querySelectorAll('#chips .chip');
+        const marcar = () => chips.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.f === modo)));
+        chips.forEach((c) => c.addEventListener('click', () => {
+          modo = c.dataset.f;
+          marcar();
+          const u = new URL(location.href);
+          if (modo === 'proximas') u.searchParams.delete('f'); else u.searchParams.set('f', modo);
+          history.replaceState(history.state, '', u.pathname + u.search);
+          pintar();
+        }));
+        marcar();
+        $('#filtro').addEventListener('input', pintar);
+
+        // Editar y cancelar sin salir de esta pantalla
+        $('#lista').addEventListener('click', async (e) => {
+          const ed = e.target.closest('[data-editar]');
+          if (ed) return DL.wizard.open({ edit: Object.assign({}, ed.dataset) });
+
+          const ca = e.target.closest('[data-cancelar]');
+          if (!ca) return;
+          const d = ca.dataset;
+          const fechaTxt = tituloDia(d.fecha).toLowerCase();
+          const ok = await DL.confirm(`¿Cancelar la cita de ${d.paciente} (${fechaTxt}, ${d.inicio} h)? Seguirá en el historial como cancelada.`, { ok: 'Cancelar cita' });
+          if (!ok) return;
+          ca.classList.add('is-busy');
+          try {
+            const r = await fetch('/cita/cancelar/' + encodeURIComponent(d.id), { method: 'POST', credentials: 'same-origin' });
+            if (!r.ok) throw new Error();
+            DL.toast('Cita cancelada');
+            await cargar();
+          } catch (err) {
+            ca.classList.remove('is-busy');
+            DL.toast('No se pudo cancelar la cita.', 'error');
+          }
+        });
+
+        cargar();
+      });
+    })();

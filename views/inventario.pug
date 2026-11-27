@@ -1,204 +1,164 @@
 extends layout
 
 block content
-  .contenido-principal(style="padding: 30px; width: 100%; box-sizing: border-box; font-family: 'Inter', sans-serif;")
-    
-    .header-inventario(style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;")
+  - var items = productos || []
+  - var cats = categoriasUnicas || []
+  - var esBajo = function (p) { return Number(p.cantidad) <= Number(p.stock_minimo) }
+  - var bajo = items.filter(esBajo).length
+  .page
+    header.page-head
       div
-        h1(style="font-size: 24px; font-weight: 700; color: #1e293b; margin: 0 0 8px 0;") Control de inventario
-        p(style="font-size: 14px; color: #64748b; margin: 0;") Mantén tus insumos al día y tu clínica siempre preparada.
-      
-      button(onclick="document.getElementById('modalNuevoProducto').style.display='flex'" style="background-color: #00A5C4; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: background 0.3s;")
-        span(style="font-size: 18px; line-height: 1;") +
-        | Nuevo Producto
+        h1.page-title Inventario
+        p.page-sub Mantén tus insumos al día y el consultorio siempre preparado.
+      button.btn.btn--primary(type="button" data-open="modalNuevoProducto")
+        +icon('plus', 18)
+        | Nuevo producto
 
-    .tabla-contenedor(style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden;")
-      
-      div(style="padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;")
-        form(action="/inventario" method="GET" style="display: flex; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 15px; border-radius: 8px; width: 350px; gap: 10px;")
-          i(data-lucide="search" style="width: 18px; height: 18px; color: #94a3b8;")
-          input(type="text" name="q" value=busqueda placeholder="Buscar producto por nombre..." style="border: none; background: transparent; outline: none; width: 100%; font-family: 'Inter', sans-serif; font-size: 14px; color: #1e293b;")
-          if busqueda
-            a(href="/inventario" style="color: #94a3b8; text-decoration: none; font-size: 18px; font-weight: bold;") &times;
-        
-        - let bajoStockCount = productos ? productos.filter(p => p.cantidad <= p.stock_minimo).length : 0
-        if bajoStockCount > 0
-          div(style="display: flex; align-items: center; gap: 8px; color: #ef4444; background: #fef2f2; padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: 600;")
-            i(data-lucide="alert-triangle" style="width: 16px; height: 16px;")
-            span #{bajoStockCount} con bajo stock
+    if items.length
+      .stats
+        .card.stat
+          span.stat__ico
+            +icon('package', 22)
+          div
+            strong= items.length
+            span Productos
+        .card.stat
+          span.stat__ico(class=(bajo ? 'stat__ico--danger' : ''))
+            +icon('alert', 22)
+          div
+            strong= bajo
+            span Con bajo stock
+        .card.stat
+          span.stat__ico
+            +icon('clipboard', 22)
+          div
+            strong= cats.length
+            span Categorías
 
-      table(style="width: 100%; border-collapse: collapse; text-align: left;")
-        thead(style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;")
-          tr
-            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569;") ID
-            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569;") Nombre del Producto
-            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569;") Cantidad
-            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569;") Estado
-            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569; text-align: left; width: 150px;") Acciones
-        
-        tbody
-          if productos && productos.length > 0
-            each producto in productos
-              tr(style="border-bottom: 1px solid #f1f5f9;")
-                td(style="padding: 16px 20px; color: #64748b; font-size: 13px; font-weight: 500;") INV-#{String(producto.id).padStart(3, '0')}
-                
-                td(style="padding: 16px 20px;")
-                  p(style="margin: 0; font-weight: 600; color: #1e293b; font-size: 14px;") #{producto.nombre}
-                  p(style="margin: 0; color: #64748b; font-size: 12px; margin-top: 4px;") #{producto.categoria || 'Sin categoría'} · #{producto.descripcion}
-                
-                // CELDA DE CANTIDAD
-                td(style="padding: 16px 20px;")
-                  form(action=`/inventario/ajustar-stock/${producto.id}` method="POST" style="margin: 0; display: flex; align-items: center; gap: 8px;")
-                    
-                    // Botón Menos
-                    button(type="button" onclick=`cambiarLocal('${producto.id}', -1)` style="width: 24px; height: 24px; border-radius: 50%; background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; padding: 0; transition: all 0.2s;") -
-                    
-                    // Input: Se agregó data-original y oninput
-                    input(type="number" id=`input_${producto.id}` name="cantidad" value=producto.cantidad min="0" data-original=producto.cantidad oninput=`verificarCambio('${producto.id}')` style="color: #475569; font-size: 14px; width: 45px; text-align: center; border: none; background: transparent; outline: none; font-family: 'Inter', sans-serif;")
-                    
-                    // Botón Más
-                    button(type="button" onclick=`cambiarLocal('${producto.id}', 1)` style="width: 24px; height: 24px; border-radius: 50%; background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; padding: 0; transition: all 0.2s;") +
+    .card.card--flush
+      if items.length
+        .toolbar
+          label.search
+            +icon('search', 18)
+            input#filtro(type="search" placeholder="Buscar por nombre o categoría" autocomplete="off" aria-label="Buscar producto")
+          .chips
+            button.chip(type="button" data-f="todos" aria-pressed="true") Todos
+            button.chip(type="button" data-f="bajo" aria-pressed="false") Bajo stock
+          span.count#conteo= items.length + (items.length === 1 ? ' producto' : ' productos')
+        .table-wrap
+          table.table
+            thead
+              tr
+                th Producto
+                th Cantidad
+                th Estado
+                th.col-actions Acciones
+            tbody#tabla
+              each p in items
+                - var b = esBajo(p)
+                tr(data-q=((p.nombre || '') + ' ' + (p.categoria || '') + ' ' + (p.descripcion || '')).toLowerCase() data-bajo=(b ? '1' : '0'))
+                  td
+                    strong #{p.nombre}
+                    .sub #{p.categoria || 'Sin categoría'}#{p.descripcion ? ', ' + p.descripcion : ''}
+                    .sub INV-#{String(p.id).padStart(3, '0')}
+                  td
+                    form.stepper(action=`/inventario/ajustar-stock/${p.id}` method="POST" data-toast="Cantidad actualizada")
+                      button.stepper__btn(type="button" data-step="-1" aria-label="Restar uno")
+                        +icon('minus', 14)
+                      input(type="number" name="cantidad" value=p.cantidad min="0" data-original=p.cantidad aria-label=`Cantidad de ${p.nombre}`)
+                      button.stepper__btn(type="button" data-step="1" aria-label="Sumar uno")
+                        +icon('plus', 14)
+                      button.btn.btn--soft.btn--sm.save(type="submit")
+                        +icon('check', 14)
+                        | Guardar
+                  td
+                    if b
+                      span.badge.badge--danger.badge--dot Bajo stock
+                    else
+                      span.badge.badge--ok.badge--dot Suficiente
+                  td.col-actions
+                    .row-actions
+                      button.icon-btn.icon-btn--primary(type="button" aria-label=`Editar ${p.nombre}` title="Editar" data-open="modalEditarProducto" data-id=p.id data-nombre=p.nombre data-categoria=(p.categoria || '') data-descripcion=(p.descripcion || '') data-cantidad=p.cantidad data-stock_minimo=p.stock_minimo)
+                        +icon('pencil', 17)
+                      form(action=`/inventario/eliminar/${p.id}` method="POST" data-confirm=`¿Eliminar «${p.nombre}»? Esta acción no se puede deshacer.` data-confirm-ok="Eliminar producto" data-toast="Producto eliminado")
+                        button.icon-btn.icon-btn--danger(type="submit" aria-label=`Eliminar ${p.nombre}` title="Eliminar")
+                          +icon('trash', 17)
+        #sinResultados.empty.hidden
+          +icon('search', 44)
+          strong Sin resultados
+          span Prueba con otro nombre o quita el filtro de bajo stock.
+      else
+        .empty
+          +icon('package', 44)
+          strong Aún no tienes productos
+          span Agrega tus insumos para llevar el control de existencias y recibir alertas de bajo stock.
+          button.btn.btn--primary(type="button" data-open="modalNuevoProducto") Agregar producto
 
-                    // BOTÓN GUARDAR: Inicia en gris (sin cambios)
-                    button(type="submit" id=`btn_save_${producto.id}` title="Guardar Cambios" style="margin-left: 8px; background: #f8fafc; border: 1px solid #e2e8f0; color: #cbd5e1; cursor: pointer; padding: 4px 6px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;")
-                      i(data-lucide="save" style="width: 15px; height: 15px;")
+  datalist#listaCategorias
+    each c in cats
+      option(value=c)
 
-                // CELDA DE ESTADO
-                td(style="padding: 16px 20px;")
-                  if producto.cantidad <= producto.stock_minimo
-                    span(style="display: inline-flex; align-items: center; gap: 6px; background-color: #fef2f2; color: #ef4444; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;")
-                      span(style="width: 6px; height: 6px; border-radius: 50%; background-color: #ef4444;")
-                      | Bajo Stock
-                  else
-                    span(style="display: inline-flex; align-items: center; gap: 6px; background-color: #ecfdf5; color: #10b981; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;")
-                      span(style="width: 6px; height: 6px; border-radius: 50%; background-color: #10b981;")
-                      | Suficiente
-                
-                // ACCIONES
-                td(style="padding: 16px 20px; text-align: left;")
-                  div(style="display: flex; gap: 10px; align-items: center;")
-                    button(type="button" onclick=`abrirModalEditar('${producto.id}', '${producto.nombre}', '${producto.categoria || ''}', '${producto.descripcion || ''}', '${producto.cantidad}', '${producto.stock_minimo}')` style="background: none; border: none; color: #00A5C4; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 0;")
-                      i(data-lucide="edit-2" style="width: 14px; height: 14px;")
-                      | Editar
-                    
-                    form(action=`/inventario/eliminar/${producto.id}` method="POST" style="margin: 0;" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');")
-                      button(type="submit" style="background: none; border: none; color: #ef4444; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 0;")
-                        i(data-lucide="trash-2" style="width: 14px; height: 14px;")
-                        | Eliminar
-          else
-            tr
-              td(colspan="5" style="text-align: center; padding: 40px; color: #64748b; font-size: 14px;")
-                i(data-lucide="package-x" style="width: 48px; height: 48px; color: #cbd5e1; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;")
-                | Aún no tienes productos registrados o tu búsqueda no dio resultados.
+  script.
+    (() => {
+      DL.ready(() => {
+        const tabla = document.getElementById('tabla');
+        if (!tabla) return;
+        const filas = Array.from(tabla.querySelectorAll('tr'));
+        const filtro = document.getElementById('filtro');
+        const conteo = document.getElementById('conteo');
+        const vacio = document.getElementById('sinResultados');
+        const chips = document.querySelectorAll('.chip[data-f]');
+        let modo = 'todos';
+        const limpiar = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-    div(style="padding: 20px 0; display: flex; justify-content: space-between; align-items: center; color: #64748b; font-size: 12px;")
-      p(style="margin: 0;") Mostrando #{productos ? productos.length : 0} productos
+        const aplicar = () => {
+          const q = limpiar(filtro.value.trim());
+          let n = 0;
+          filas.forEach((tr) => {
+            const ok = (!q || limpiar(tr.dataset.q).includes(q)) && (modo === 'todos' || tr.dataset.bajo === '1');
+            tr.classList.toggle('is-hidden', !ok);
+            if (ok) n++;
+          });
+          conteo.textContent = n + (n === 1 ? ' producto' : ' productos');
+          vacio.classList.toggle('hidden', n > 0);
+        };
+        filtro.addEventListener('input', aplicar);
+        chips.forEach((c) => c.addEventListener('click', () => {
+          modo = c.dataset.f;
+          chips.forEach((x) => x.setAttribute('aria-pressed', String(x === c)));
+          aplicar();
+        }));
 
-    datalist#listaCategorias
-      if categoriasUnicas
-        each cat in categoriasUnicas
-          option(value=cat)
+        // Botones - / + : el botón "Guardar" aparece solo cuando la cantidad cambió
+        const revisar = (input) => input.closest('.stepper').classList.toggle('is-dirty', input.value !== input.dataset.original);
+        tabla.addEventListener('click', (e) => {
+          const b = e.target.closest('[data-step]');
+          if (!b) return;
+          const input = b.parentElement.querySelector('input');
+          input.value = Math.max(0, (parseInt(input.value, 10) || 0) + Number(b.dataset.step));
+          revisar(input);
+        });
+        tabla.addEventListener('input', (e) => { if (e.target.matches('.stepper input')) revisar(e.target); });
+      });
+    })();
 
-    #modalNuevoProducto(style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000;")
-      .modal-content(style="background: white; padding: 30px 40px; border-radius: 16px; width: 450px; max-width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative; box-sizing: border-box;")
-        button(type="button" onclick="document.getElementById('modalNuevoProducto').style.display='none'" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; line-height: 1; padding: 0;") &times;
-        h2(style="margin: 0 0 20px 0; color: #1e293b; font-size: 20px; font-weight: 700; text-align: center;") Nuevo Producto
-        
-        form(action="/inventario/nuevo" method="POST" style="display: flex; flex-direction: column; gap: 15px;")
-          div(style="display: flex; flex-direction: column; gap: 4px;")
-            label(style="font-size: 12px; font-weight: 600; color: #475569;") Nombre del producto
-            input(type="text" name="nombre" placeholder="Ej. Resina compuesta A2" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
-          
-          div(style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;")
-            div(style="display: flex; flex-direction: column; gap: 4px;")
-              label(style="font-size: 12px; font-weight: 600; color: #475569;") Categoría
-              input(type="text" name="categoria" list="listaCategorias" placeholder="Ej. Restauración" autocomplete="off" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
-            div(style="display: flex; flex-direction: column; gap: 4px;")
-              label(style="font-size: 12px; font-weight: 600; color: #475569;") Descripción
-              input(type="text" name="descripcion" placeholder="Ej. Jeringa de 4 g" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
-          
-          div(style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;")
-            div(style="display: flex; flex-direction: column; gap: 4px;")
-              label(style="font-size: 12px; font-weight: 600; color: #475569;") Cantidad Actual
-              input(type="number" name="cantidad" value="0" min="0" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
-            div(style="display: flex; flex-direction: column; gap: 4px;")
-              label(style="font-size: 12px; font-weight: 600; color: #475569;") Stock Mínimo (Alerta)
-              input(type="number" name="stock_minimo" value="5" min="0" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
-          
-          button(type="submit" style="margin-top: 10px; width: 100%; padding: 12px; background: #00A5C4; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: 600; font-size: 14px;") Agregar Producto
+block modals
+  +modal('modalNuevoProducto', 'Nuevo producto')
+    form.form(action="/inventario/nuevo" method="POST" data-toast="Producto agregado" data-steps data-fresh data-submit="Agregar producto")
+      .step(data-q="¿Qué producto es?")
+        +field('Nombre del producto', 'nombre', { placeholder: 'Ej. Resina compuesta A2', required: true })
+        +field('Categoría', 'categoria', { placeholder: 'Ej. Restauración', list: 'listaCategorias', autocomplete: 'off' })
+        +field('Descripción', 'descripcion', { placeholder: 'Ej. Jeringa de 4 g' })
+      .step(data-q="¿Cuántas unidades tienes?" data-hint="Te avisaremos cuando la cantidad llegue al stock mínimo.")
+        +field('Cantidad actual', 'cantidad', { type: 'number', value: '0', min: 0, required: true })
+        +field('Stock mínimo (alerta)', 'stock_minimo', { type: 'number', value: '5', min: 0, required: true })
 
-    #modalEditarProducto(style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000;")
-      .modal-content(style="background: white; padding: 30px 40px; border-radius: 16px; width: 450px; max-width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative; box-sizing: border-box;")
-        button(type="button" onclick="document.getElementById('modalEditarProducto').style.display='none'" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; line-height: 1; padding: 0;") &times;
-        h2(style="margin: 0 0 20px 0; color: #1e293b; font-size: 20px; font-weight: 700; text-align: center;") Editar Producto
-        
-        form#formEditar(method="POST" style="display: flex; flex-direction: column; gap: 15px;")
-          div(style="display: flex; flex-direction: column; gap: 4px;")
-            label(style="font-size: 12px; font-weight: 600; color: #475569;") Nombre del producto
-            input(type="text" id="edit_nombre" name="nombre" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
-          
-          div(style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;")
-            div(style="display: flex; flex-direction: column; gap: 4px;")
-              label(style="font-size: 12px; font-weight: 600; color: #475569;") Categoría
-              input(type="text" id="edit_categoria" name="categoria" list="listaCategorias" autocomplete="off" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
-            div(style="display: flex; flex-direction: column; gap: 4px;")
-              label(style="font-size: 12px; font-weight: 600; color: #475569;") Descripción
-              input(type="text" id="edit_descripcion" name="descripcion" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
-          
-          div(style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;")
-            div(style="display: flex; flex-direction: column; gap: 4px;")
-              label(style="font-size: 12px; font-weight: 600; color: #475569;") Cantidad Actual
-              input(type="number" id="edit_cantidad" name="cantidad" min="0" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
-            div(style="display: flex; flex-direction: column; gap: 4px;")
-              label(style="font-size: 12px; font-weight: 600; color: #475569;") Stock Mínimo
-              input(type="number" id="edit_stock_minimo" name="stock_minimo" min="0" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; outline: none; font-size: 14px;")
-          
-          button(type="submit" style="margin-top: 10px; width: 100%; padding: 12px; background: #10b981; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: 600; font-size: 14px;") Guardar Cambios
-
-    script.
-      // Modifica la cantidad en pantalla y luego valida si hubo cambio
-      function cambiarLocal(id, cambio) {
-          const input = document.getElementById('input_' + id);
-          let nuevaCantidad = parseInt(input.value) + cambio;
-          
-          if (nuevaCantidad >= 0) {
-              input.value = nuevaCantidad;
-              verificarCambio(id); // Llamamos a la validación de color
-          }
-      }
-
-      // Valida y cambia el color del botón de guardado
-      function verificarCambio(id) {
-          const input = document.getElementById('input_' + id);
-          const btnSave = document.getElementById('btn_save_' + id);
-          
-          // data-original tiene el número intacto que trajo de la base de datos
-          const original = parseInt(input.getAttribute('data-original'));
-          const actual = parseInt(input.value);
-
-          if (actual !== original) {
-              // Si cambió: Activo (VERDE)
-              btnSave.style.background = '#ecfdf5';
-              btnSave.style.borderColor = '#10b981';
-              btnSave.style.color = '#10b981';
-          } else {
-              // Si regresó a la normalidad: Inactivo (GRIS)
-              btnSave.style.background = '#f8fafc';
-              btnSave.style.borderColor = '#e2e8f0';
-              btnSave.style.color = '#cbd5e1';
-          }
-      }
-
-      function abrirModalEditar(id, nombre, categoria, descripcion, cantidad, stock_minimo) {
-          document.getElementById('formEditar').action = '/inventario/editar/' + id;
-          document.getElementById('edit_nombre').value = nombre;
-          document.getElementById('edit_categoria').value = categoria;
-          document.getElementById('edit_descripcion').value = descripcion;
-          document.getElementById('edit_cantidad').value = cantidad;
-          document.getElementById('edit_stock_minimo').value = stock_minimo;
-          document.getElementById('modalEditarProducto').style.display = 'flex';
-      }
-      
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-      }
+  +modal('modalEditarProducto', 'Editar producto')
+    form.form(method="POST" data-action="/inventario/editar/{id}" data-toast="Cambios guardados" data-steps data-submit="Guardar cambios")
+      .step(data-q="¿Qué producto es?")
+        +field('Nombre del producto', 'nombre', { required: true, fill: 'nombre' })
+        +field('Categoría', 'categoria', { list: 'listaCategorias', autocomplete: 'off', fill: 'categoria' })
+        +field('Descripción', 'descripcion', { fill: 'descripcion' })
+      .step(data-q="¿Cuántas unidades tienes?" data-hint="Te avisaremos cuando la cantidad llegue al stock mínimo.")
+        +field('Cantidad actual', 'cantidad', { type: 'number', min: 0, required: true, fill: 'cantidad' })
+        +field('Stock mínimo', 'stock_minimo', { type: 'number', min: 0, required: true, fill: 'stock_minimo' })

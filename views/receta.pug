@@ -1,148 +1,177 @@
 extends layout
 
 block content
-  .contenido(style="padding: 30px; font-family: 'Inter', sans-serif; background-color: #f1f5f9; min-height: calc(100vh - 60px);")
-    .encabezado-de-pagina(style="display: flex; justify-content: space-between; margin-bottom: 30px;")
-      .titulo-y-descripcion
-        h1(style="font-size: 26px; font-weight: 700; color: #1e293b; margin: 0 0 8px 0;") Emisión de Recetas
-        p(style="color: #64748b; margin: 0; font-size: 15px;") Crea indicaciones claras y profesionales para tus pacientes.
+  - var fechaReceta = new Date().toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Mexico_City' })
+  - var nomDoc = (doctor && doctor.nombre_doctor) || ''
+  - var nomDocMostrado = /^dra?\.?\s/i.test(nomDoc) ? nomDoc : 'Dr. ' + nomDoc
+  .page
+    header.page-head
+      div
+        h1.page-title Recetas
+        p.page-sub Crea indicaciones claras y profesionales para tus pacientes.
 
-    .layout-receta(style="display: grid; grid-template-columns: 450px 1fr; gap: 30px; align-items: start;")
-      
-      // PANEL IZQUIERDO: FORMULARIO (Estilo Tarjeta)
-      .panel-izquierdo(style="background: white; padding: 30px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);")
-        
-        // 1. Selección de Paciente
-        div(style="margin-bottom: 30px;")
-          label(style="font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #00A5C4; display: block; margin-bottom: 12px;") 1. Datos del Paciente
-          select#pacienteSelect(style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; background-color: #f8fafc; color: #1e293b; outline: none; cursor: pointer; transition: all 0.3s;")
-            option(value="" disabled selected) -- Selecciona al paciente --
-            if pacientes
-              each paciente in pacientes
-                option(value=paciente.id) #{paciente.nombre} #{paciente.apellidos}
+    .receta
+      section.card#rxCard
+        .sf__head
+          .wiz__meta
+            strong#rxTxt Faltan 2 preguntas
+            span#rxPct 0%
+          .wiz__bar
+            span#rxFill
 
-        div(style="border-bottom: 1px dashed #cbd5e1; margin-bottom: 30px;")
-        
-        // 2. Formulario de Medicamentos
-        div(style="margin-bottom: 25px;")
-          label(style="font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #00A5C4; display: block; margin-bottom: 5px;") 2. Prescripción Médica
-          p(style="font-size: 13px; color: #64748b; margin-bottom: 20px; margin-top: 0;") Completa los campos para añadir a la receta.
-          
-          div(style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;")
+        .rx-step.is-active
+          h3.step__q ¿Para quién es la receta?
+          label.field
+            span.field__label Paciente
+            select.input#pacienteSelect
+              option(value="" disabled selected) Elige un paciente
+              each p in (pacientes || [])
+                option(value=p.id)= p.nombre + ' ' + p.apellidos
+
+        .rx-step
+          h3.step__q ¿Qué medicamentos le recetas?
+          p.step__hint Agrega uno por uno; aparecen en la hoja de la derecha.
+          +field('Medicamento', '', { id: 'medNombre', placeholder: 'Ej. Amoxicilina' })
+          +field('Dosis y presentación', '', { id: 'medDosis', placeholder: 'Ej. 500 mg, 1 cápsula' })
+          +field('Frecuencia e indicaciones', '', { id: 'medFrecuencia', placeholder: 'Ej. Cada 8 horas por 7 días' })
+          button.btn.btn--soft.btn--block#btnAgregar(type="button")
+            +icon('plus', 16)
+            | Agregar a la receta
+          #medsLista.meds(style="margin-top: 0")
+
+        .rx-step
+          h3.step__q Revisa y genera la receta
+          p.step__hint Si algo no es correcto, usa “Cambiar”.
+          .wiz__sum#rxSum
+
+        .sf__foot
+          button.btn.btn--ghost.is-gone#rxBack(type="button") Atrás
+          button.btn.btn--primary#rxNext(type="button") Continuar
+          button.btn.btn--primary.hidden#btnGenerar(type="button")
+            +icon('file-text', 18)
+            | Generar y descargar PDF
+
+      section.stage
+        .paper
+          .paper__head
             div
-              label(style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;") Medicamento
-              input#medNombre(type="text" placeholder="Ej. Amoxicilina" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; box-sizing: border-box; font-size: 14px; outline: none; transition: border 0.3s;")
-            
-            div
-              label(style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;") Dosis y Presentación
-              input#medDosis(type="text" placeholder="Ej. 500 mg - 1 cápsula" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; box-sizing: border-box; font-size: 14px; outline: none; transition: border 0.3s;")
-            
-            div
-              label(style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;") Frecuencia e Indicaciones
-              input#medFrecuencia(type="text" placeholder="Ej. Cada 8 horas por 7 días" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; box-sizing: border-box; font-size: 14px; outline: none; transition: border 0.3s;")
-              
-          button(type="button" onclick="agregarMedicamentoUI()" style="width: 100%; padding: 14px; background: #ecfdf5; border: 1px solid #10b981; color: #10b981; font-weight: 600; border-radius: 10px; font-size: 14px; cursor: pointer; transition: all 0.2s;") + Agregar a la receta
+              h3= clinicaActiva ? clinicaActiva.nombre_clinica : 'DentaLink'
+              if clinicaActiva
+                p #{clinicaActiva.direccion}
+                p Tel. #{clinicaActiva.telefono}
+            div(style="text-align: right")
+              h3= nomDocMostrado
+              if doctor && doctor.cedula
+                p Cédula prof. #{doctor.cedula}
+          .paper__who
+            span Paciente: 
+              strong#papelPaciente Sin seleccionar
+            span= fechaReceta
+          .paper__rx Rx
+          #listaVistaPrevia.paper__list
+            p.paper__empty El recetero está vacío.<br>Agrega medicamentos para comenzar.
+          .paper__sign Firma del médico
 
-      // PANEL DERECHO: VISTA PREVIA (Estilo Hoja Flotante)
-      .panel-derecho(style="background: #e2e8f0; padding: 40px; border-radius: 16px; display: flex; flex-direction: column; align-items: center;")
-        
-        // El "Papel" de la receta
-        #hojaPreview(style="background: white; width: 100%; max-width: 550px; min-height: 400px; border-radius: 8px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); padding: 40px; position: relative;")
-          
-          div(style="border-bottom: 2px solid #00A5C4; padding-bottom: 15px; margin-bottom: 20px;")
-            h3(style="font-size: 18px; margin: 0; color: #1e293b;") Vista previa de medicamentos
-            p(style="margin: 5px 0 0 0; font-size: 12px; color: #64748b;") El diseño final del PDF incluirá tu logotipo y firma.
+  script.
+    (() => {
+      DL.ready(() => {
+        const $ = (s) => document.getElementById(s);
+        const meds = [];
+        const pasos = Array.from(document.querySelectorAll('#rxCard .rx-step'));
+        const VACIO = '<p class="paper__empty">El recetero está vacío.<br>Agrega medicamentos para comenzar.</p>';
+        const sel = $('pacienteSelect');
+        let paso = 0;
 
-          // Contenedor dinámico donde se verán los medicamentos
-          #listaVistaPrevia(style="flex-grow: 1;")
-            p#placeholderTexto(style="color: #94a3b8; text-align: center; margin-top: 80px; font-style: italic;") El recetero está vacío. <br> Agrega medicamentos para comenzar.
+        const pintar = () => {
+          $('listaVistaPrevia').innerHTML = meds.length
+            ? meds.map((m, i) => `<div class="paper__item"><b>${i + 1}. ${DL.esc(m.nombre)}</b> ${DL.esc(m.dosis)}<p>${DL.esc(m.frecuencia)}</p></div>`).join('')
+            : VACIO;
+          $('medsLista').innerHTML = meds.map((m, i) => `
+            <div class="med"><div><strong>${DL.esc(m.nombre)}</strong><span>${DL.esc(m.dosis)}, ${DL.esc(m.frecuencia)}</span></div>
+            <button type="button" class="icon-btn icon-btn--sm icon-btn--danger" data-quitar="${i}" aria-label="Quitar ${DL.esc(m.nombre)}">
+              <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>`).join('');
+        };
+        const nombrePaciente = () => (sel.selectedIndex > 0 ? sel.options[sel.selectedIndex].text : 'Sin seleccionar');
 
-        // Botón Final debajo de la hoja
-        button(type="button" onclick="enviarReceta()" style="margin-top: 30px; width: 100%; max-width: 550px; padding: 16px; background: #00A5C4; color: white; border: none; font-weight: bold; border-radius: 10px; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0, 165, 196, 0.3); transition: all 0.3s;") Generar y Descargar PDF
+        const resumen = () => {
+          const fila = (etq, val, ir) => `<div class="wiz__row"><div><small>${etq}</small><strong class="sf__val">${val}</strong></div><button type="button" class="btn btn--ghost btn--sm" data-ir="${ir}">Cambiar</button></div>`;
+          $('rxSum').innerHTML = fila('Paciente', DL.esc(nombrePaciente()), 0)
+            + fila(`Medicamentos (${meds.length})`, meds.map((m, i) => `${i + 1}. ${DL.esc(m.nombre)} ${DL.esc(m.dosis)}, ${DL.esc(m.frecuencia)}`).join('<br>'), 1);
+        };
 
-    // LOGICA JAVASCRIPT DEL FRONTEND
-    script.
-      let listaMeds = [];
+        const ir = (i, dir) => {
+          paso = Math.max(0, Math.min(2, i));
+          if (paso === 2) resumen();
+          pasos.forEach((p, k) => { p.classList.toggle('is-active', k === paso); p.classList.remove('sf-fwd', 'sf-back'); });
+          if (dir) { const c = pasos[paso]; void c.offsetWidth; c.classList.add(dir > 0 ? 'sf-fwd' : 'sf-back'); }
+          const falta = 2 - paso;
+          $('rxTxt').textContent = paso === 2 ? '¡Listo! Revisa y confirma' : (falta === 1 ? 'Última pregunta' : `Faltan ${falta} preguntas`);
+          const pct = paso === 2 ? 100 : paso * 50;
+          $('rxPct').textContent = pct + '%';
+          $('rxFill').style.transform = `scaleX(${Math.max(pct, 4) / 100})`;
+          $('rxBack').classList.toggle('is-gone', paso === 0);
+          $('rxNext').classList.toggle('hidden', paso === 2);
+          $('btnGenerar').classList.toggle('hidden', paso !== 2);
+          if (dir && paso === 1) setTimeout(() => $('medNombre').focus({ preventScroll: true }), 60);
+        };
 
-      // Efecto focus bonito para los inputs
-      document.querySelectorAll('input').forEach(input => {
-        input.addEventListener('focus', (e) => { e.target.style.border = '1px solid #00A5C4'; e.target.style.backgroundColor = '#ffffff'; });
-        input.addEventListener('blur', (e) => { e.target.style.border = '1px solid #e2e8f0'; e.target.style.backgroundColor = '#f8fafc'; });
+        const siguiente = () => {
+          if (paso === 0 && !sel.value) return DL.toast('Selecciona al paciente.', 'error');
+          if (paso === 1 && !meds.length) {
+            if ($('medNombre').value.trim()) { agregar(); if (!meds.length) return; }
+            else return DL.toast('Agrega al menos un medicamento.', 'error');
+          }
+          ir(paso + 1, 1);
+        };
+
+        function agregar() {
+          const nombre = $('medNombre').value.trim(), dosis = $('medDosis').value.trim(), frecuencia = $('medFrecuencia').value.trim();
+          if (!nombre || !dosis || !frecuencia) return DL.toast('Completa los tres campos del medicamento.', 'error');
+          meds.push({ nombre, dosis, frecuencia });
+          ['medNombre', 'medDosis', 'medFrecuencia'].forEach((id) => { $(id).value = ''; });
+          pintar();
+          $('medNombre').focus();
+        }
+
+        $('btnAgregar').addEventListener('click', agregar);
+        ['medNombre', 'medDosis', 'medFrecuencia'].forEach((id, k, arr) => $(id).addEventListener('keydown', (e) => {
+          if (e.key !== 'Enter') return;
+          e.preventDefault();
+          if (k < arr.length - 1) $(arr[k + 1]).focus(); else agregar();
+        }));
+        $('medsLista').addEventListener('click', (e) => {
+          const b = e.target.closest('[data-quitar]');
+          if (b) { meds.splice(Number(b.dataset.quitar), 1); pintar(); }
+        });
+        sel.addEventListener('change', () => {
+          $('papelPaciente').textContent = nombrePaciente();
+          if (paso === 0) setTimeout(siguiente, 190);
+        });
+        $('rxNext').addEventListener('click', siguiente);
+        $('rxBack').addEventListener('click', () => ir(paso - 1, -1));
+        $('rxSum').addEventListener('click', (e) => { const b = e.target.closest('[data-ir]'); if (b) ir(Number(b.dataset.ir), -1); });
+
+        const pre = new URLSearchParams(location.search).get('paciente');
+        if (pre) {
+          sel.value = pre;
+          if (sel.selectedIndex > 0) { $('papelPaciente').textContent = nombrePaciente(); ir(1, 0); }
+        }
+
+        $('btnGenerar').addEventListener('click', async function () {
+          const btn = this;
+          btn.classList.add('is-busy');
+          try {
+            const r = await fetch('/receta/generar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pacienteId: sel.value, medicamentos: meds }) });
+            const data = await r.json();
+            if (!data.success) throw new Error();
+            window.location.href = '/receta/descargar/' + data.id;   // descarga el PDF sin salir de la página
+            meds.length = 0; pintar();
+            sel.selectedIndex = 0; $('papelPaciente').textContent = 'Sin seleccionar';
+            ir(0, -1);
+            DL.toast('Receta generada');
+          } catch (err) {
+            DL.toast('No se pudo generar la receta.', 'error');
+          } finally { btn.classList.remove('is-busy'); }
+        });
       });
-
-      function agregarMedicamentoUI() {
-          const nombre = document.getElementById('medNombre').value;
-          const dosis = document.getElementById('medDosis').value;
-          const frecuencia = document.getElementById('medFrecuencia').value;
-
-          if(!nombre || !dosis || !frecuencia) {
-              alert("Por favor completa todos los campos del medicamento.");
-              return;
-          }
-
-          listaMeds.push({ nombre, dosis, frecuencia });
-
-          document.getElementById('medNombre').value = '';
-          document.getElementById('medDosis').value = '';
-          document.getElementById('medFrecuencia').value = '';
-
-          renderizarVistaPrevia();
-      }
-
-      function renderizarVistaPrevia() {
-          const contenedor = document.getElementById('listaVistaPrevia');
-          
-          if(listaMeds.length === 0) {
-              contenedor.innerHTML = '<p id="placeholderTexto" style="color: #94a3b8; text-align: center; margin-top: 80px; font-style: italic;">El recetero está vacío. <br> Agrega medicamentos para comenzar.</p>';
-              return;
-          }
-
-          let html = '<h2 style="margin-top:0; font-size: 28px; color: #00A5C4; font-weight: 800;">Rx</h2>';
-          listaMeds.forEach((med, index) => {
-              html += `
-                <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed #e2e8f0;">
-                  <p style="margin: 0; font-weight: 700; color: #1e293b; font-size: 15px;">${index + 1}. ${med.nombre} <span style="font-weight: 500; color: #475569;">${med.dosis}</span></p>
-                  <p style="margin: 6px 0 0 0; color: #64748b; font-size: 13px; line-height: 1.5;">${med.frecuencia}</p>
-                </div>
-              `;
-          });
-          contenedor.innerHTML = html;
-      }
-
-      function enviarReceta() {
-          const pacienteId = document.getElementById('pacienteSelect').value;
-          
-          if(!pacienteId) {
-              alert("Selecciona al paciente para emitir la receta.");
-              return;
-          }
-          if(listaMeds.length === 0) {
-              alert("Debes agregar al menos un medicamento.");
-              return;
-          }
-
-          fetch('/receta/generar', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ pacienteId, medicamentos: listaMeds })
-          })
-          .then(res => res.json())
-          .then(data => {
-              if (data.success) {
-                  // MAGIA DEL FRONTEND:
-                  // Mandamos al navegador a la ruta de descarga. No refresca la página,
-                  // solo dispara la ventana de guardar de Windows.
-                  window.location.href = `/receta/descargar/${data.id}`;
-                  
-                  // Limpiamos la pantalla
-                  listaMeds = [];
-                  renderizarVistaPrevia();
-                  document.getElementById('pacienteSelect').value = '';
-              } else {
-                  alert("Error al generar la receta.");
-              }
-          })
-          .catch(err => console.error(err));
-      }
+    })();

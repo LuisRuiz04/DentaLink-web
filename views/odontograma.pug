@@ -1,278 +1,153 @@
 extends layout
 
+mixin tooth(n)
+  button.tooth-btn(type="button" data-pieza=n aria-label=`Pieza ${n}`)
+    small= n
+    span.tooth(id=`diente-${n}`)
+
 block content
-  .contenido-principal(style="padding: 30px; width: 100%; box-sizing: border-box; font-family: 'Inter', sans-serif; background-color: #f8fafc; min-height: 100vh;")
-    
-    // Encabezado Superior y Datos del Paciente
-    .header-odontograma(style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 20px 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 24px;")
+  - var ini = paciente ? ((paciente.nombre || '').charAt(0) + (paciente.apellidos || '').charAt(0)).toUpperCase() : ''
+  .page
+    a.back#volver(href="/expediente" data-prefetch)
+      +icon('arrow-left', 16)
+      span Pacientes
+
+    header.page-head
       div
-        a(href="/expediente" style="color: #00A5C4; text-decoration: none; font-size: 13px; font-weight: 600; display: inline-block; margin-bottom: 6px;") ← Volver al Directorio
-        h1(style="font-size: 22px; font-weight: 700; color: #1e293b; margin: 0;") Odontograma Digital
-        p(style="font-size: 13px; color: #64748b; margin: 4px 0 0 0;") Registra el estado dental y da seguimiento clínico a cada tratamiento.
-      
-      div(style="text-align: right; background: #f8fafc; padding: 10px 16px; border-radius: 8px; border: 1px solid #e2e8f0;")
-        if paciente
-          p(style="margin: 0; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase;") Paciente Seleccionado
-          h3(style="margin: 2px 0 0 0; font-size: 15px; color: #1e293b; font-weight: 700;") #{paciente.nombre} #{paciente.apellidos}
-          p(style="margin: 2px 0 0 0; font-size: 12px; color: #00A5C4;") Tel: #{paciente.telefono}
-        else
-          h3(style="margin: 0; font-size: 15px; color: #ef4444; font-weight: 700;") Sin Paciente Asignado
+        h1.page-title Odontograma
+        p.page-sub Elige una herramienta y toca el diente para registrar su estado.
+      if paciente
+        .row-actions
+          span.avatar.avatar--soft= ini
+          div
+            strong #{paciente.nombre} #{paciente.apellidos}
+            .sub #{paciente.telefono}
+          a.btn.btn--ghost.btn--sm(href=`/expediente/detalle?paciente=${paciente.id}` data-prefetch) Ver expediente
 
-    // Contenedor General en Grid (Izquierda: Gráfico | Derecha: Herramientas)
-    .odontograma-grid(style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;")
-      
-      // PANEL IZQUIERDO: GRÁFICO DEL ODONTOGRAMA
-      .panel-izquierdo(style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02);")
-        div(style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;")
-          span(style="font-weight: 700; color: #1e293b; font-size: 15px;") Dentición Permanente
-          span(style="color: #64748b; font-size: 13px; background: #f1f5f9; padding: 4px 10px; border-radius: 6px; font-weight: 600;") 32 Piezas
-        
-        // ARCADA SUPERIOR
-        .arcada(style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-bottom: 30px;")
-          // Cuadrante 1 (Superior Derecho)
-          .cuadrante(style="display: flex; gap: 4px;")
-            each val in [18, 17, 16, 15, 14, 13, 12, 11]
-              .pieza-container(data-pieza=val style="text-align: center; cursor: pointer; transition: transform 0.15s;")
-                .numero-pieza(style="font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;")= val
-                .diente-svg.estado-sano(id="diente-"+val style="width: 32px; height: 48px; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #f8fafc; position: relative; overflow: hidden; transition: all 0.2s;")
-          
-          .linea-media(style="width: 2px; height: 55px; background: #cbd5e1; margin: 0 12px;")
-          
-          // Cuadrante 2 (Superior Izquierdo)
-          .cuadrante(style="display: flex; gap: 4px;")
-            each val in [21, 22, 23, 24, 25, 26, 27, 28]
-              .pieza-container(data-pieza=val style="text-align: center; cursor: pointer; transition: transform 0.15s;")
-                .numero-pieza(style="font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;")= val
-                .diente-svg.estado-sano(id="diente-"+val style="width: 32px; height: 48px; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #f8fafc; position: relative; overflow: hidden; transition: all 0.2s;")
-        
-        // Separador visual de arcadas
-        div(style="height: 1px; background: #e2e8f0; margin: 24px 0;")
-        
-        // ARCADA INFERIOR
-        .arcada(style="display: flex; justify-content: center; align-items: center; gap: 6px;")
-          // Cuadrante 4 (Inferior Derecho)
-          .cuadrante(style="display: flex; gap: 4px;")
-            each val in [48, 47, 46, 45, 44, 43, 42, 41]
-              .pieza-container(data-pieza=val style="text-align: center; cursor: pointer; transition: transform 0.15s;")
-                .diente-svg.estado-sano(id="diente-"+val style="width: 32px; height: 48px; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #f8fafc; position: relative; overflow: hidden; transition: all 0.2s;")
-                .numero-pieza(style="font-size: 11px; font-weight: 600; color: #64748b; margin-top: 4px;")= val
-          
-          .linea-media(style="width: 2px; height: 55px; background: #cbd5e1; margin: 0 12px;")
-          
-          // Cuadrante 3 (Inferior Izquierdo)
-          .cuadrante(style="display: flex; gap: 4px;")
-            each val in [31, 32, 33, 34, 35, 36, 37, 38]
-              .pieza-container(data-pieza=val style="text-align: center; cursor: pointer; transition: transform 0.15s;")
-                .diente-svg.estado-sano(id="diente-"+val style="width: 32px; height: 48px; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #f8fafc; position: relative; overflow: hidden; transition: all 0.2s;")
-                .numero-pieza(style="font-size: 11px; font-weight: 600; color: #64748b; margin-top: 4px;")= val
+    .odonto
+      section.card
+        .card__head
+          h2 Dentición permanente
+          span.badge 32 piezas
+        .board
+          .board__inner
+            .arch
+              .quad
+                each n in [18, 17, 16, 15, 14, 13, 12, 11]
+                  +tooth(n)
+              .mid
+              .quad
+                each n in [21, 22, 23, 24, 25, 26, 27, 28]
+                  +tooth(n)
+            .arch.arch--lower
+              .quad
+                each n in [48, 47, 46, 45, 44, 43, 42, 41]
+                  +tooth(n)
+              .mid
+              .quad
+                each n in [31, 32, 33, 34, 35, 36, 37, 38]
+                  +tooth(n)
 
-      // PANEL DERECHO: HERRAMIENTAS Y HALLAZGOS
-      .panel-derecho(style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: space-between;")
-        
-        div
-          h3(style="margin: 0 0 4px 0; font-size: 16px; color: #1e293b; font-weight: 700;") Herramientas Clínicas
-          p(style="font-size: 13px; color: #64748b; margin: 0 0 16px 0;") Selecciona una opción y haz clic en el diente.
+      aside.card
+        h2(style="font-size: 17px") Herramientas
+        .tools#tools
+          button.tool(type="button" data-tool="caries" aria-pressed="false")
+            i
+            | Caries
+          button.tool(type="button" data-tool="resina" aria-pressed="false")
+            i
+            | Resina
+          button.tool(type="button" data-tool="extraccion" aria-pressed="false")
+            i
+            | Extracción
+          button.tool(type="button" data-tool="corona" aria-pressed="false")
+            i
+            | Corona
+          button.tool.tool--wide(type="button" data-tool="sano" aria-pressed="false")
+            i
+            | Marcar como sano
+        p.hint#hint Ninguna herramienta seleccionada
 
-          .grid-herramientas(style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;")
-            button.btn-herramienta(data-tool="caries" style="padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-weight: 600; color: #475569; font-size: 13px; transition: all 0.2s;") Caries
-            button.btn-herramienta(data-tool="resina" style="padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-weight: 600; color: #475569; font-size: 13px; transition: all 0.2s;") Resina
-            button.btn-herramienta(data-tool="extraccion" style="padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-weight: 600; color: #475569; font-size: 13px; transition: all 0.2s;") Extracción
-            button.btn-herramienta(data-tool="corona" style="padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-weight: 600; color: #475569; font-size: 13px; transition: all 0.2s;") Corona
-            button.btn-herramienta(data-tool="sano" style="grid-column: span 2; padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-weight: 600; color: #475569; font-size: 13px; transition: all 0.2s;") Marcar como Sano
+        h2(style="font-size: 15px; margin-top: 22px") Hallazgos registrados
+        ul.finds#hallazgos
 
-          div(style="background: #f8fafc; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px;")
-            p(style="margin: 0; font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;") Estado Activo:
-            p#herramienta-activa-texto(style="margin: 4px 0 0 0; font-size: 14px; font-weight: 600; color: #1e293b;") Ninguna herramienta seleccionada
-          
-          h3(style="font-size: 15px; color: #1e293b; font-weight: 700; margin: 0 0 12px 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;") Hallazgos Registrados
-          
-          ul.lista-hallazgos#contenedor-hallazgos(style="list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto;")
-            li(style="font-size: 13px; color: #64748b; text-align: center; padding: 20px 0;") No hay hallazgos registrados aún.
+        .save-bar
+          p.dirty#dirty Cambios sin guardar
+          button.btn.btn--primary.btn--block#btnGuardar(type="button" data-paciente=(paciente ? paciente.id : ''))
+            +icon('save', 16)
+            span Guardar odontograma
 
-        // Botón Guardar inferior
-        div(style="margin-top: 20px;")
-          button.btn-guardar#btnGuardarOdontograma(style="width: 100%; padding: 12px; background: #00A5C4; color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0, 165, 196, 0.2); transition: background 0.3s;") Guardar Odontograma
-
-  // Estilos CSS adicionales para clases dinámicas del estado dental y herramientas activas
-  style.
-    .pieza-container:hover { transform: scale(1.06); }
-    .estado-sano { border-color: #cbd5e1 !important; background: #f8fafc !important; }
-    .estado-caries { border-color: #ef4444 !important; background: #fee2e2 !important; }
-    .estado-caries::after { content: ''; position: absolute; top: 35%; left: 35%; width: 30%; height: 30%; background: #ef4444; border-radius: 50%; }
-    .estado-resina { border-color: #3b82f6 !important; background: #dbeafe !important; }
-    .estado-resina::after { content: ''; position: absolute; top: 35%; left: 35%; width: 30%; height: 30%; background: #3b82f6; border-radius: 50%; }
-    .estado-extraccion { border-color: #64748b !important; background: #f1f5f9 !important; }
-    .estado-extraccion::before, .estado-extraccion::after { content: ''; position: absolute; top: 10%; left: 48%; width: 2px; height: 80%; background: #64748b; }
-    .estado-extraccion::before { transform: rotate(45deg); }
-    .estado-extraccion::after { transform: rotate(-45deg); }
-    .estado-corona { border-color: #f59e0b !important; background: #fef3c7 !important; }
-    .estado-corona::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 30%; background: #f59e0b; }
-
-    .tool-active-caries { border-color: #ef4444 !important; background: #fee2e2 !important; color: #b91c1c !important; }
-    .tool-active-resina { border-color: #3b82f6 !important; background: #dbeafe !important; color: #1d4ed8 !important; }
-    .tool-active-extraccion { border-color: #64748b !important; background: #f1f5f9 !important; color: #334155 !important; }
-    .tool-active-corona { border-color: #f59e0b !important; background: #fef3c7 !important; color: #b45309 !important; }
-    .tool-active-sano { border-color: #10b981 !important; background: #d1fae5 !important; color: #047857 !important; }
-
-    .item-hallazgo { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
-    .item-hallazgo span { font-weight: 600; color: #1e293b; }
-    .tag-estado { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-
-  // ==========================================
-  // SCRIPT: LÓGICA DEL ODONTOGRAMA
-  // ==========================================
+  script#datos-odonto(type="application/json")!= JSON.stringify(hallazgosPrevios || {}).replace(/</g, '\\u003c')
   script.
-    document.addEventListener('DOMContentLoaded', () => {
-      let herramientaActiva = null;
-      let estadoDientes = !{JSON.stringify(hallazgosPrevios ? hallazgosPrevios : {})}; 
+    (() => {
+      DL.ready(() => {
+        const $ = (s) => document.querySelector(s);
+        const desdeCita = new URLSearchParams(location.search).get('cita');
+        if (desdeCita) { const v = $('#volver'); v.href = '/consulta?cita=' + encodeURIComponent(desdeCita); v.querySelector('span').textContent = 'Volver a la consulta'; }
+        let previos = {};
+        try { previos = JSON.parse($('#datos-odonto').textContent || '{}'); } catch (e) { /* vacío */ }
+        const estado = (previos && typeof previos === 'object') ? Object.assign({}, previos) : {};
+        const LABEL = { caries: 'Caries', resina: 'Resina', extraccion: 'Extracción', corona: 'Corona' };
+        const BADGE = { caries: 'badge--danger', resina: 'badge--info', extraccion: '', corona: 'badge--warn' };
+        let herramienta = null;
+        let sucio = false;
 
-      const coloresEstado = {
-        'caries': { bg: '#fee2e2', text: '#ef4444', label: 'Caries' },
-        'resina': { bg: '#dbeafe', text: '#3b82f6', label: 'Resina' },
-        'extraccion': { bg: '#f1f5f9', text: '#475569', label: 'Extracción' },
-        'corona': { bg: '#fef3c7', text: '#d97706', label: 'Corona' },
-      };
-
-      // Pintar dientes al cargar
-      Object.keys(estadoDientes).forEach(pieza => {
-          const dienteGrafico = document.getElementById('diente-' + pieza);
-          if(dienteGrafico) {
-              dienteGrafico.className = 'diente-svg'; 
-              dienteGrafico.classList.add('estado-' + estadoDientes[pieza]); 
-          }
-      });
-      actualizarListaHallazgos(); 
-
-      // Selección de herramientas
-      const botonesHerramienta = document.querySelectorAll('.btn-herramienta');
-      const textoHerramientaActiva = document.getElementById('herramienta-activa-texto');
-
-      botonesHerramienta.forEach(boton => {
-        boton.addEventListener('click', function() {
-          const tool = this.getAttribute('data-tool');
-          herramientaActiva = tool;
-          
-          botonesHerramienta.forEach(b => {
-             b.className = 'btn-herramienta'; 
-             b.style.borderColor = '#e2e8f0';
-             b.style.background = 'white';
-             b.style.color = '#475569';
-          });
-          
-          this.classList.add('tool-active-' + tool);
-          
-          const nombresLegibles = { 'caries': 'Caries', 'resina': 'Resina', 'extraccion': 'Extracción', 'corona': 'Corona', 'sano': 'Marcar como Sano' };
-          textoHerramientaActiva.innerText = `Aplicando: ${nombresLegibles[tool]}`;
-        });
-      });
-
-      // Clic en los dientes
-      const contenedoresPiezas = document.querySelectorAll('.pieza-container');
-      
-      contenedoresPiezas.forEach(contenedor => {
-        contenedor.addEventListener('click', function() {
-          if (!herramientaActiva) {
-            alert('Por favor, selecciona una herramienta clínica primero.');
-            return;
-          }
-
-          const numPieza = this.getAttribute('data-pieza');
-          const dienteGrafico = document.getElementById('diente-' + numPieza);
-
-          dienteGrafico.className = 'diente-svg'; 
-
-          if (herramientaActiva === 'sano') {
-            dienteGrafico.classList.add('estado-sano');
-            delete estadoDientes[numPieza];
-          } else {
-            dienteGrafico.classList.add('estado-' + herramientaActiva);
-            estadoDientes[numPieza] = herramientaActiva;
-          }
-
-          actualizarListaHallazgos();
-        });
-      });
-
-      // Actualizar lista lateral
-      function actualizarListaHallazgos() {
-        const contenedor = document.getElementById('contenedor-hallazgos');
-        contenedor.innerHTML = ''; 
-
-        const piezasModificadas = Object.keys(estadoDientes);
-
-        if (piezasModificadas.length === 0) {
-          contenedor.innerHTML = '<li style="font-size:13px; color:#64748b; text-align:center; padding:20px 0;">No hay hallazgos registrados aún.</li>';
-          return;
-        }
-
-        piezasModificadas.sort().forEach(pieza => {
-          const estado = estadoDientes[pieza];
-          const configColor = coloresEstado[estado];
-
-          const li = document.createElement('li');
-          li.className = 'item-hallazgo';
-          
-          const textPieza = document.createElement('span');
-          textPieza.innerText = `Pieza ${pieza}`;
-          
-          const tagEstado = document.createElement('div');
-          tagEstado.className = 'tag-estado';
-          tagEstado.style.backgroundColor = configColor.bg;
-          tagEstado.style.color = configColor.text;
-          tagEstado.innerText = configColor.label;
-
-          li.appendChild(textPieza);
-          li.appendChild(tagEstado);
-          contenedor.appendChild(li);
-        });
-      }
-
-      // Guardar con fetch real
-      document.getElementById('btnGuardarOdontograma').addEventListener('click', async function() {
-        const pacienteId = new URLSearchParams(window.location.search).get('paciente');
-        
-        if(!pacienteId) {
-            alert('Error: No se detectó al paciente.');
-            return;
-        }
-
-        const dataGuardar = {
-            pacienteId: pacienteId,
-            hallazgos: estadoDientes
+        const pintar = (n) => {
+          const el = document.getElementById('diente-' + n);
+          if (el) el.className = 'tooth' + (estado[n] ? ' st-' + estado[n] : '');
         };
-        
-        const btn = this;
-        const textoOriginal = btn.innerText;
-        btn.innerText = 'Guardando...';
-        btn.style.background = '#0ea5e9';
-        
-        try {
-            const respuesta = await fetch('/odontograma/guardar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dataGuardar)
-            });
+        const lista = () => {
+          const ul = $('#hallazgos');
+          const piezas = Object.keys(estado).sort((a, b) => a - b);
+          ul.innerHTML = piezas.length
+            ? piezas.map((n) => `<li class="find"><strong>Pieza ${DL.esc(n)}</strong><span class="badge ${BADGE[estado[n]] || ''}">${DL.esc(LABEL[estado[n]] || estado[n])}</span></li>`).join('')
+            : '<li class="sub" style="padding:18px 0;text-align:center">Aún no hay hallazgos registrados.</li>';
+        };
+        const marcarSucio = (v) => { sucio = v; $('#dirty').classList.toggle('show', v); };
 
-            const resultado = await respuesta.json();
+        Object.keys(estado).forEach(pintar);
+        lista();
 
-            if(respuesta.ok) {
-                btn.innerText = 'Guardado Correctamente';
-                btn.style.background = '#10b981';
-            } else {
-                alert(resultado.mensaje);
-                btn.innerText = textoOriginal;
-                btn.style.background = '#00A5C4';
-            }
-        } catch(error) {
-            console.error(error);
-            alert('Error de conexión al guardar.');
-            btn.innerText = textoOriginal;
-            btn.style.background = '#00A5C4';
-        }
+        // Herramientas
+        const botones = document.querySelectorAll('.tool');
+        botones.forEach((b) => b.addEventListener('click', () => {
+          herramienta = herramienta === b.dataset.tool ? null : b.dataset.tool;
+          botones.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.tool === herramienta)));
+          $('#hint').textContent = herramienta ? `Aplicando: ${b.textContent.trim()}. Toca un diente.` : 'Ninguna herramienta seleccionada';
+        }));
 
-        setTimeout(() => {
-            btn.innerText = textoOriginal;
-            btn.style.background = '#00A5C4';
-        }, 2500);
+        // Dientes
+        document.querySelectorAll('.tooth-btn').forEach((btn) => btn.addEventListener('click', () => {
+          if (!herramienta) {
+            const t = $('#tools');
+            t.classList.remove('nudge'); void t.offsetWidth; t.classList.add('nudge');
+            return DL.toast('Elige primero una herramienta.', 'error');
+          }
+          const n = btn.dataset.pieza;
+          if (herramienta === 'sano' || estado[n] === herramienta) delete estado[n];   // tocar de nuevo = quitar
+          else estado[n] = herramienta;
+          pintar(n); lista(); marcarSucio(true);
+        }));
+
+        // Avisar si se intenta salir con cambios sin guardar
+        DL.guard = () => (sucio ? DL.confirm('Tienes cambios sin guardar en el odontograma. Si sales ahora se perderán.', { ok: 'Salir sin guardar' }) : true);
+        window.onbeforeunload = (e) => { if (sucio) { e.preventDefault(); return ''; } };
+
+        // Guardar
+        $('#btnGuardar').addEventListener('click', async function () {
+          const btn = this;
+          const pacienteId = btn.dataset.paciente;
+          if (!pacienteId) return DL.toast('No se detectó al paciente.', 'error');
+          btn.classList.add('is-busy');
+          try {
+            const r = await fetch('/odontograma/guardar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pacienteId, hallazgos: estado }) });
+            const j = await r.json().catch(() => ({}));
+            if (!r.ok) throw new Error(j.mensaje || 'No se pudo guardar.');
+            marcarSucio(false);
+            DL.toast('Odontograma guardado');
+          } catch (err) {
+            DL.toast(err.message || 'Error de conexión al guardar.', 'error');
+          } finally { btn.classList.remove('is-busy'); }
+        });
       });
-    });
+    })();

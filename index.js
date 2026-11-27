@@ -13,6 +13,7 @@ import Receta from './models/recetaModel.js';
 import Cita from './models/citaModel.js';
 import Odontograma from './models/odontogramaModel.js';
 import ExpedienteNota from './models/expedienteModel.js';
+import Mensaje from './models/mensajeModel.js';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -76,6 +77,15 @@ ExpedienteNota.belongsTo(Clinica, { foreignKey: 'clinicaId' });
 // 11. Un Paciente tiene muchas Notas de Expediente
 Paciente.hasMany(ExpedienteNota, { foreignKey: 'pacienteId' });
 ExpedienteNota.belongsTo(Paciente, { foreignKey: 'pacienteId' });
+
+// 12. Una Clínica tiene muchos Mensajes (chat clínica <-> paciente)
+//     Si se borra la clínica o el paciente, se borran sus mensajes
+Clinica.hasMany(Mensaje, { foreignKey: 'clinicaId', onDelete: 'CASCADE' });
+Mensaje.belongsTo(Clinica, { foreignKey: 'clinicaId', onDelete: 'CASCADE' });
+
+// 13. Un Paciente tiene muchos Mensajes
+Paciente.hasMany(Mensaje, { foreignKey: 'pacienteId', onDelete: 'CASCADE' });
+Mensaje.belongsTo(Paciente, { foreignKey: 'pacienteId', onDelete: 'CASCADE' });
 
 // ==========================================
 
