@@ -1,7 +1,26 @@
 import Cita from '../models/citaModel.js';
 import Paciente from '../models/pacienteModel.js';
+import { Op } from 'sequelize';
 // Opcional: importaremos moment.js u otra librería de fechas si te gusta, 
 // pero podemos hacerlo con JS nativo para no meter más paquetes.
+
+// --- Validación de horario (la usan agendar y editar) ---
+// Devuelve 0 si está bien, o un código de error que la vista convierte en aviso:
+// 2 = faltan datos, 5 = choca con otra cita, 6 = la hora de fin no es posterior a la de inicio
+const aMinutos = (t) => {
+    const [h, m] = String(t || '').split(':');
+    return (parseInt(h, 10) || 0) * 60 + (parseInt(m, 10) || 0);
+};
+const validarHorario = async ({ clinicaId, fecha, hora_inicio, hora_fin, excluirId }) => {
+    if (!fecha || !hora_inicio || !hora_fin) return 2;
+    const ini = aMinutos(hora_inicio);
+    const fin = aMinutos(hora_fin);
+    if (fin <= ini) return 6;
+    // Las canceladas no ocupan lugar; la cita que se está editando tampoco choca consigo misma
+    const delDia = await Cita.findAll({ where: { clinicaId, fecha, estado: { [Op.ne]: 'Cancelada' } } });
+    const choca = delDia.some((c) => String(c.id) !== String(excluirId) && ini < aMinutos(c.hora_fin) && fin > aMinutos(c.hora_inicio));
+    return choca ? 5 : 0;
+};
 
 const obtenerCitas = async (req, res) => {
     try {
@@ -23,6 +42,9 @@ const obtenerCitas = async (req, res) => {
 const agendarCita = async (req, res) => {
     const { pacienteId, fecha, hora_inicio, hora_fin, motivo } = req.body;
     try {
+        const error = await validarHorario({ clinicaId: req.clinicaActiva.id, fecha, hora_inicio, hora_fin });
+        if (error) return res.redirect('/?error=' + error);
+
         await Cita.create({
             fecha,
             hora_inicio,
@@ -111,6 +133,9 @@ const editarCita = async (req, res) => {
     try {
         const cita = await Cita.findOne({ where: { id, clinicaId: req.clinicaActiva.id } });
         if (cita) {
+            const error = await validarHorario({ clinicaId: req.clinicaActiva.id, fecha, hora_inicio, hora_fin, excluirId: cita.id });
+            if (error) return res.redirect('/?error=' + error);
+
             await cita.update({
                 fecha,
                 hora_inicio,

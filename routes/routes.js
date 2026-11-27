@@ -3,13 +3,15 @@ import { Op } from 'sequelize';
 
 // Controladores
 import { registrarDoctor, autenticarDoctor, cerrarSesion, editarPerfil } from '../controllers/doctorController.js'; 
-import { registrarPaciente } from '../controllers/pacienteController.js'; 
+import { registrarPaciente, editarPaciente } from '../controllers/pacienteController.js'; 
 import { agregarProducto, actualizarProducto, ajustarStock, eliminarProducto } from '../controllers/inventarioController.js'; 
 import { vistaReceta, generarReceta, descargarReceta } from '../controllers/recetaController.js'; 
 import { agregarClinica, cambiarClinica, editarClinica, eliminarClinica } from '../controllers/clinicaController.js'; 
 import { obtenerCitas, agendarCita, completarCita, cancelarCita, editarCita } from '../controllers/citaController.js';
 import { verOdontograma, guardarOdontograma } from '../controllers/odontogramaController.js';
 import { verExpedienteDetalle, agregarNotaExpediente } from '../controllers/expedienteController.js';
+import { verConsulta, listarPacientes } from '../controllers/consultaController.js';
+import { vistaMensajes, pendientes, conversaciones, historial, enviar } from '../controllers/mensajeController.js';
 
 // Middlewares y Modelos
 import protegerRuta from '../middleware/authMiddleware.js'; 
@@ -60,6 +62,11 @@ route.post('/cita/completar/:id', protegerRuta, completarCita);
 route.post('/cita/cancelar/:id', protegerRuta, cancelarCita);
 route.post('/cita/editar/:id', protegerRuta, editarCita);
 
+// --- CONSULTA (cita en curso) Y LISTA DE PACIENTES PARA EL ASISTENTE (solo lectura) ---
+route.get('/consulta', protegerRuta, verConsulta);
+route.get('/citas', protegerRuta, (req, res) => res.render('citas', { pagina: 'agenda' }));
+route.get('/api/pacientes', protegerRuta, listarPacientes);
+
 // --- RUTAS DE PACIENTES ---
 route.get('/expediente', protegerRuta, async (req, res) => {
     try {
@@ -74,6 +81,7 @@ route.get('/expediente', protegerRuta, async (req, res) => {
 });
 
 route.post('/pacientes/nuevo', protegerRuta, registrarPaciente);
+route.post('/pacientes/editar/:id', protegerRuta, editarPaciente);
 
 // --- RUTAS DE DETALLE DE EXPEDIENTE Y NOTAS CLÍNICAS ---
 route.get('/expediente/detalle', protegerRuta, verExpedienteDetalle);
@@ -84,8 +92,15 @@ route.get('/odontograma', protegerRuta, verOdontograma);
 route.post('/odontograma/guardar', protegerRuta, guardarOdontograma);
 
 route.get('/historial', protegerRuta, (req, res) => {
-    res.render('historial-fotos', { pagina: 'historial' });
+    res.render('historialF', { pagina: 'historial' });
 });
+
+// --- MENSAJES (chat clínica <-> paciente) ---
+route.get('/mensajes', protegerRuta, vistaMensajes);
+route.get('/api/mensajes/pendientes', protegerRuta, pendientes);
+route.get('/api/mensajes/conversaciones', protegerRuta, conversaciones);
+route.get('/api/mensajes/chat/:pacienteId', protegerRuta, historial);
+route.post('/api/mensajes/chat/:pacienteId', protegerRuta, enviar);
 
 // --- RUTAS DE RECETAS ---
 route.get('/receta', protegerRuta, vistaReceta); 

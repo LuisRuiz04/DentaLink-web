@@ -1,0 +1,148 @@
+extends layout
+
+block content
+  - var nombreP = paciente.nombre + ' ' + paciente.apellidos
+  - var ini = ((paciente.nombre || '').charAt(0) + (paciente.apellidos || '').charAt(0)).toUpperCase()
+  - var hm = function (t) { return String(t).slice(0, 5) }
+  - var fechaLarga = function (f) { return new Date(f + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }) }
+  - var piezas = Object.keys(hallazgos || {}).sort(function (a, b) { return a - b })
+  - var ETQ = { caries: 'Caries', resina: 'Resina', extraccion: 'Extracción', corona: 'Corona' }
+  - var BDG = { caries: 'badge--danger', resina: 'badge--info', extraccion: '', corona: 'badge--warn' }
+  - var terminada = cita.estado === 'Completada'
+  .page
+    a.back(href="/" data-prefetch)
+      +icon('arrow-left', 16)
+      | Agenda
+
+    section.card.consulta-head
+      .profile
+        span.avatar.avatar--lg= ini
+        .profile__data
+          p.consulta-state#estadoLive(data-estado=cita.estado data-fecha=cita.fecha data-inicio=hm(cita.hora_inicio) data-fin=hm(cita.hora_fin))
+            span.badge(class=(terminada ? 'badge--ok' : cita.estado === 'Cancelada' ? 'badge--danger' : 'badge--tint'))= cita.estado
+          h1= nombreP
+          .meta
+            span
+              +icon('calendar', 15)
+              | #{fechaLarga(cita.fecha)}, #{hm(cita.hora_inicio)} a #{hm(cita.hora_fin)} h
+            span
+              +icon('clipboard', 15)
+              | #{cita.motivo}
+            if paciente.telefono
+              span
+                +icon('phone', 15)
+                | #{paciente.telefono}
+        if !terminada && cita.estado !== 'Cancelada'
+          form(action=`/cita/completar/${cita.id}` method="POST" data-confirm=`¿Finalizar la consulta de ${nombreP}? La cita quedará como completada.` data-confirm-ok="Finalizar consulta" data-toast="Consulta finalizada")
+            button.btn.btn--ok(type="submit" style="height: 44px")
+              +icon('check', 18)
+              | Finalizar consulta
+
+    .consulta
+      div
+        section.card
+          .card__head
+            h2 Nota de esta consulta
+            span.badge.badge--tint Se guarda en el expediente
+          form.form#formNota(action="/expediente/nota/nueva" method="POST" data-steps data-submit="Guardar nota")
+            input(type="hidden" name="pacienteId" value=paciente.id)
+            .step(data-q="¿Qué hiciste hoy?")
+              +field('Nota de la consulta', 'nota', { type: 'textarea', rows: 4, placeholder: 'Tratamiento, indicaciones, cambios de arco…', required: true })
+
+        h2.section-title Historial reciente
+        if notas && notas.length
+          ol.timeline
+            each nota in notas
+              li
+                article.card.note
+                  time(datetime=new Date(nota.createdAt).toISOString())= new Date(nota.createdAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City' })
+                  p= nota.nota
+          p(style="margin-top: 14px")
+            a.back(href=`/expediente/detalle?paciente=${paciente.id}` data-prefetch style="margin: 0") Ver expediente completo
+        else
+          .card.empty
+            +icon('clipboard', 44)
+            strong Sin notas todavía
+            span La primera nota que guardes aparecerá aquí.
+
+      aside.consulta-side
+        section.card
+          .card__head
+            h2 Odontograma
+            if piezas.length
+              span.badge= piezas.length + (piezas.length === 1 ? ' pieza' : ' piezas')
+          if piezas.length
+            ul.finds(style="max-height: 180px")
+              each n in piezas
+                li.find
+                  strong Pieza #{n}
+                  span.badge(class=(BDG[hallazgos[n]] || ''))= ETQ[hallazgos[n]] || hallazgos[n]
+          else
+            p.muted(style="margin-bottom: 12px") Aún no hay hallazgos registrados.
+          a.btn.btn--soft.btn--block(href=`/odontograma?paciente=${paciente.id}&cita=${cita.id}` data-prefetch style="margin-top: 12px")
+            +icon('smile', 16)
+            | Abrir odontograma
+
+        section.card
+          .card__head
+            h2 Después de la consulta
+          .stack
+            button.btn.btn--ghost.btn--block(type="button" data-wizard data-paciente-id=paciente.id data-paciente-nombre=nombreP)
+              +icon('calendar', 16)
+              | Agendar siguiente cita
+            a.btn.btn--ghost.btn--block(href=`/receta?paciente=${paciente.id}` data-prefetch)
+              +icon('file-text', 16)
+              | Hacer receta
+            a.btn.btn--ghost.btn--block(href=`/mensajes?paciente=${paciente.id}` data-prefetch)
+              +icon('message', 16)
+              | Enviar mensaje
+          if proximas && proximas.length
+            p.sub(style="margin: 16px 0 8px; font-weight: 600") Próximas citas
+            ul.finds(style="max-height: none")
+              each c in proximas
+                li.find
+                  span #{fechaLarga(c.fecha)}
+                  strong #{hm(c.hora_inicio)} h
+
+        if anteriores && anteriores.length
+          section.card
+            .card__head
+              h2 Visitas anteriores
+            ul.finds(style="max-height: none")
+              each c in anteriores
+                li.find
+                  span #{fechaLarga(c.fecha)}
+                  span.sub= c.motivo
+
+  script.
+    (() => {
+      DL.ready(() => {
+        // La etiqueta "En curso" se calcula con la hora de esta computadora
+        const el = document.getElementById('estadoLive');
+        if (el && el.dataset.estado === 'Pendiente') {
+          const n = new Date(), p2 = (x) => String(x).padStart(2, '0');
+          const hoy = `${n.getFullYear()}-${p2(n.getMonth() + 1)}-${p2(n.getDate())}`;
+          const ahora = `${p2(n.getHours())}:${p2(n.getMinutes())}`;
+          if (el.dataset.fecha === hoy && el.dataset.inicio <= ahora && ahora < el.dataset.fin) {
+            el.innerHTML = '<span class="badge badge--ok badge--dot">En curso ahora</span>';
+          }
+        }
+
+        // Guardar la nota sin salir de la consulta
+        const f = document.getElementById('formNota');
+        f.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const btn = e.submitter || f.querySelector('[data-sf-submit]');
+          btn.classList.add('is-busy');
+          try {
+            const r = await fetch(f.action, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(new FormData(f)) });
+            if (!r.ok) throw new Error();
+            DL.toast('Nota guardada');
+            DL.refresh();
+          } catch (err) {
+            btn.classList.remove('is-busy');
+            DL.toast('No se pudo guardar la nota.', 'error');
+          }
+        });
+      });
+    })();

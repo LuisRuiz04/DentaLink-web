@@ -1,103 +1,90 @@
 extends layout
 
 block content
-  .contenido-principal(style="padding: 30px; width: 100%; box-sizing: border-box; font-family: 'Inter', sans-serif;")
-    
-    // Encabezado
-    .header-pacientes(style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;")
+  - var lista = (pacientes || []).slice().sort(function (a, b) { return (a.nombre || '').localeCompare(b.nombre || '', 'es') })
+  .page
+    header.page-head
       div
-        h1(style="font-size: 24px; font-weight: 700; color: #1e293b; margin: 0 0 8px 0;") Directorio de Pacientes
-        p(style="font-size: 14px; color: #64748b; margin: 0;") Gestiona los expedientes clínicos y odontogramas de tus pacientes.
-      
-      // Botón de Nuevo Paciente
-      button(onclick="document.getElementById('modalNuevoPaciente').style.display='flex'" style="background-color: #00A5C4; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: background 0.3s;")
-        span(style="font-size: 18px; line-height: 1;") +
-        | Nuevo Paciente
+        h1.page-title Pacientes
+        p.page-sub Expedientes clínicos y odontogramas de cada paciente.
+      button.btn.btn--primary(type="button" data-open="modalNuevoPaciente")
+        +icon('plus', 18)
+        | Nuevo paciente
 
-    // Contenedor de la Tabla
-    .tabla-contenedor(style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden;")
-      table(style="width: 100%; border-collapse: collapse; text-align: left;")
-        thead(style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;")
-          tr
-            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569;") Nombre del Paciente
-            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569;") Teléfono
-            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569;") Última Visita
-            th(style="padding: 16px 20px; font-size: 13px; font-weight: 600; color: #475569; text-align: center;") Acciones
-        
-        tbody
-          if pacientes && pacientes.length > 0
-            each paciente in pacientes
-              tr(style="border-bottom: 1px solid #f1f5f9;")
-                td(style="padding: 16px 20px;")
-                  div(style="display: flex; align-items: center; gap: 12px;")
-                    // Círculo con las iniciales dinámicas (Nombre y Apellido)
-                    div(style="width: 36px; height: 36px; border-radius: 50%; background-color: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; text-transform: uppercase;") #{paciente.nombre.charAt(0)}#{paciente.apellidos.charAt(0)}
-                    div
-                      // Nombre y correo dinámicos
-                      p(style="margin: 0; font-weight: 500; color: #1e293b; font-size: 14px;") #{paciente.nombre} #{paciente.apellidos}
-                      p(style="margin: 0; color: #64748b; font-size: 12px;") #{paciente.correo}
-                
-                // Teléfono dinámico
-                td(style="padding: 16px 20px; color: #475569; font-size: 14px;") #{paciente.telefono}
-                
-                // Fecha de última visita
-                td(style="padding: 16px 20px; color: #475569; font-size: 14px;") -
-                
-                td(style="padding: 16px 20px; text-align: center;")
-                  .acciones(style="display: flex; justify-content: center; gap: 12px;")
-                    // Enlace Dinámico a Expediente del Paciente
-                    a(href=`/expediente/detalle?paciente=${paciente.id}` style="color: #00A5C4; text-decoration: none; font-size: 13px; font-weight: 600;") Expediente
-                    span(style="color: #cbd5e1;") |
-                    // Enlace Dinámico a Odontograma del Paciente
-                    a(href=`/odontograma?paciente=${paciente.id}` style="color: #00A5C4; text-decoration: none; font-size: 13px; font-weight: 600;") Odontograma
-          else
-            // Si la base de datos no encuentra nada, muestra este mensaje
-            tr
-              td(colspan="4" style="text-align: center; padding: 30px; color: #64748b; font-size: 14px;") Aún no tienes pacientes registrados. ¡Agrega el primero!
+    .card.card--flush
+      if lista.length
+        .toolbar
+          label.search
+            +icon('search', 18)
+            input#filtro(type="search" placeholder="Buscar por nombre, teléfono o correo" autocomplete="off" aria-label="Buscar paciente")
+          span.count#conteo= lista.length + (lista.length === 1 ? ' paciente' : ' pacientes')
+        .table-wrap
+          table.table
+            thead
+              tr
+                th Paciente
+                th Teléfono
+                th.col-actions Acciones
+            tbody#tabla
+              each p in lista
+                tr(data-q=((p.nombre || '') + ' ' + (p.apellidos || '') + ' ' + (p.telefono || '') + ' ' + (p.correo || '')).toLowerCase())
+                  td
+                    a.person(href=`/expediente/detalle?paciente=${p.id}` data-prefetch)
+                      span.avatar.avatar--soft= ((p.nombre || '').charAt(0) + (p.apellidos || '').charAt(0)).toUpperCase()
+                      span
+                        strong #{p.nombre} #{p.apellidos}
+                        small= p.correo
+                  td= p.telefono
+                  td.col-actions
+                    .row-actions
+                      +btnEditarPaciente(p)
+                      a.btn.btn--ghost.btn--sm(href=`/expediente/detalle?paciente=${p.id}` data-prefetch) Expediente
+                      a.btn.btn--soft.btn--sm(href=`/odontograma?paciente=${p.id}` data-prefetch) Odontograma
+        #sinResultados.empty.hidden
+          +icon('search', 44)
+          strong Sin resultados
+          span Prueba con otro nombre, teléfono o correo.
+      else
+        .empty
+          +icon('users', 44)
+          strong Aún no tienes pacientes
+          span Registra al primero para crear su expediente y su odontograma.
+          button.btn.btn--primary(type="button" data-open="modalNuevoPaciente") Registrar paciente
 
-    // Modal para Registrar Nuevo Paciente
-    #modalNuevoPaciente(style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000;")
-      .modal-content(style="background: white; padding: 40px; border-radius: 20px; width: 550px; max-width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative;")
-        
-        // Botón de cerrar (X)
-        button(type="button" onclick="document.getElementById('modalNuevoPaciente').style.display='none'" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 28px; color: #94a3b8; cursor: pointer; line-height: 1; padding: 0;") &times;
+  script.
+    (() => {
+      DL.ready(() => {
+        const input = document.getElementById('filtro');
+        if (!input) return;
+        const filas = Array.from(document.querySelectorAll('#tabla tr'));
+        const conteo = document.getElementById('conteo');
+        const vacio = document.getElementById('sinResultados');
+        const limpiar = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        input.addEventListener('input', () => {
+          const q = limpiar(input.value.trim());
+          let n = 0;
+          filas.forEach((tr) => {
+            const ok = !q || limpiar(tr.dataset.q).includes(q);
+            tr.classList.toggle('is-hidden', !ok);
+            if (ok) n++;
+          });
+          conteo.textContent = n + (n === 1 ? ' paciente' : ' pacientes');
+          vacio.classList.toggle('hidden', n > 0);
+        });
+      });
+    })();
 
-        div(style="text-align: center; margin-bottom: 30px;")
-          h2(style="margin: 0; color: #1e293b; font-size: 24px; font-weight: 700;") Nuevo Paciente
-          p(style="margin: 8px 0 0 0; color: #64748b; font-size: 14px;") Crea su perfil y cuenta de acceso para la app móvil.
+block modals
+  +modal('modalNuevoPaciente', 'Nuevo paciente', { wide: true })
+    form.form(action="/pacientes/nuevo" method="POST" data-toast="Paciente registrado" data-steps data-fresh data-submit="Guardar paciente")
+      .step(data-q="¿Cómo se llama el paciente?")
+        +field('Nombre(s)', 'nombre', { placeholder: 'Ej. Abraham', required: true })
+        +field('Apellidos', 'apellidos', { placeholder: 'Ej. Raúl', required: true })
+      .step(data-q="¿Cómo lo contactamos?")
+        +field('Teléfono', 'telefono', { type: 'tel', placeholder: '10 dígitos', required: true })
+        +field('Dirección', 'direccion', { placeholder: 'Calle y número', required: true })
+      .step(data-q="Su acceso a la app móvil" data-hint="Con este correo y contraseña el paciente entra a la app.")
+        +field('Correo electrónico', 'correo', { type: 'email', placeholder: 'correo@ejemplo.com', required: true })
+        +field('Contraseña de la app', 'password', { type: 'password', placeholder: 'Mínimo 6 caracteres', required: true, minlength: 6, autocomplete: 'new-password' })
 
-        form(action="/pacientes/nuevo" method="POST" style="display: flex; flex-direction: column; gap: 20px;")
-          
-          // Fila 1: Nombre y Apellidos
-          div(style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;")
-            div(style="display: flex; flex-direction: column; gap: 6px;")
-              label(style="font-size: 13px; font-weight: 600; color: #475569;") Nombre(s)
-              input(type="text" name="nombre" placeholder="Ej. Abraham" required style="padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 14px; outline: none;")
-            
-            div(style="display: flex; flex-direction: column; gap: 6px;")
-              label(style="font-size: 13px; font-weight: 600; color: #475569;") Apellidos
-              input(type="text" name="apellidos" placeholder="Ej. Raúl" required style="padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 14px; outline: none;")
-
-          // Fila 2: Teléfono y Dirección
-          div(style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;")
-            div(style="display: flex; flex-direction: column; gap: 6px;")
-              label(style="font-size: 13px; font-weight: 600; color: #475569;") Teléfono
-              input(type="tel" name="telefono" placeholder="10 dígitos" required style="padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 14px; outline: none;")
-            
-            div(style="display: flex; flex-direction: column; gap: 6px;")
-              label(style="font-size: 13px; font-weight: 600; color: #475569;") Dirección
-              input(type="text" name="direccion" placeholder="Calle y número" required style="padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 14px; outline: none;")
-
-          // Fila 3: Correo y Contraseña
-          div(style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;")
-            div(style="display: flex; flex-direction: column; gap: 6px;")
-              label(style="font-size: 13px; font-weight: 600; color: #475569;") Correo Electrónico
-              input(type="email" name="correo" placeholder="correo@ejemplo.com" required style="padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 14px; outline: none;")
-            
-            div(style="display: flex; flex-direction: column; gap: 6px;")
-              label(style="font-size: 13px; font-weight: 600; color: #475569;") Contraseña (App)
-              input(type="password" name="password" placeholder="Mínimo 6 caracteres" required style="padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 14px; outline: none;")
-          
-          // Botón Guardar
-          div(style="margin-top: 15px;")
-            button(type="submit" style="width: 100%; padding: 14px; background: #00A5C4; border: none; border-radius: 10px; cursor: pointer; color: white; font-weight: 600; font-size: 15px; box-shadow: 0 4px 6px -1px rgba(0, 165, 196, 0.2); transition: background 0.3s;") Guardar Paciente
+  +modalEditarPaciente('lista')

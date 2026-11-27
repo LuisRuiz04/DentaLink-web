@@ -1,113 +1,105 @@
+include _ui
+
 doctype html
 html(lang="es")
   head
     meta(charset="UTF-8")
-    meta(name="viewport" content="width=device-width, initial-scale=1.0")
-    title DentaLink · Acceso al Sistema
+    meta(name="viewport" content="width=device-width, initial-scale=1")
+    meta(name="color-scheme" content="light dark")
+    title Acceso · DentaLink
+    script.
+      (function(){try{var t=localStorage.getItem('dl-theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t}catch(e){}})()
     link(rel="preconnect" href="https://fonts.googleapis.com")
     link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
     link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap")
-    link(rel="stylesheet" href="/css/style.css")
-    style.
-      html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow-x: hidden; }
-      .auth-container { display: flex; width: 100vw; min-height: 100vh; }
-      .auth-brand-panel { background: #FFFFFF !important; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
-      .auth-form-panel { background: #00A5C4 !important; flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-  body
-    .auth-container
-      .auth-brand-panel
-        div(style="display: flex; flex-direction: column; align-items: center; max-width: 500px; text-align: center; margin-top: -120px;")
-          .brand-logo-box(style="background: transparent; width: 100%; display: flex; justify-content: center; margin-bottom: 6rem;")
-            img(src="/img/logo.png" alt="DentaLink Logo" style="width: 100%; max-width: 480px; height: auto; object-fit: contain;")
-          .brand-content
-            h1(style="color: #00a5c4; font-weight: 700; margin-bottom: 15px;") Gestión clínica integral para odontólogos modernos.
-            p(style="color: #5a6b7c; font-size: 1.1rem; line-height: 1.6;") Controla tu agenda, expedientes digitales, odontogramas interactivos, historial fotográfico y recetas médicas en una sola plataforma diseñada para tu consultorio.
-          .brand-footer(style="margin-top: 2rem;")
-            p(style="color: #94a3b8; font-size: 0.9rem;") DentaLink © 2026 · Todos los derechos reservados
+    link(rel="stylesheet" href="/css/style.css?v=8")
+    script(src="/js/app.js?v=8")
+    script(src="/js/steps.js?v=8" defer)
 
-      .auth-form-panel
-        .auth-card(style="background-color: #FFFFFF; border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); margin-top: -120px;")
-          div(style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 25px;")
-            h2(style="font-size: 24px; font-weight: 700; color: #00a5c4;") ¡Bienvenido de nuevo!
-            p(style="font-size: 13px; color: #5a6b7c;") Ingresa a tu cuenta o registra tu consultorio.
+  body
+    main.auth
+      section.auth__brand
+        img(src="/img/logo.png" alt="DentaLink" width="440" height="199")
+        div
+          h1 Gestión clínica integral para odontólogos modernos.
+          p Controla tu agenda, expedientes digitales, odontogramas interactivos, historial fotográfico y recetas médicas en una sola plataforma diseñada para tu consultorio.
+        p.muted(style="font-size: 13px") DentaLink © 2026. Todos los derechos reservados.
+
+      section.auth__panel
+        button.icon-btn.auth__theme(type="button" data-theme-toggle aria-label="Cambiar modo claro u oscuro" title="Modo claro / oscuro")
+          span.theme-btn
+            span.i-sun
+              +icon('sun', 19)
+            span.i-moon
+              +icon('moon', 19)
+
+        .auth__card
+          img.auth__logo-sm(src="/img/logo.png" alt="DentaLink" width="160" height="72")
+          header
+            h2 ¡Bienvenido de nuevo!
+            p.muted Ingresa a tu cuenta o registra tu consultorio.
 
           if error == '1'
-            div(style="background-color: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; text-align: center; border: 1px solid #f87171;")
+            .alert.alert--error(role="alert")
               strong ¡Ups! 
               | Correo o contraseña incorrectos.
           if error == '2'
-            div(style="background-color: #fef08a; color: #a16207; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; text-align: center; border: 1px solid #facc15;")
+            .alert.alert--warn(role="alert")
               strong Error del servidor. 
-              | Intenta de nuevo más tarde.
+              | Inténtalo de nuevo más tarde.
 
-          .auth-tabs
-            .auth-tab.active#tab-login(onclick="switchTab('login')") Iniciar Sesión
-            .auth-tab#tab-signup(onclick="switchTab('signup')") Registrarse
+          .seg#seg(data-mode="login" role="tablist")
+            span.seg__thumb
+            button#tab-login(type="button" role="tab" data-mode="login" aria-selected="true") Iniciar sesión
+            button#tab-signup(type="button" role="tab" data-mode="signup" aria-selected="false") Registrarse
 
-          form#form-login(action="/login" method="POST" style="display: flex; flex-direction: column; gap: 16px;")
-            .auth-form-group
-              label.auth-label(style="color: #5a6b7c;") Correo electrónico
-              .auth-input-wrapper
-                input.auth-input(type="email", name="email", placeholder="doctor@dentalink.com", required)
-            .auth-form-group
-              label.auth-label(style="color: #5a6b7c;") Contraseña
-              .auth-input-wrapper
-                input.auth-input(type="password", name="password", placeholder="••••••••", required)
-            a.auth-forgot(href="#") ¿Olvidaste tu contraseña?
-            button.auth-btn-primary(type="submit") Entrar al Sistema
+          form.form#form-login(action="/login" method="POST")
+            +field('Correo electrónico', 'email', { type: 'email', placeholder: 'doctor@dentalink.com', required: true, autocomplete: 'email' })
+            label.field
+              span.field__label Contraseña
+              .pw
+                input.input(type="password" name="password" placeholder="••••••••" required autocomplete="current-password")
+                button(type="button" data-reveal aria-label="Mostrar contraseña")
+                  +icon('eye', 18)
+            button.btn.btn--primary.btn--block(type="submit" style="height: 46px") Entrar al sistema
 
-          form#form-signup(action="/registro" method="POST" style="display: none; flex-direction: column; gap: 16px;")
-            .auth-form-group
-              label.auth-label(style="color: #5a6b7c;") Nombre completo del doctor
-              .auth-input-wrapper
-                input.auth-input(type="text", name="nombre_doctor", placeholder="Dr. Luis Hernández", required)
-            .auth-form-group
-              label.auth-label(style="color: #5a6b7c;") Nombre de la clínica
-              .auth-input-wrapper
-                input.auth-input(type="text", name="nombre_clinica", placeholder="Clínica Sonrisa", required)
-            
-            // --- NUEVOS CAMPOS ---
-            .auth-form-group
-              label.auth-label(style="color: #5a6b7c;") Teléfono del consultorio
-              .auth-input-wrapper
-                input.auth-input(type="tel", name="telefono", placeholder="Ej. 452 123 4567", required)
-            .auth-form-group
-              label.auth-label(style="color: #5a6b7c;") Cédula Profesional
-              .auth-input-wrapper
-                input.auth-input(type="text", name="cedula", placeholder="Ej. 7845123", required)
-            .auth-form-group
-              label.auth-label(style="color: #5a6b7c;") Dirección del Consultorio
-              .auth-input-wrapper
-                input.auth-input(type="text", name="direccion", placeholder="Av. Principal #123, Uruapan", required)
-            // ---------------------
+          form.form.hidden#form-signup(action="/registro" method="POST" data-steps data-submit="Crear cuenta y consultorio")
+            .step(data-q="¿Quién eres?")
+              +field('Nombre completo del doctor', 'nombre_doctor', { placeholder: 'Dr. Luis Hernández', required: true })
+              +field('Cédula profesional', 'cedula', { placeholder: 'Ej. 7845123', required: true })
+            .step(data-q="¿Cómo es tu consultorio?")
+              +field('Nombre de la clínica', 'nombre_clinica', { placeholder: 'Clínica Sonrisa', required: true })
+              +field('Teléfono del consultorio', 'telefono', { type: 'tel', placeholder: 'Ej. 452 123 4567', required: true })
+              +field('Dirección del consultorio', 'direccion', { placeholder: 'Av. Principal #123, Uruapan', required: true })
+            .step(data-q="Crea tu acceso")
+              +field('Correo electrónico', 'email', { type: 'email', placeholder: 'doctor@dentalink.com', required: true, autocomplete: 'email' })
+              label.field
+                span.field__label Contraseña
+                .pw
+                  input.input(type="password" name="password" placeholder="Mínimo 8 caracteres" required minlength="8" autocomplete="new-password")
+                  button(type="button" data-reveal aria-label="Mostrar contraseña")
+                    +icon('eye', 18)
 
-            .auth-form-group
-              label.auth-label(style="color: #5a6b7c;") Correo electrónico
-              .auth-input-wrapper
-                input.auth-input(type="email", name="email", placeholder="doctor@dentalink.com", required)
-            .auth-form-group
-              label.auth-label(style="color: #5a6b7c;") Contraseña
-              .auth-input-wrapper
-                input.auth-input(type="password", name="password", placeholder="Mínimo 8 caracteres", required)
-
-            button.auth-btn-primary(type="submit") Crear Cuenta y Consultorio
-
-  script.
-    function switchTab(mode) {
-      const tabLogin = document.getElementById('tab-login');
-      const tabSignup = document.getElementById('tab-signup');
-      const formLogin = document.getElementById('form-login');
-      const formSignup = document.getElementById('form-signup');
-
-      if (mode === 'login') {
-        tabLogin.classList.add('active');
-        tabSignup.classList.remove('active');
-        formLogin.style.display = 'flex';
-        formSignup.style.display = 'none';
-      } else {
-        tabSignup.classList.add('active');
-        tabLogin.classList.remove('active');
-        formSignup.style.display = 'flex';
-        formLogin.style.display = 'none';
-      }
-    }
+    script.
+      (function () {
+        var seg = document.getElementById('seg');
+        var forms = { login: document.getElementById('form-login'), signup: document.getElementById('form-signup') };
+        seg.addEventListener('click', function (e) {
+          var b = e.target.closest('button[data-mode]');
+          if (!b) return;
+          var mode = b.dataset.mode;
+          seg.dataset.mode = mode;
+          seg.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-selected', String(x === b)); });
+          forms.login.classList.toggle('hidden', mode !== 'login');
+          forms.signup.classList.toggle('hidden', mode !== 'signup');
+          var f = forms[mode].querySelector('input'); if (f) f.focus();
+        });
+        document.addEventListener('click', function (e) {
+          var r = e.target.closest('[data-reveal]');
+          if (!r) return;
+          var i = r.parentElement.querySelector('input');
+          var show = i.type === 'password';
+          i.type = show ? 'text' : 'password';
+          r.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+        });
+      })();

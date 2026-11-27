@@ -1,224 +1,163 @@
+include _ui
+
+- var activa = (typeof pagina !== 'undefined' && pagina) || ''
+- var nombreDoc = (doctor && doctor.nombre_doctor) || ''
+- var nombreMostrado = /^dra?\.?\s/i.test(nombreDoc) ? nombreDoc : 'Dr. ' + nombreDoc
+- var iniciales = nombreDoc.replace(/^dra?\.?\s+/i, '').split(/\s+/).filter(Boolean).slice(0, 2).map(function (p) { return p[0] }).join('').toUpperCase() || 'Dr'
+- var hoyTxt = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Mexico_City' })
+- var TITULOS = { agenda: 'Agenda', pacientes: 'Pacientes', expediente: 'Pacientes', odontograma: 'Odontograma', inventario: 'Inventario', recetas: 'Recetas', historial: 'Historial fotográfico', mensajes: 'Mensajes', citas: 'Citas' }
+- var navItems = [{ href: '/', label: 'Agenda', icon: 'calendar', match: '/citas /consulta', exact: true, keys: ['agenda'] }, { href: '/mensajes', label: 'Mensajes', icon: 'message', match: '/mensajes', keys: ['mensajes'], badge: true }, { href: '/expediente', label: 'Pacientes', icon: 'users', match: '/expediente /odontograma', keys: ['pacientes', 'expediente', 'odontograma'] }, { href: '/inventario', label: 'Inventario', icon: 'package', match: '/inventario', keys: ['inventario'] }, { href: '/receta', label: 'Recetas', icon: 'file-text', match: '/receta', keys: ['recetas'] }]
+
 doctype html
 html(lang="es")
   head
     meta(charset="UTF-8")
-    meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    title DentaLink | Gestión Clínica
-    link(rel="preconnect", href="https://fonts.googleapis.com")
-    link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin)
-    link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap")
-    link(rel="stylesheet", href="/css/style.css")
-    script(src="https://unpkg.com/lucide@latest")
-    
+    meta(name="viewport" content="width=device-width, initial-scale=1")
+    meta(name="color-scheme" content="light dark")
+    title= (TITULOS[activa] ? TITULOS[activa] + ' · ' : '') + 'DentaLink'
+    //- El tema se aplica ANTES de pintar para que no haya destello blanco al abrir en modo oscuro.
+    script.
+      (function(){try{var t=localStorage.getItem('dl-theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t}catch(e){}})()
+    link(rel="preconnect" href="https://fonts.googleapis.com")
+    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+    link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap")
+    link(rel="stylesheet" href="/css/style.css?v=8")
+    script(src="/js/app.js?v=8")
+    script(src="/js/wizard.js?v=8" defer)
+    script(src="/js/steps.js?v=8" defer)
+    script(src="/js/mensajes.js?v=8" defer)
+
   body
-    .agenda-de-citas
-      // BARRA LATERAL
-      .barra-lateral
-        .marca(style="display: flex; align-items: center; justify-content: center; height: auto !important; min-height: 80px; padding: 15px 0; margin-bottom: 15px; overflow: visible !important;")
-          img(src="/img/logo.png" alt="DentaLink Logo" style="width: 150px; height: auto; object-fit: contain; display: block;")
-        
-        // ==========================================
-        // SELECTOR DE CLÍNICAS DESPLEGABLE
-        // ==========================================
-        .selector-clinica-container(style="position: relative; margin-bottom: 20px;")
-          .clinica(onclick="toggleMenuClinicas()" style="display: flex; align-items: center; gap: 12px; padding: 10px; background: #f8fafc; border-radius: 8px; cursor: pointer; border: 1px solid #e2e8f0; transition: all 0.2s;")
-            i(data-lucide="building" style="width: 20px; height: 20px; color: #00A5C4;")
-            .datos-de-clinica
-              p.texto(style="margin: 0; font-weight: 600; color: #1e293b; font-size: 14px;") #{clinicaActiva ? clinicaActiva.nombre_clinica : 'Sin Clínica'}
-              p.texto-2(style="margin: 0; font-size: 12px; color: #64748b;") Cambiar consultorio
-            i(data-lucide="chevron-down" style="width: 16px; height: 16px; color: #94a3b8; margin-left: auto;")
-          
-          // Menú desplegable oculto
-          #menuClinicas(style="display: none; position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); margin-top: 5px; z-index: 100; overflow: hidden;")
-            if misClinicas && misClinicas.length > 0
-              each clinica in misClinicas
-                // Fila de cada clínica con su botón de lápiz
-                div(style=`display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f1f5f9; ${clinicaActiva && clinicaActiva.id === clinica.id ? 'background: #f0fdfa;' : 'background: white;'}`)
-                  a(href=`/cambiar-clinica/${clinica.id}` style=`flex-grow: 1; text-decoration: none; padding: 10px 15px; font-size: 13px; color: ${clinicaActiva && clinicaActiva.id === clinica.id ? '#0d9488' : '#1e293b'}; font-weight: ${clinicaActiva && clinicaActiva.id === clinica.id ? '600' : '400'};`)
-                    | #{clinica.nombre_clinica}
-                  
-                  // Botón del Lápiz (Editar)
-                  button(type="button" onclick=`abrirModalEditarClinica('${clinica.id}', '${clinica.nombre_clinica}', '${clinica.telefono}', '${clinica.direccion}')` style="background: none; border: none; cursor: pointer; color: #94a3b8; padding: 10px; margin-right: 5px; transition: color 0.2s;" onmouseover="this.style.color='#00A5C4'" onmouseout="this.style.color='#94a3b8'")
-                    i(data-lucide="edit-2" style="width: 14px; height: 14px;")
-            
-            button(type="button" onclick="abrirModalNuevaClinica()" style="width: 100%; text-align: left; padding: 12px 15px; background: #f8fafc; border: none; color: #00A5C4; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;")
-              i(data-lucide="plus-circle" style="width: 14px; height: 14px;")
+    a.skip(href="#vista") Saltar al contenido
+    #progress(aria-hidden="true")
+
+    .app
+      aside#sidebar.sidebar
+        a.brand(href="/" aria-label="DentaLink, ir a la agenda")
+          img(src="/img/logo.png" alt="DentaLink" width="150" height="68")
+
+        #clinica-switch.clinica-switch(data-sync)
+          button.clinica(type="button" data-toggle="menuClinicas" aria-haspopup="true")
+            +icon('building', 20)
+            span.clinica__txt
+              strong= clinicaActiva ? clinicaActiva.nombre_clinica : 'Sin clínica'
+              small Cambiar consultorio
+            +icon('chevron-down', 16)
+          #menuClinicas.menu
+            each c in (misClinicas || [])
+              - var esActiva = clinicaActiva && clinicaActiva.id === c.id
+              .menu__row
+                a.menu__item(href=`/cambiar-clinica/${c.id}` class=(esActiva ? 'is-active' : '') data-clinica-id=c.id)
+                  span= c.nombre_clinica
+                  if esActiva
+                    +icon('check', 16)
+                button.icon-btn.icon-btn--sm(type="button" data-open="modalEditarClinica" data-id=c.id data-nombre=c.nombre_clinica data-telefono=c.telefono data-direccion=c.direccion aria-label=`Editar ${c.nombre_clinica}`)
+                  +icon('pencil', 15)
+            button.menu__item.menu__item--accent(type="button" data-open="modalNuevaClinica")
+              +icon('plus', 16)
               | Registrar nueva clínica
 
-        // NAVEGACIÓN
-        .navegacion-principal
-          p.etiqueta-de-menu ESPACIO CLÍNICO
-          
-          a(href="/" class=(pagina === 'agenda' ? 'opcion-de-navegacion' : 'opcion-de-navegacion-2') style="display: flex; align-items: center; gap: 12px; text-decoration: none;")
-            i(data-lucide="calendar" style="width: 20px; height: 20px;")
-            p(class=(pagina === 'agenda' ? 'texto-3' : 'texto-4') style="margin: 0;") Agenda
-            
-          a(href="/expediente" class=(pagina === 'pacientes' ? 'opcion-de-navegacion' : 'opcion-de-navegacion-2') style="display: flex; align-items: center; gap: 12px; text-decoration: none;")
-            i(data-lucide="users" style="width: 20px; height: 20px;")
-            p(class=(pagina === 'pacientes' ? 'texto-3' : 'texto-4') style="margin: 0;") Pacientes
-            
-          a(href="/inventario" class=(pagina === 'inventario' ? 'opcion-de-navegacion' : 'opcion-de-navegacion-2') style="display: flex; align-items: center; gap: 12px; text-decoration: none;")
-            i(data-lucide="package" style="width: 20px; height: 20px;")
-            p(class=(pagina === 'inventario' ? 'texto-3' : 'texto-4') style="margin: 0;") Inventario
-            
-          a(href="/receta" class=(pagina === 'recetas' ? 'opcion-de-navegacion' : 'opcion-de-navegacion-2') style="display: flex; align-items: center; gap: 12px; text-decoration: none;")
-            i(data-lucide="file-text" style="width: 20px; height: 20px;")
-            p(class=(pagina === 'recetas' ? 'texto-3' : 'texto-4') style="margin: 0;") Recetas
-            
-        .espaciador
-        
-        .ayuda(style="background: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 15px;")
-          i(data-lucide="help-circle" style="width: 20px; height: 20px; color: #64748b; margin-bottom: 10px;")
-          p.texto(style="margin: 0 0 5px 0; font-weight: 600; font-size: 14px; color: #1e293b;") Estamos para ayudarte
-          p.texto-9(style="margin: 0 0 10px 0; font-size: 12px; color: #64748b; line-height: 1.4;") Encuentra respuestas en nuestro centro de ayuda.
-          a(href="#" style="color: #00A5C4; font-size: 13px; font-weight: 600; text-decoration: none;") Visitar centro de ayuda ↗
-          
-        p.texto-12(style="margin-top: 20px; font-size: 11px; color: #94a3b8; text-align: center;") DentaLink · Gestión clínica integral
+        nav.nav(aria-label="Principal")
+          p.nav__title Espacio clínico
+          each it in navItems
+            a.nav__item(href=it.href data-match=it.match data-exact=it.exact data-prefetch aria-current=(it.keys.indexOf(activa) > -1 ? 'page' : undefined))
+              +icon(it.icon, 20)
+              span= it.label
+              if it.badge
+                span.nav__badge#badgeMensajes(hidden aria-label="mensajes sin leer")
 
-      // ESPACIO DE TRABAJO (Área Derecha)
-      .espacio-de-trabajo
-        // BARRA SUPERIOR
-        .barra-superior(style="display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; border-bottom: 1px solid #e2e8f0; background: white;")
-          .buscador(style="display: flex; align-items: center; gap: 10px; background: #f1f5f9; padding: 8px 15px; border-radius: 8px; width: 300px;")
-            i(data-lucide="search" style="width: 18px; height: 18px; color: #94a3b8;")
-            input(type="text" placeholder="Buscar paciente..." style="border: none; background: transparent; outline: none; font-family: 'Inter', sans-serif; font-size: 14px; color: #475569; width: 100%;")
-            p.texto-2(style="margin: 0; background: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; color: #94a3b8; border: 1px solid #e2e8f0;") ⌘ K
-          
-          div(style="display: flex; align-items: center; gap: 20px;")
-            i(data-lucide="bell" style="width: 20px; height: 20px; color: #64748b; cursor: pointer;")
-            .separador(style="width: 1px; height: 24px; background-color: #e2e8f0;")
-            
-            // ==========================================
-            // PERFIL DEL DOCTOR (Un solo clic para Editar)
-            // ==========================================
-            div(style="display: flex; align-items: center; gap: 10px;")
-              div(onclick="abrirModalEditarPerfil()" style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 5px 10px; border-radius: 8px; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'" title="Editar mis datos")
-                .avatar-del-doctor(style="width: 36px; height: 36px; border-radius: 50%; background-color: #00A5C4; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;") Dr
-                .perfil-del-doctor
-                  p.texto(style="margin: 0; font-weight: 600; font-size: 14px; color: #1e293b;") Dr. #{doctor.nombre_doctor}
-                  p.texto-2(style="margin: 0; font-size: 12px; color: #64748b;") Odontólogo
-                i(data-lucide="edit-2" style="width: 16px; height: 16px; color: #64748b;")
-              
-              a(href="/cerrar-sesion" style="text-decoration: none; color: #dc2626; font-size: 13px; font-weight: 600; padding: 6px 12px; border: 1px solid #fca5a5; border-radius: 6px; background-color: #fef2f2; transition: all 0.2s; margin-left: 10px;") Cerrar Sesión
+        p.sidebar__foot DentaLink · Gestión clínica integral
 
-        block content
+      .scrim(data-nav-close)
 
-    // ==========================================
-    // 1. MODAL PARA AÑADIR NUEVO CONSULTORIO
-    // ==========================================
-    #modalNuevaClinica.modal-overlay(style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000;")
-      .modal-content(style="background: white; padding: 30px; border-radius: 16px; width: 400px; max-width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative;")
-        button(type="button" onclick="cerrarModales()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; line-height: 1;") &times;
-        h2(style="margin: 0 0 20px 0; color: #1e293b; font-size: 20px; font-weight: 700; text-align: center;") Registrar Nuevo Consultorio
-        
-        form(action="/clinica/nueva" method="POST" style="display: flex; flex-direction: column; gap: 15px;")
-          div
-            label(style="font-size: 12px; font-weight: 600; color: #475569;") Nombre de la Clínica
-            input(type="text" name="nombre_clinica" placeholder="Ej. Consultorio Centro" required style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 4px; outline: none;")
-          div
-            label(style="font-size: 12px; font-weight: 600; color: #475569;") Teléfono
-            input(type="text" name="telefono" placeholder="Ej. 452 987 6543" required style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 4px; outline: none;")
-          div
-            label(style="font-size: 12px; font-weight: 600; color: #475569;") Dirección Completa
-            input(type="text" name="direccion" placeholder="Calle, Número, Colonia, Ciudad" required style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 4px; outline: none;")
-          
-          button(type="submit" style="margin-top: 10px; width: 100%; padding: 12px; background: #00A5C4; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: 600;") Crear Consultorio
+      .main
+        header.topbar
+          button.icon-btn.only-mobile(type="button" data-nav-toggle aria-label="Abrir menú")
+            +icon('menu', 20)
+          p.topbar__date#hoy= hoyTxt
+          .spacer
+          button.btn.btn--primary.btn--sm.topbar__new(type="button" data-wizard)
+            +icon('plus', 16)
+            span Nueva cita
+          button.icon-btn.theme-btn(type="button" data-theme-toggle aria-label="Cambiar modo claro u oscuro" title="Modo claro / oscuro")
+            span.i-sun
+              +icon('sun', 19)
+            span.i-moon
+              +icon('moon', 19)
+          #perfil.perfil(data-sync)
+            button.perfil__btn(type="button" data-toggle="menuPerfil" aria-haspopup="true")
+              span.avatar= iniciales
+              span.perfil__txt
+                strong= nombreMostrado
+                small Odontólogo
+              +icon('chevron-down', 16)
+            #menuPerfil.menu.menu--right
+              button.menu__item(type="button" data-open="modalPerfil")
+                +icon('user', 16)
+                | Mi perfil
+              a.menu__item.menu__item--danger(href="/cerrar-sesion" data-native)
+                +icon('log-out', 16)
+                | Cerrar sesión
 
-    // ==========================================
-    // 2. MODAL PARA EDITAR/ELIMINAR CONSULTORIO
-    // ==========================================
-    #modalEditarClinica.modal-overlay(style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000;")
-      .modal-content(style="background: white; padding: 30px; border-radius: 16px; width: 400px; max-width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative;")
-        button(type="button" onclick="cerrarModales()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; line-height: 1;") &times;
-        h2(style="margin: 0 0 20px 0; color: #1e293b; font-size: 20px; font-weight: 700; text-align: center;") Configuración del Consultorio
-        
-        // FORMULARIO DE EDICIÓN
-        form#formEditarClinica(method="POST" style="display: flex; flex-direction: column; gap: 15px;")
-          div
-            label(style="font-size: 12px; font-weight: 600; color: #475569;") Nombre de la Clínica
-            input#editClinicaNombre(type="text" name="nombre_clinica" required style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 4px; outline: none;")
-          div
-            label(style="font-size: 12px; font-weight: 600; color: #475569;") Teléfono
-            input#editClinicaTelefono(type="text" name="telefono" required style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 4px; outline: none;")
-          div
-            label(style="font-size: 12px; font-weight: 600; color: #475569;") Dirección Completa
-            input#editClinicaDireccion(type="text" name="direccion" required style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 4px; outline: none;")
-          
-          button(type="submit" style="margin-top: 10px; width: 100%; padding: 12px; background: #00A5C4; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: 600;") Guardar Cambios
+        main#vista(tabindex="-1")
+          block content
 
-        // BOTÓN DE ELIMINAR CONSULTORIO (Independiente)
-        div(style="margin-top: 20px; padding-top: 20px; border-top: 1px dashed #e2e8f0;")
-          form#formEliminarClinica(method="POST" onsubmit="return confirm('¿Estás SEGURO de eliminar este consultorio? Perderás permanentemente a todos los pacientes y el inventario vinculados a él.');")
-            button(type="submit" style="width: 100%; padding: 12px; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; cursor: pointer; color: #ef4444; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'")
-              i(data-lucide="trash-2" style="width: 16px; height: 16px;")
-              | Eliminar Consultorio
+    //- Ventanas propias de cada vista (fuera de #vista para que sigan fijas a la pantalla)
+    #vista-extras
+      block modals
 
-    // ==========================================
-    // 3. MODAL PARA EDITAR DATOS PERSONALES
-    // ==========================================
-    #modalEditarPerfil.modal-overlay(style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000;")
-      .modal-content(style="background: white; padding: 30px; border-radius: 16px; width: 400px; max-width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative;")
-        button(type="button" onclick="cerrarModales()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; line-height: 1;") &times;
-        h2(style="margin: 0 0 20px 0; color: #1e293b; font-size: 20px; font-weight: 700; text-align: center;") Datos del Médico
-        
-        form(action="/perfil/editar" method="POST" style="display: flex; flex-direction: column; gap: 15px;")
-          div
-            label(style="font-size: 12px; font-weight: 600; color: #475569;") Nombre completo
-            input(type="text" name="nombre_doctor" value=`${doctor.nombre_doctor}` required style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 4px; outline: none;")
-          div
-            label(style="font-size: 12px; font-weight: 600; color: #475569;") Cédula Profesional
-            input(type="text" name="cedula" value=`${doctor.cedula || ''}` style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 4px; outline: none;")
-          div
-            label(style="font-size: 12px; font-weight: 600; color: #475569;") Correo Electrónico
-            input(type="email" name="email" value=`${doctor.email}` required style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 4px; outline: none;")
-          div
-            label(style="font-size: 12px; font-weight: 600; color: #475569;") Nueva Contraseña (Opcional)
-            input(type="password" name="password" placeholder="Dejar en blanco para no cambiar" style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 4px; outline: none;")
-          
-          button(type="submit" style="margin-top: 10px; width: 100%; padding: 12px; background: #00A5C4; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: 600;") Actualizar Datos
+    //- Ventanas globales
+    //- Asistente "Nueva cita" (pregunta por pregunta). El contenido lo dibuja /js/wizard.js
+    #wizCita.modal(role="dialog" aria-modal="true" aria-labelledby="wizStepTxt" aria-hidden="true")
+      .modal__box.modal__box--wide.wiz
+        header.wiz__head
+          button.icon-btn#wizBack(type="button" aria-label="Pregunta anterior")
+            +icon('chevron-left', 20)
+          .wiz__progress
+            .wiz__meta
+              strong#wizStepTxt Nueva cita
+              span#wizPct 0%
+            .wiz__bar
+              span#wizBarFill
+          button.icon-btn(type="button" data-close aria-label="Cerrar")
+            +icon('x', 18)
+        #wizBody.wiz__body
+        #wizFoot.wiz__foot.hidden
 
-    script.
-      lucide.createIcons();
-      
-      // Control del menú desplegable de Clínicas
-      function toggleMenuClinicas() {
-        const menu = document.getElementById('menuClinicas');
-        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-      }
+    +modal('modalNuevaClinica', 'Registrar consultorio')
+      form.form(action="/clinica/nueva" method="POST" data-toast="Consultorio creado" data-steps data-fresh data-submit="Crear consultorio")
+        .step(data-q="¿Cómo se llama el consultorio?")
+          +field('Nombre de la clínica', 'nombre_clinica', { placeholder: 'Ej. Consultorio Centro', required: true })
+        .step(data-q="¿Dónde lo encuentran tus pacientes?")
+          +field('Teléfono', 'telefono', { type: 'tel', placeholder: 'Ej. 452 987 6543', required: true })
+          +field('Dirección completa', 'direccion', { placeholder: 'Calle, número, colonia, ciudad', required: true })
 
-      // Cerrar menús si se hace clic fuera de ellos
-      document.addEventListener('click', function(event) {
-        const isClickInsideClinicas = document.querySelector('.selector-clinica-container').contains(event.target);
-        if (!isClickInsideClinicas) {
-          document.getElementById('menuClinicas').style.display = 'none';
-        }
-      });
+    +modal('modalEditarClinica', 'Configuración del consultorio')
+      form.form#formEditarClinica(method="POST" data-action="/clinica/editar/{id}" data-toast="Cambios guardados" data-steps data-submit="Guardar cambios")
+        .step(data-q="¿Cómo se llama el consultorio?")
+          +field('Nombre de la clínica', 'nombre_clinica', { required: true, fill: 'nombre' })
+        .step(data-q="¿Dónde lo encuentran tus pacientes?")
+          +field('Teléfono', 'telefono', { type: 'tel', required: true, fill: 'telefono' })
+          +field('Dirección completa', 'direccion', { required: true, fill: 'direccion' })
+      form.danger-zone#formEliminarClinica(method="POST" data-action="/clinica/eliminar/{id}" data-confirm="Se eliminará el consultorio junto con todos sus pacientes y su inventario. Esta acción no se puede deshacer." data-confirm-ok="Eliminar consultorio" data-toast="Consultorio eliminado")
+        button.btn.btn--danger-soft.btn--block(type="submit")
+          +icon('trash', 16)
+          | Eliminar consultorio
 
-      // Funciones para cerrar todos los Modales
-      function cerrarModales() {
-        document.querySelectorAll('.modal-overlay').forEach(modal => modal.style.display = 'none');
-      }
+    +modal('modalPerfil', 'Mi perfil')
+      form.form(action="/perfil/editar" method="POST" data-toast="Perfil actualizado" data-steps data-submit="Guardar cambios")
+        .step(data-q="¿Cómo apareces en tus recetas?")
+          +field('Nombre completo', 'nombre_doctor', { value: nombreDoc, required: true })
+          +field('Cédula profesional', 'cedula', { value: (doctor && doctor.cedula) || '' })
+        .step(data-q="¿Con qué correo inicias sesión?")
+          +field('Correo electrónico', 'email', { type: 'email', value: (doctor && doctor.email) || '', required: true })
+        .step(data-q="¿Quieres cambiar tu contraseña?" data-hint="Es opcional. Déjala vacía para conservar la actual.")
+          +field('Nueva contraseña', 'password', { type: 'password', placeholder: 'Déjala vacía para no cambiarla', autocomplete: 'new-password' })
 
-      function abrirModalNuevaClinica() {
-        document.getElementById('menuClinicas').style.display = 'none';
-        document.getElementById('modalNuevaClinica').style.display = 'flex';
-      }
+    +modal('modalConfirm', 'Confirmar acción')
+      p.muted#confirmMsg
+      .modal__actions
+        button.btn.btn--ghost(type="button" data-close) Cancelar
+        button.btn.btn--danger#confirmOk(type="button") Eliminar
 
-      function abrirModalEditarClinica(id, nombre, telefono, direccion) {
-        document.getElementById('menuClinicas').style.display = 'none';
-        
-        // Inyectamos los datos dinámicamente al formulario de EDICIÓN
-        document.getElementById('formEditarClinica').action = '/clinica/editar/' + id;
-        document.getElementById('editClinicaNombre').value = nombre;
-        document.getElementById('editClinicaTelefono').value = telefono;
-        document.getElementById('editClinicaDireccion').value = direccion;
-        
-        // Inyectamos el ID al formulario de ELIMINACIÓN
-        document.getElementById('formEliminarClinica').action = '/clinica/eliminar/' + id;
-        
-        document.getElementById('modalEditarClinica').style.display = 'flex';
-      }
-
-      function abrirModalEditarPerfil() {
-        document.getElementById('modalEditarPerfil').style.display = 'flex';
-      }
+    #toasts(aria-live="polite" aria-atomic="false")

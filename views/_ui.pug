@@ -1,0 +1,50 @@
+include _icons
+
+//- Ventana modal reutilizable. Uso: +modal('idModal', 'Título') y el contenido debajo.
+mixin modal(id, title, opts)
+  .modal(id=id role="dialog" aria-modal="true" aria-labelledby=id + '-t' aria-hidden="true")
+    .modal__box(class=(opts && opts.wide ? 'modal__box--wide' : ''))
+      header.modal__head
+        h2(id=id + '-t')= title
+        button.icon-btn(type="button" data-close aria-label="Cerrar")
+          +icon('x', 18)
+      .modal__body
+        block
+
+//- Campo de formulario con etiqueta. data-fill rellena el valor desde el botón que abre el modal.
+mixin field(label, name, opts)
+  - var o = opts || {}
+  label.field(class=o.class)
+    span.field__label= label
+    if o.type === 'textarea'
+      textarea.input(name=name rows=(o.rows || 4) placeholder=o.placeholder required=o.required data-fill=o.fill)
+    else
+      input.input(type=(o.type || 'text') name=name id=o.id placeholder=o.placeholder required=o.required value=o.value autocomplete=o.autocomplete data-fill=o.fill list=o.list min=o.min inputmode=o.inputmode minlength=o.minlength)
+
+//- Ventana "Editar paciente" (pregunta por pregunta). Se abre con un botón:
+//-   button(data-open="modalEditarPaciente" data-id=.. data-nombre=.. data-apellidos=.. data-telefono=.. data-direccion=.. data-correo=..)
+//- volver: 'lista' o 'detalle' (a qué pantalla regresa después de guardar)
+mixin modalEditarPaciente(volver)
+  +modal('modalEditarPaciente', 'Editar paciente', { wide: true })
+    form.form(method="POST" data-action="/pacientes/editar/{id}" data-toast="Paciente actualizado" data-steps data-submit="Guardar cambios")
+      input(type="hidden" name="volver" value=(volver || 'lista'))
+      .step(data-q="¿Cómo se llama el paciente?")
+        +field('Nombre(s)', 'nombre', { required: true, fill: 'nombre' })
+        +field('Apellidos', 'apellidos', { required: true, fill: 'apellidos' })
+      .step(data-q="¿Cómo lo contactamos?")
+        +field('Teléfono', 'telefono', { type: 'tel', required: true, fill: 'telefono' })
+        +field('Dirección', 'direccion', { required: true, fill: 'direccion' })
+      .step(data-q="Su acceso a la app móvil" data-hint="Si cambias el correo, el paciente deberá entrar a la app con el nuevo. Deja la contraseña vacía para no cambiarla.")
+        +field('Correo electrónico', 'correo', { type: 'email', required: true, fill: 'correo' })
+        +field('Nueva contraseña (opcional)', 'password', { type: 'password', placeholder: 'Déjala vacía para conservar la actual', minlength: 6, autocomplete: 'new-password', fill: 'sinvalor' })
+
+//- Botón lápiz que abre la ventana con los datos del paciente
+mixin btnEditarPaciente(p, conTexto)
+  - var etiqueta = 'Editar a ' + p.nombre + ' ' + p.apellidos
+  if conTexto
+    button.btn.btn--ghost(type="button" data-open="modalEditarPaciente" data-id=p.id data-nombre=p.nombre data-apellidos=p.apellidos data-telefono=p.telefono data-direccion=p.direccion data-correo=p.correo)
+      +icon('pencil', 16)
+      | Editar
+  else
+    button.icon-btn.icon-btn--primary(type="button" title="Editar paciente" aria-label=etiqueta data-open="modalEditarPaciente" data-id=p.id data-nombre=p.nombre data-apellidos=p.apellidos data-telefono=p.telefono data-direccion=p.direccion data-correo=p.correo)
+      +icon('pencil', 17)

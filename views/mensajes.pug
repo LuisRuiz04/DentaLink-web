@@ -1,0 +1,339 @@
+extends layout
+
+block content
+  .chat#chat
+    //- ---------- Bandeja ----------
+    aside.chat__list(aria-label="Conversaciones")
+      header.chat__list-head
+        h1.page-title Mensajes
+        span.count#chatConteo
+      label.search
+        +icon('search', 18)
+        input#chatBuscar(type="search" placeholder="Buscar chat o paciente" autocomplete="off" aria-label="Buscar chat")
+      .chips#chatFiltros(role="group" aria-label="Filtrar chats")
+        button.chip(type="button" data-f="todos" aria-pressed="true") Todos
+        button.chip(type="button" data-f="noleidos" aria-pressed="false") No leídos
+      ul.chat__items#chatLista
+        li.skeleton(style="height: 60px")
+        li.skeleton(style="height: 60px")
+        li.skeleton(style="height: 60px")
+
+    //- ---------- Conversación ----------
+    section.chat__pane(aria-label="Conversación")
+      .chat__empty#chatVacio
+        +icon('message', 48)
+        strong Tus conversaciones
+        span Elige un paciente para ver todo el historial o escribirle.
+
+      .chat__conv.hidden#chatConv
+        header.chat__head
+          button.icon-btn.chat__back(type="button" data-chat-back aria-label="Volver a la lista")
+            +icon('arrow-left', 20)
+          span.avatar.avatar--soft#chatAvatar
+          .chat__who
+            strong#chatNombre
+            small#chatSub
+          a.btn.btn--ghost.btn--sm#chatExpediente(href="#" data-prefetch) Expediente
+
+        .chat__scroll#chatScroll
+          #chatMsgs
+        button.chat__pill.hidden#chatNuevos(type="button") Mensajes nuevos ↓
+
+        form.chat__composer#chatForm(data-native autocomplete="off")
+          textarea.input#chatTexto(rows="1" maxlength="2000" placeholder="Escribe un mensaje" aria-label="Mensaje")
+          button.chat__send#chatEnviar(type="submit" aria-label="Enviar" disabled)
+            +icon('send', 20)
+        p.chat__hint#chatHint Enter para enviar · Shift + Enter para salto de línea
+
+  script.
+    (() => {
+      DL.ready(() => {
+        const $ = (s) => document.getElementById(s);
+        if (!$('chat')) return;
+        const esc = DL.esc;
+        const p2 = (n) => String(n).padStart(2, '0');
+        const limpiar = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        const iniciales = (p) => (`${(p.nombre || '').charAt(0)}${(p.apellidos || '').charAt(0)}`).toUpperCase() || '?';
+        const nombre = (p) => `${p.nombre || ''} ${p.apellidos || ''}`.trim();
+        const diaKey = (d) => `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
+        const hora = (d) => `${p2(d.getHours())}:${p2(d.getMinutes())}`;
+        const hoyK = () => diaKey(new Date());
+        const ayerK = () => { const d = new Date(); d.setDate(d.getDate() - 1); return diaKey(d); };
+        const ICO = {
+          check: '<svg viewBox="0 0 16 11" width="16" height="11" aria-hidden="true"><path d="M1 5.5 4.5 9 11 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+          doble: '<svg viewBox="0 0 16 11" width="16" height="11" aria-hidden="true"><path d="M1 5.5 4.5 9 11 2M6.5 8.2 7.4 9 14 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+          reloj: '<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+        };
+
+        // Fecha corta para la bandeja: "10:42", "Ayer", "lun", "24/11/26"
+        const fechaLista = (iso) => {
+          const d = new Date(iso);
+          const k = diaKey(d);
+          if (k === hoyK()) return hora(d);
+          if (k === ayerK()) return 'Ayer';
+          const dias = (new Date().setHours(0, 0, 0, 0) - new Date(d).setHours(0, 0, 0, 0)) / 864e5;
+          if (dias < 7) return d.toLocaleDateString('es-MX', { weekday: 'short' }).replace('.', '');
+          return d.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: '2-digit' });
+        };
+        // Separador del chat: "Hoy", "Ayer", "Lunes", "24 de noviembre de 2026"
+        const fechaSeparador = (d) => {
+          const k = diaKey(d);
+          if (k === hoyK()) return 'Hoy';
+          if (k === ayerK()) return 'Ayer';
+          const dias = (new Date().setHours(0, 0, 0, 0) - new Date(d).setHours(0, 0, 0, 0)) / 864e5;
+          const t = dias < 7
+            ? d.toLocaleDateString('es-MX', { weekday: 'long' })
+            : d.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+          return t.charAt(0).toUpperCase() + t.slice(1);
+        };
+
+        /* ============ Bandeja ============ */
+        let convs = [];
+        let filtro = 'todos';
+        let actual = null;            // paciente abierto
+        const CHAT = { mensajes: [], ids: new Set(), lastId: 0, leidoHasta: 0, temp: 0 };
+
+        const pintarLista = () => {
+          const q = limpiar($('chatBuscar').value.trim());
+          const lista = convs
+            .filter((c) => filtro === 'todos' || c.noLeidos > 0)
+            .filter((c) => !q || limpiar(`${nombre(c)} ${c.telefono || ''} ${c.ultimo ? c.ultimo.texto : ''}`).includes(q))
+            .sort((a, b) => {
+              const ua = a.ultimo ? a.ultimo.id : 0, ub = b.ultimo ? b.ultimo.id : 0;
+              if (ua !== ub) return ub - ua;                               // lo más reciente arriba
+              return nombre(a).localeCompare(nombre(b), 'es');             // sin mensajes: alfabético
+            });
+          const sinLeer = convs.filter((c) => c.noLeidos > 0).length;
+          $('chatConteo').textContent = sinLeer ? `${sinLeer} sin leer` : `${convs.length} pacientes`;
+
+          if (!convs.length) {
+            $('chatLista').innerHTML = '<li class="empty" style="padding:32px 12px"><strong>Aún no tienes pacientes</strong><span>Registra pacientes para poder escribirles.</span><a class="btn btn--primary btn--sm" href="/expediente">Ir a Pacientes</a></li>';
+            return;
+          }
+          if (!lista.length) {
+            $('chatLista').innerHTML = `<li class="empty" style="padding:32px 12px"><strong>${q ? 'Sin resultados' : 'Todo al día'}</strong><span>${q ? 'Prueba con otro nombre.' : 'No tienes mensajes sin leer.'}</span></li>`;
+            return;
+          }
+          $('chatLista').innerHTML = lista.map((c) => {
+            const u = c.ultimo;
+            let prev = '<span class="chat__muted">Sin mensajes todavía</span>';
+            if (u) {
+              const tick = u.remitente === 'clinica' ? `<span class="tick${u.leido ? ' is-read' : ''}">${u.leido ? ICO.doble : ICO.check}</span>` : '';
+              prev = `${tick}${u.remitente === 'clinica' ? '<span class="chat__muted">Tú:</span> ' : ''}${esc(u.texto.replace(/\s+/g, ' '))}`;
+            }
+            const activo = actual && String(actual.id) === String(c.id);
+            return `
+              <li><button type="button" class="chat__item${activo ? ' is-active' : ''}${c.noLeidos ? ' is-unread' : ''}" data-pid="${esc(c.id)}">
+                <span class="avatar avatar--soft">${esc(iniciales(c))}</span>
+                <span class="chat__item-main">
+                  <span class="chat__item-top"><strong>${esc(nombre(c))}</strong>${u ? `<time>${esc(fechaLista(u.createdAt))}</time>` : ''}</span>
+                  <span class="chat__item-bottom"><span class="chat__preview">${prev}</span>${c.noLeidos ? `<span class="chat__unread">${c.noLeidos > 99 ? '99+' : c.noLeidos}</span>` : ''}</span>
+                </span>
+              </button></li>`;
+          }).join('');
+        };
+
+        const cargarLista = async () => {
+          try {
+            const r = await fetch('/api/mensajes/conversaciones', { credentials: 'same-origin', headers: { Accept: 'application/json' } });
+            if (!r.ok) throw new Error(r.status);
+            const data = await r.json();
+            if (!$('chat')) return;
+            convs = Array.isArray(data) ? data : [];
+            if (actual) { const c = convs.find((x) => String(x.id) === String(actual.id)); if (c) c.noLeidos = 0; }
+            pintarLista();
+          } catch (e) {
+            if (!convs.length) $('chatLista').innerHTML = '<li class="empty" style="padding:32px 12px"><strong>No se pudieron cargar los chats</strong><span>Revisa tu conexión.</span></li>';
+          }
+        };
+
+        /* ============ Conversación ============ */
+        const scroll = $('chatScroll');
+        const cercaDelFinal = () => scroll.scrollHeight - scroll.scrollTop - scroll.clientHeight < 80;
+        const alFinal = (suave) => scroll.scrollTo({ top: scroll.scrollHeight, behavior: suave ? 'smooth' : 'auto' });
+
+        const burbuja = (m, prev) => {
+          const d = new Date(m.createdAt);
+          const sale = m.remitente === 'clinica';
+          const seguido = prev && prev.remitente === m.remitente && diaKey(new Date(prev.createdAt)) === diaKey(d) && (d - new Date(prev.createdAt)) < 5 * 60000;
+          let estado = '';
+          if (sale) {
+            if (m.pendiente) estado = `<span class="tick">${ICO.reloj}</span>`;
+            else if (m.id <= CHAT.leidoHasta || m.leido) estado = `<span class="tick is-read" title="Leído">${ICO.doble}</span>`;
+            else estado = `<span class="tick" title="Enviado">${ICO.check}</span>`;
+          }
+          return `<div class="msg ${sale ? 'msg--out' : 'msg--in'}${seguido ? ' is-cont' : ''}${m.pendiente ? ' is-pending' : ''}" data-id="${esc(m.id)}">
+            <div class="msg__bubble"><span class="msg__text">${esc(m.texto)}</span><span class="msg__meta"><time>${hora(d)}</time>${estado}</span></div>
+          </div>`;
+        };
+
+        const pintarChat = () => {
+          let html = '';
+          let dia = '';
+          CHAT.mensajes.forEach((m, i) => {
+            const d = new Date(m.createdAt);
+            const k = diaKey(d);
+            if (k !== dia) { dia = k; html += `<div class="chat__day"><span>${esc(fechaSeparador(d))}</span></div>`; }
+            html += burbuja(m, i && diaKey(new Date(CHAT.mensajes[i - 1].createdAt)) === k ? CHAT.mensajes[i - 1] : null);
+          });
+          if (!CHAT.mensajes.length) {
+            html = `<div class="chat__first">Aún no hay mensajes con ${esc(nombre(actual))}.<br>Escribe el primero.</div>`;
+          }
+          $('chatMsgs').innerHTML = html;
+        };
+
+        const agregar = (nuevos) => {
+          let hubo = false;
+          nuevos.forEach((m) => {
+            if (CHAT.ids.has(m.id)) return;
+            CHAT.ids.add(m.id);
+            CHAT.mensajes.push(m);
+            CHAT.lastId = Math.max(CHAT.lastId, m.id);
+            hubo = true;
+          });
+          // los pendientes (aún sin id real) siempre al final
+          CHAT.mensajes.sort((a, b) => (a.pendiente ? 1 : 0) - (b.pendiente ? 1 : 0) || (a.pendiente ? 0 : a.id - b.id));
+          return hubo;
+        };
+
+        let pollChat = null;
+        const abrir = async (pid) => {
+          const c = convs.find((x) => String(x.id) === String(pid));
+          actual = c || { id: pid, nombre: '', apellidos: '' };
+          CHAT.mensajes = []; CHAT.ids = new Set(); CHAT.lastId = 0; CHAT.leidoHasta = 0;
+          $('chatVacio').classList.add('hidden');
+          $('chatConv').classList.remove('hidden');
+          $('chat').classList.add('is-open');
+          $('chatNombre').textContent = nombre(actual) || 'Cargando…';
+          $('chatSub').textContent = actual.telefono || '';
+          $('chatAvatar').textContent = iniciales(actual);
+          $('chatExpediente').href = '/expediente/detalle?paciente=' + encodeURIComponent(pid);
+          $('chatMsgs').innerHTML = '<div class="skeleton" style="height:44px;width:55%;margin:12px 0"></div><div class="skeleton" style="height:44px;width:45%;margin:12px 0 12px auto"></div>';
+          $('chatNuevos').classList.add('hidden');
+          const u = new URL(location.href); u.searchParams.set('paciente', pid);
+          history.replaceState(history.state, '', u.pathname + u.search);
+          pintarLista();
+
+          try {
+            const r = await fetch('/api/mensajes/chat/' + encodeURIComponent(pid), { credentials: 'same-origin', headers: { Accept: 'application/json' } });
+            const d = await r.json();
+            if (!r.ok) throw new Error(d.error || 'No se pudo abrir el chat');
+            if (!actual || String(actual.id) !== String(pid)) return;     // ya abrió otro
+            actual = Object.assign({}, actual, d.paciente);
+            $('chatNombre').textContent = nombre(actual);
+            $('chatSub').textContent = actual.telefono || actual.correo || '';
+            $('chatAvatar').textContent = iniciales(actual);
+            CHAT.leidoHasta = d.leidoHasta || 0;
+            agregar(d.mensajes || []);
+            pintarChat();
+            alFinal(false);
+            const cc = convs.find((x) => String(x.id) === String(pid)); if (cc) cc.noLeidos = 0;
+            pintarLista();
+            if (DL.mensajes) DL.mensajes.refresh();
+            if (matchMedia('(pointer: fine)').matches) $('chatTexto').focus({ preventScroll: true });
+          } catch (e) {
+            $('chatMsgs').innerHTML = `<div class="chat__first">${esc(e.message)}</div>`;
+          }
+          clearInterval(pollChat);
+          pollChat = setInterval(revisarChat, 3000);
+        };
+
+        // Cada 3 s: mensajes nuevos de este chat y palomitas de leído
+        let revisando = false;
+        async function revisarChat() {
+          if (!actual || document.hidden || revisando) return;
+          revisando = true;
+          const pid = actual.id;
+          try {
+            const r = await fetch(`/api/mensajes/chat/${encodeURIComponent(pid)}?despues=${CHAT.lastId}`, { credentials: 'same-origin', headers: { Accept: 'application/json' } });
+            if (!r.ok) return;
+            const d = await r.json();
+            if (!actual || String(actual.id) !== String(pid)) return;
+            const abajo = cercaDelFinal();
+            const cambioLeido = (d.leidoHasta || 0) !== CHAT.leidoHasta;
+            CHAT.leidoHasta = d.leidoHasta || 0;
+            const hubo = agregar(d.mensajes || []);
+            if (hubo || cambioLeido) {
+              pintarChat();
+              if (hubo && abajo) alFinal(true);
+              else if (hubo && (d.mensajes || []).some((m) => m.remitente === 'paciente')) $('chatNuevos').classList.remove('hidden');
+            }
+            if (hubo) { cargarLista(); if (DL.mensajes) DL.mensajes.refresh(); }
+          } catch (e) { /* se reintenta en 3 s */ } finally { revisando = false; }
+        }
+
+        /* ============ Enviar ============ */
+        const texto = $('chatTexto');
+        const ajustar = () => {
+          texto.style.height = 'auto';
+          texto.style.height = Math.min(texto.scrollHeight, 140) + 'px';
+          $('chatEnviar').disabled = !texto.value.trim();
+          const n = texto.value.length;
+          $('chatHint').textContent = n > 1800 ? `${n} / 2000 caracteres` : 'Enter para enviar · Shift + Enter para salto de línea';
+        };
+        texto.addEventListener('input', ajustar);
+        texto.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); $('chatForm').requestSubmit(); }
+        });
+
+        $('chatForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const t = texto.value.trim();
+          if (!t || !actual) return;
+          const pid = actual.id;
+          const tempId = 'tmp' + (++CHAT.temp);
+          const temporal = { id: tempId, remitente: 'clinica', texto: t, createdAt: new Date().toISOString(), pendiente: true };
+          CHAT.mensajes.push(temporal);
+          pintarChat(); alFinal(true);
+          texto.value = ''; ajustar();
+          try {
+            const r = await fetch('/api/mensajes/chat/' + encodeURIComponent(pid), {
+              method: 'POST', credentials: 'same-origin',
+              headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+              body: JSON.stringify({ texto: t })
+            });
+            const d = await r.json().catch(() => ({}));
+            if (!r.ok) throw new Error(d.error || 'No se pudo enviar');
+            CHAT.mensajes = CHAT.mensajes.filter((m) => m.id !== tempId);
+            if (actual && String(actual.id) === String(pid)) { agregar([d.mensaje]); pintarChat(); alFinal(true); }
+            const c = convs.find((x) => String(x.id) === String(pid));
+            if (c) { c.ultimo = d.mensaje; pintarLista(); }
+          } catch (err) {
+            CHAT.mensajes = CHAT.mensajes.filter((m) => m.id !== tempId);
+            pintarChat();
+            if (!texto.value) { texto.value = t; ajustar(); }
+            DL.toast(err.message === 'No se pudo enviar' ? 'No se pudo enviar el mensaje. Revisa tu conexión.' : err.message, 'error');
+          }
+        });
+
+        /* ============ Eventos ============ */
+        $('chatLista').addEventListener('click', (e) => {
+          const b = e.target.closest('[data-pid]');
+          if (b) abrir(b.dataset.pid);
+        });
+        $('chatBuscar').addEventListener('input', pintarLista);
+        document.querySelectorAll('#chatFiltros .chip').forEach((c) => c.addEventListener('click', () => {
+          filtro = c.dataset.f;
+          document.querySelectorAll('#chatFiltros .chip').forEach((x) => x.setAttribute('aria-pressed', String(x === c)));
+          pintarLista();
+        }));
+        document.querySelector('[data-chat-back]').addEventListener('click', () => {
+          $('chat').classList.remove('is-open');
+          actual = null; clearInterval(pollChat);
+          const u = new URL(location.href); u.searchParams.delete('paciente');
+          history.replaceState(history.state, '', u.pathname + u.search);
+          pintarLista();
+        });
+        scroll.addEventListener('scroll', () => { if (cercaDelFinal()) $('chatNuevos').classList.add('hidden'); });
+        $('chatNuevos').addEventListener('click', () => { alFinal(true); $('chatNuevos').classList.add('hidden'); });
+
+        // La bandeja se actualiza cada vez que el indicador global revisa (cada 10 s)
+        const alAviso = () => cargarLista();
+        document.addEventListener('dl:mensajes', alAviso);
+        DL.cleanups.push(() => { clearInterval(pollChat); document.removeEventListener('dl:mensajes', alAviso); });
+
+        // Arranque: lista y, si viene ?paciente=ID, ese chat abierto
+        const inicial = new URLSearchParams(location.search).get('paciente');
+        cargarLista().then(() => { if (inicial) abrir(inicial); });
+      });
+    })();
